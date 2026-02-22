@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import { Farmacia } from './models/Farmacia.js';
 import { Medicamento } from './models/Medicamento.js';
 import { Precio } from './models/Precio.js';
+import sugerenciasRouter from './sugerencias/sugerenciasRouter.js';
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +18,9 @@ const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/farmalink
 mongoose.connect(mongoUri)
   .then(() => console.log('MongoDB conectado'))
   .catch(err => console.error('Error conectando a MongoDB:', err));
+
+  // ── Punto 5: Sugerencias con Strategy + Factory ──────────────────────────────
+app.use('/api/sugerencias', sugerenciasRouter);
 
 app.get('/api/farmacias', async (_req, res) => {
   try {
