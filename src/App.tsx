@@ -39,19 +39,40 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/dashboard')
-      .then(res => {
+    async function loadData() {
+      try {
+        // 1️. Login para obtener token
+        const loginRes = await fetch('http://localhost:4000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: 'test@test.com' })
+        });
+
+        const loginData = await loginRes.json();
+        const token = loginData.token;
+
+        localStorage.setItem("token", token);
+
+        // 2️. Llamar dashboard usando gateway
+        const res = await fetch('http://localhost:4000/api/dashboard', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
         if (!res.ok) throw new Error('Error fetching data');
-        return res.json();
-      })
-      .then(data => {
+
+        const data = await res.json();
         setData(data);
         setLoading(false);
-      })
-      .catch(err => {
+
+      } catch (err: any) {
         setError(err.message);
         setLoading(false);
-      });
+      }
+    }
+
+    loadData();
   }, []);
 
   if (loading) return <div className="loading">Cargando datos...</div>;

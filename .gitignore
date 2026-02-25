@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Backend Mongo files
+backend/_tmp/
+backend/diagnostic.data/
+backend/journal/
