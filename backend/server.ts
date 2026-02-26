@@ -5,7 +5,8 @@ import { Farmacia } from './models/Farmacia.js';
 import { Medicamento } from './models/Medicamento.js';
 import { Precio } from './models/Precio.js';
 import sugerenciasRouter from './sugerencias/sugerenciasRouter.js';
-
+import medicamentosRouter from './medicamentos/medicamentosRouter.js';
+import preciosRouter from './precios/preciosRouter.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -19,9 +20,16 @@ mongoose.connect(mongoUri)
   .then(() => console.log('MongoDB conectado'))
   .catch(err => console.error('Error conectando a MongoDB:', err));
 
-  // ── Punto 5: Sugerencias con Strategy + Factory ──────────────────────────────
+// ── Sugerencias: Strategy + Factory ─────────────────────────────────────────
 app.use('/api/sugerencias', sugerenciasRouter);
 
+// ── Medicamentos: CRUD limpio con DTO y validaciones ────────────────────────
+app.use('/api/medicamentos', medicamentosRouter);
+
+// ── Precios: Strategy + Factory + comparación + PUT ─────────────────────────
+app.use('/api/precios', preciosRouter);
+
+// ── Farmacias ────────────────────────────────────────────────────────────────
 app.get('/api/farmacias', async (_req, res) => {
   try {
     const farmacias = await Farmacia.find();
@@ -31,26 +39,7 @@ app.get('/api/farmacias', async (_req, res) => {
   }
 });
 
-app.get('/api/medicamentos', async (_req, res) => {
-  try {
-    const medicamentos = await Medicamento.find().populate('farmaciaId');
-    res.json(medicamentos);
-  } catch {
-    res.status(500).json({ error: 'Error fetching medicamentos' });
-  }
-});
-
-app.get('/api/precios', async (_req, res) => {
-  try {
-    const precios = await Precio.find()
-      .populate('medicamentoId')
-      .populate('farmaciaId');
-    res.json(precios);
-  } catch {
-    res.status(500).json({ error: 'Error fetching precios' });
-  }
-});
-
+// ── Dashboard ────────────────────────────────────────────────────────────────
 app.get('/api/dashboard', async (_req, res) => {
   try {
     const [farmacias, medicamentos, precios] = await Promise.all([

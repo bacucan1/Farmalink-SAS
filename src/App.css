@@ -58,3 +58,36 @@ h1 {
 .error {
   color: #ff4444;
 }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #2a2a4a;
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #888;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: -2px;
+  border-radius: 0;
+  transition: color 0.2s;
+}
+
+.tab-btn:hover {
+  color: #a78bfa;
+  border-bottom-color: transparent;
+}
+
+.tab-active {
+  color: #a78bfa !important;
+  border-bottom: 3px solid #646cff !important;
+}
