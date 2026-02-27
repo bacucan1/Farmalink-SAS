@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import authRouter from './auth/authRouter.js';
 import { Farmacia } from './models/Farmacia.js';
 import { Medicamento } from './models/Medicamento.js';
 import { Precio } from './models/Precio.js';
@@ -19,6 +20,9 @@ const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/farmalink
 mongoose.connect(mongoUri)
   .then(() => console.log('MongoDB conectado'))
   .catch(err => console.error('Error conectando a MongoDB:', err));
+
+// ── Auth ───────────────────────────────────────────────────────────────────────
+app.use('/api/auth', authRouter);
 
 // ── Sugerencias: Strategy + Factory ─────────────────────────────────────────
 app.use('/api/sugerencias', sugerenciasRouter);

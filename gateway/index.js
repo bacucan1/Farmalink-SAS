@@ -13,10 +13,19 @@ app.use(express.json());
 /* ================= LOGIN ================= */
 
 app.post('/api/auth/login', (req, res) => {
-    const { email } = req.body;
+    const { email, password } = req.body;
     if (!email) return res.status(400).json({ message: 'Email requerido' });
-    const token = jwt.sign({ email }, "supersecreto", { expiresIn: '1h' });
-    res.json({ token });
+    if (!password) return res.status(400).json({ message: 'Contraseña requerida' });
+    
+    let role = 'cliente';
+    if (email === 'admin@farmalink.com' && password === 'admin123') {
+        role = 'admin';
+    } else if (email === 'farmaceutico@farmalink.com' && password === 'farm123') {
+        role = 'farmaceutico';
+    }
+    
+    const token = jwt.sign({ email, password, role }, "supersecreto", { expiresIn: '1h' });
+    res.json({ token, user: { email, role } });
 });
 
 /* ================= MIDDLEWARE JWT ================= */
@@ -26,11 +35,19 @@ function validateJWT(req, res, next) {
     if (!authHeader) return res.status(401).json({ message: 'Token requerido' });
     const token = authHeader.split(' ')[1];
     try {
-        jwt.verify(token, "supersecreto");
+        const decoded = jwt.verify(token, "supersecreto");
+        req.user = decoded;
         next();
     } catch {
         return res.status(403).json({ message: 'Token inválido' });
     }
+}
+
+function requireAdmin(req, res, next) {
+    if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Acceso denegado. Se requiere rol de administrador.' });
+    }
+    next();
 }
 
 /* ================= PROXIES ================= */
@@ -51,7 +68,7 @@ app.get('/api/medicamentos/:id', validateJWT, async (req, res) => {
     } catch { res.status(500).json({ error: 'Error en backend medicamentos' }); }
 });
 
-app.post('/api/medicamentos', validateJWT, async (req, res) => {
+app.post('/api/medicamentos', validateJWT, requireAdmin, async (req, res) => {
     try {
         const response = await axios.post('http://localhost:3001/api/medicamentos', req.body);
         res.status(201).json(response.data);
@@ -60,7 +77,7 @@ app.post('/api/medicamentos', validateJWT, async (req, res) => {
     }
 });
 
-app.put('/api/medicamentos/:id', validateJWT, async (req, res) => {
+app.put('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => {
     try {
         const response = await axios.put(`http://localhost:3001/api/medicamentos/${req.params.id}`, req.body);
         res.json(response.data);
@@ -69,7 +86,7 @@ app.put('/api/medicamentos/:id', validateJWT, async (req, res) => {
     }
 });
 
-app.delete('/api/medicamentos/:id', validateJWT, async (req, res) => {
+app.delete('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => {
     try {
         const response = await axios.delete(`http://localhost:3001/api/medicamentos/${req.params.id}`);
         res.json(response.data);

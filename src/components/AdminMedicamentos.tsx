@@ -37,10 +37,12 @@ const EMPTY_FORM: FormData = {
 
 const TOKEN_KEY = 'token';
 
+const GATEWAY = import.meta.env.VITE_API_URL || `http://localhost:${import.meta.env.VITE_API_PORT || 3000}`;
+
 async function getToken(): Promise<string> {
   let token = localStorage.getItem(TOKEN_KEY);
   if (!token) {
-    const res = await fetch('http://localhost:4000/api/auth/login', {
+    const res = await fetch(`${GATEWAY}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: 'admin@farmalink.com' }),
@@ -80,8 +82,8 @@ export function AdminMedicamentos() {
       const token = await getToken();
       const headers = { Authorization: `Bearer ${token}` };
       const [medRes, farRes] = await Promise.all([
-        fetch('http://localhost:4000/api/medicamentos', { headers }),
-        fetch('http://localhost:4000/api/farmacias', { headers }),
+        fetch(`${GATEWAY}/api/medicamentos`, { headers }),
+        fetch(`${GATEWAY}/api/farmacias`, { headers }),
       ]);
       const medData = await medRes.json();
       const farData = await farRes.json();
@@ -139,8 +141,8 @@ export function AdminMedicamentos() {
     try {
       const token = await getToken();
       const url = editando
-        ? `http://localhost:4000/api/medicamentos/${editando._id}`
-        : 'http://localhost:4000/api/medicamentos';
+        ? `${GATEWAY}/api/medicamentos/${editando._id}`
+        : `${GATEWAY}/api/medicamentos`;
       const method = editando ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -151,7 +153,11 @@ export function AdminMedicamentos() {
       const data = await res.json();
 
       if (!res.ok) {
-        setFormErrors(data.errors || [data.message || 'Error al guardar']);
+        if (res.status === 403) {
+          setFormErrors(['Acceso denegado. Se requiere rol de administrador.']);
+        } else {
+          setFormErrors(data.errors || [data.message || 'Error al guardar']);
+        }
         return;
       }
 
@@ -168,7 +174,7 @@ export function AdminMedicamentos() {
   async function eliminar(med: Medicamento) {
     try {
       const token = await getToken();
-      await fetch(`http://localhost:4000/api/medicamentos/${med._id}`, {
+      await fetch(`${GATEWAY}/api/medicamentos/${med._id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

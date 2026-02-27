@@ -1,0 +1,51 @@
+.search-section {
+  padding-top: 80px;
+  min-height: 80vh;
+}
+
+.search-hero {
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.section-tag {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.section-desc {
+  font-size: 1rem;
+  color: var(--text-2);
+  max-width: 500px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .search-hero {
+    padding: 2rem 0;
+  }
+
+  .section-desc {
+    font-size: 0.875rem;
+    padding: 0 1rem;
+  }
+}
