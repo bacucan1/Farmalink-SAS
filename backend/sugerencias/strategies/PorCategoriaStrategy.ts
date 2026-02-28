@@ -41,7 +41,7 @@ export class PorCategoriaStrategy implements SugerenciaStrategy {
           med.category?.toLowerCase().includes(categoriaCoincidente)
       )
       .map((med) => ({
-        _id: med._id as string,
+        _id: med._id.toString(),
         name: med.name,
         lab: med.lab,
         category: med.category,

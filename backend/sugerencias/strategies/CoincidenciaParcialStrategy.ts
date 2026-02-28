@@ -15,7 +15,7 @@ export class CoincidenciaParcialStrategy implements SugerenciaStrategy {
     return medicamentos
       .filter((med) => med.active && med.name.toLowerCase().startsWith(q))
       .map((med) => ({
-        _id: med._id as string,
+        _id: med._id.toString(),
         name: med.name,
         lab: med.lab,
         category: med.category,

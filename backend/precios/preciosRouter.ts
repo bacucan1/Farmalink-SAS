@@ -25,7 +25,8 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
 // Query param: ?orden=asc|desc|reciente (default: asc)
 router.get('/comparar/:medicamentoId', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { medicamentoId } = req.params;
+    const { medicamentoId: medId } = req.params;
+    const medicamentoId = Array.isArray(medId) ? medId[0] : medId;
     const orden = req.query.orden as string | undefined;
 
     // Validar ObjectId
@@ -101,7 +102,8 @@ router.get('/comparar/:medicamentoId', async (req: Request, res: Response): Prom
 // Simula actualización de precio. Solo permite cambiar el campo `precio`.
 router.put('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id: paramId } = req.params;
+    const id = Array.isArray(paramId) ? paramId[0] : paramId;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({ success: false, message: 'ID inválido' });

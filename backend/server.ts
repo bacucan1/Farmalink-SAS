@@ -10,16 +10,27 @@ import medicamentosRouter from './medicamentos/medicamentosRouter.js';
 import preciosRouter from './precios/preciosRouter.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 app.use(express.json());
 
 const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/farmalink';
 
+console.log('🔌 Intentando conectar a MongoDB:', mongoUri);
+
 mongoose.connect(mongoUri)
-  .then(() => console.log('MongoDB conectado'))
-  .catch(err => console.error('Error conectando a MongoDB:', err));
+  .then(() => {
+    console.log('✅ MongoDB conectado exitosamente');
+    console.log('📊 Estado de conexión:', mongoose.connection.readyState);
+  })
+  .catch(err => {
+    console.error('❌ Error conectando a MongoDB:', err.message);
+    console.error('📊 Estado de conexión:', mongoose.connection.readyState);
+  });
 
 // ── Auth ───────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);

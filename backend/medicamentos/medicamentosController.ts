@@ -10,6 +10,7 @@ import {
 
 // ── GET /api/medicamentos ─────────────────────────────────────────────────────
 export async function getAll(req: Request, res: Response): Promise<void> {
+  console.log('📥 Petición GET /api/medicamentos recibida');
   try {
     const { category, active, lab } = req.query;
     const filter: any = {};
@@ -18,12 +19,16 @@ export async function getAll(req: Request, res: Response): Promise<void> {
     if (active !== undefined) filter.active = active === 'true';
     if (lab) filter.lab = { $regex: lab as string, $options: 'i' };
 
+    console.log('🔍 Buscando medicamentos con filtro:', filter);
+
     const medicamentos = await Medicamento.find(filter)
       .populate('farmaciaId', 'name address phone')
       .sort({ name: 1 });
 
+    console.log('✅ Medicamentos encontrados:', medicamentos.length);
     res.json({ success: true, total: medicamentos.length, data: medicamentos });
   } catch (error) {
+    console.error('❌ Error en GET /api/medicamentos:', error);
     res.status(500).json({ success: false, message: 'Error al obtener medicamentos', error });
   }
 }
@@ -32,13 +37,14 @@ export async function getAll(req: Request, res: Response): Promise<void> {
 export async function getById(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
+    const idString = Array.isArray(id) ? id[0] : id;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(idString)) {
       res.status(400).json({ success: false, message: 'ID inválido' });
       return;
     }
 
-    const medicamento = await Medicamento.findById(id).populate('farmaciaId', 'name address phone');
+    const medicamento = await Medicamento.findById(idString).populate('farmaciaId', 'name address phone');
 
     if (!medicamento) {
       res.status(404).json({ success: false, message: 'Medicamento no encontrado' });
@@ -96,9 +102,10 @@ export async function create(req: Request, res: Response): Promise<void> {
 export async function update(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
+    const idString = Array.isArray(id) ? id[0] : id;
     const body: UpdateMedicamentoDTO = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(idString)) {
       res.status(400).json({ success: false, message: 'ID inválido' });
       return;
     }
@@ -111,7 +118,7 @@ export async function update(req: Request, res: Response): Promise<void> {
     }
 
     const actualizado = await Medicamento.findByIdAndUpdate(
-      id,
+      idString,
       { $set: body },
       { new: true, runValidators: true }
     ).populate('farmaciaId', 'name address phone');
@@ -131,13 +138,14 @@ export async function update(req: Request, res: Response): Promise<void> {
 export async function remove(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
+    const idString = Array.isArray(id) ? id[0] : id;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(idString)) {
       res.status(400).json({ success: false, message: 'ID inválido' });
       return;
     }
 
-    const eliminado = await Medicamento.findByIdAndDelete(id);
+    const eliminado = await Medicamento.findByIdAndDelete(idString);
 
     if (!eliminado) {
       res.status(404).json({ success: false, message: 'Medicamento no encontrado' });

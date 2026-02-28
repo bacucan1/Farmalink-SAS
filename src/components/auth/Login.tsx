@@ -6,6 +6,8 @@ interface LoginProps {
   onNavigateToRegister: () => void;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || `http://localhost:${import.meta.env.VITE_API_PORT || 3000}`;
+
 export function Login({ onLoginSuccess, onNavigateToRegister: _onNavigateToRegister }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +20,7 @@ export function Login({ onLoginSuccess, onNavigateToRegister: _onNavigateToRegis
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:4000/api/auth/login', {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -50,7 +52,7 @@ export function Login({ onLoginSuccess, onNavigateToRegister: _onNavigateToRegis
     setError('');
 
     try {
-      const response = await fetch('http://localhost:4000/api/auth/login', {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
