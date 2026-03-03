@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import './Login.css';
-
+// import './Login.css';
 interface LoginProps {
   onLoginSuccess: () => void;
   onNavigateToRegister: () => void;
@@ -8,7 +8,7 @@ interface LoginProps {
 
 const API_URL = import.meta.env.VITE_API_URL || `http://localhost:${import.meta.env.VITE_API_PORT || 3000}`;
 
-export function Login({ onLoginSuccess, onNavigateToRegister: _onNavigateToRegister }: LoginProps) {
+export default function Login({ onLoginSuccess, onNavigateToRegister: _onNavigateToRegister }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

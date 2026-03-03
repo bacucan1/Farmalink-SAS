@@ -8,7 +8,7 @@ import { Features } from './components/home/Features';
 import { SearchSection } from './components/search/SearchSection';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { LoadingState, ErrorState } from './components/common/LoadingError';
-import { Login } from './components/auth/Login';
+import Login from './components/auth/Login';
 import { AdminMedicamentos } from './components/AdminMedicamentos';
 import './App.css';
 
