@@ -1,3 +1,7 @@
+import iconBusqueda from '../../assets/icon-busqueda.png';
+import iconPrecios from '../../assets/icon-precios.png';
+import iconMapa from '../../assets/icon-mapa.png';
+import iconIA from '../../assets/icon-ia.png';
 import './Features.css';
 
 /**
@@ -19,22 +23,22 @@ interface FeaturesProps {
 export function Features({ farmCount = 0 }: FeaturesProps) {
   const features = [
     {
-      icon: '🔍',
+      img: iconBusqueda,
       title: 'Búsqueda Inteligente',
       desc: 'Autocompletado con 3 estrategias: nombre, categoría y similitud'
     },
     {
-      icon: '💰',
+      img: iconPrecios,
       title: 'Comparador de Precios',
       desc: 'Visualiza precios de múltiples farmacias con indicador de mejor oferta'
     },
     {
-      icon: '📍',
+      img: iconMapa,
       title: 'Mapa de Farmacias',
       desc: `${farmCount} farmacias en Bogotá con datos de contacto y dirección`
     },
     {
-      icon: '🤖',
+      img: iconIA,
       title: 'IA Personalizada',
       desc: 'Recomendaciones inteligentes basadas en patrones y alternativas genéricas'
     }
@@ -45,12 +49,14 @@ export function Features({ farmCount = 0 }: FeaturesProps) {
       <div className="container">
         <div className="features-grid">
           {features.map((feature, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="feature-item"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="feature-icon">{feature.icon}</div>
+              <div className="feature-icon">
+                <img src={feature.img} alt={feature.title} className="feature-icon-img" />
+              </div>
               <h3 className="feature-title">{feature.title}</h3>
               <p className="feature-desc">{feature.desc}</p>
             </div>

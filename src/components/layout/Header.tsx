@@ -1,4 +1,5 @@
 import type { View } from '../../types';
+import logoFarmalink from '../../assets/logo-farmalink.png';
 import './Header.css';
 
 /**
@@ -35,8 +36,7 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
             href="#" 
             onClick={(e) => { e.preventDefault(); onViewChange('home'); }}
           >
-            <div className="logo-icon">💊</div>
-            <span className="logo-text">FarmaLink</span>
+            <img src={logoFarmalink} alt="FarmaLink" className="logo-img" />
           </a>
           
           <button 

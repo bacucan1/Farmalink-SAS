@@ -96,3 +96,9 @@
     text-align: center;
   }
 }
+
+.footer-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}

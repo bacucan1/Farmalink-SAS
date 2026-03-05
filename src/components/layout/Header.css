@@ -155,3 +155,11 @@
   color: white;
 }
 }
+
+/* Logo imagen real */
+.logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}

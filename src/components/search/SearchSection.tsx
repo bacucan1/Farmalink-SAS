@@ -28,7 +28,7 @@ export function SearchSection({ onSelect }: SearchSectionProps) {
     <div className="view active search-section">
       <div className="search-hero">
         <div className="container">
-          <div className="section-tag">🔍 Búsqueda inteligente</div>
+          <div className="section-tag">Búsqueda inteligente</div>
           <h1 className="section-title">¿Qué medicamento<br />estás buscando?</h1>
           <p className="section-desc">
             Escribe al menos 2 caracteres. El sistema selecciona automáticamente 

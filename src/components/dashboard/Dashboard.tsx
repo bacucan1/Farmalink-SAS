@@ -1,26 +1,15 @@
 import type { DashboardData, Tab } from '../../types';
+import iconDashFarmacias from '../../assets/icon-dash-farmacias.png';
+import iconDashMedicamentos from '../../assets/icon-dash-medicamentos.png';
+import iconDashPrecios from '../../assets/icon-dash-precios.png';
 import './Dashboard.css';
 
-/**
- * Props para el componente Dashboard
- * @interface DashboardProps
- */
 interface DashboardProps {
-  /** Datos del dashboard */
   data: DashboardData | null;
-  /** Pestaña activa */
   activeTab: Tab;
-  /** Callback para cambiar de pestaña */
   onTabChange: (tab: Tab) => void;
 }
 
-/**
- * Dashboard - Panel de control con estadísticas y datos
- * @component
- * @description Panel de administración con stats, tabs y tablas de datos
- * @param {DashboardProps} props - Propiedades del componente
- * @returns {JSX.Element} Dashboard con información de farmacias, medicamentos y precios
- */
 export function Dashboard({ data, activeTab, onTabChange }: DashboardProps) {
   if (!data) return null;
 
@@ -38,50 +27,38 @@ export function Dashboard({ data, activeTab, onTabChange }: DashboardProps) {
       </div>
 
       <div className="container">
-        <StatsStrip 
+        <StatsStrip
           farmCount={data.farmacias.length}
           medCount={data.medicamentos.length}
           priceCount={data.precios.length}
         />
-
         <Tabs activeTab={activeTab} onTabChange={onTabChange} data={data} />
-
-        {activeTab === 'farmacias' && (
-          <FarmaciasPanel farmacias={data.farmacias} />
-        )}
-
-        {activeTab === 'medicamentos' && (
-          <MedicamentosPanel medicamentos={data.medicamentos} />
-        )}
-
-        {activeTab === 'precios' && (
-          <PreciosPanel precios={data.precios} />
-        )}
+        {activeTab === 'farmacias' && <FarmaciasPanel farmacias={data.farmacias} />}
+        {activeTab === 'medicamentos' && <MedicamentosPanel medicamentos={data.medicamentos} />}
+        {activeTab === 'precios' && <PreciosPanel precios={data.precios} />}
       </div>
     </div>
   );
 }
 
-/**
- * StatsStrip - Tarjetas de estadísticas
- * @component
- */
-function StatsStrip({ farmCount, medCount, priceCount }: { 
-  farmCount: number; 
-  medCount: number; 
-  priceCount: number; 
+function StatsStrip({ farmCount, medCount, priceCount }: {
+  farmCount: number;
+  medCount: number;
+  priceCount: number;
 }) {
   const stats = [
-    { icon: '🏪', value: farmCount, label: 'Farmacias' },
-    { icon: '💊', value: medCount, label: 'Medicamentos' },
-    { icon: '💰', value: priceCount, label: 'Precios' }
+    { img: iconDashFarmacias, value: farmCount, label: 'Farmacias' },
+    { img: iconDashMedicamentos, value: medCount, label: 'Medicamentos' },
+    { img: iconDashPrecios, value: priceCount, label: 'Precios' }
   ];
 
   return (
     <div className="stats-strip">
       {stats.map((stat, index) => (
         <div key={index} className="stat-card">
-          <div className="stat-icon">{stat.icon}</div>
+          <div className="stat-icon">
+            <img src={stat.img} alt={stat.label} className="stat-icon-img" />
+          </div>
           <div className="stat-val">{stat.value}</div>
           <div className="stat-lbl">{stat.label}</div>
         </div>
@@ -90,12 +67,8 @@ function StatsStrip({ farmCount, medCount, priceCount }: {
   );
 }
 
-/**
- * Tabs - Pestañas de navegación del dashboard
- * @component
- */
-function Tabs({ activeTab, onTabChange, data }: { 
-  activeTab: Tab; 
+function Tabs({ activeTab, onTabChange, data }: {
+  activeTab: Tab;
   onTabChange: (tab: Tab) => void;
   data: DashboardData;
 }) {
@@ -105,28 +78,27 @@ function Tabs({ activeTab, onTabChange, data }: {
         className={`tab-btn ${activeTab === 'farmacias' ? 'active' : ''}`}
         onClick={() => onTabChange('farmacias')}
       >
-        🏪 Farmacias <span className="tab-count">{data.farmacias.length}</span>
+        <img src={iconDashFarmacias} alt="" className="tab-icon-img" />
+        Farmacias <span className="tab-count">{data.farmacias.length}</span>
       </button>
       <button
         className={`tab-btn ${activeTab === 'medicamentos' ? 'active' : ''}`}
         onClick={() => onTabChange('medicamentos')}
       >
-        💊 Medicamentos <span className="tab-count">{data.medicamentos.length}</span>
+        <img src={iconDashMedicamentos} alt="" className="tab-icon-img" />
+        Medicamentos <span className="tab-count">{data.medicamentos.length}</span>
       </button>
       <button
         className={`tab-btn ${activeTab === 'precios' ? 'active' : ''}`}
         onClick={() => onTabChange('precios')}
       >
-        💰 Precios <span className="tab-count">{data.precios.length}</span>
+        <img src={iconDashPrecios} alt="" className="tab-icon-img" />
+        Precios <span className="tab-count">{data.precios.length}</span>
       </button>
     </div>
   );
 }
 
-/**
- * FarmaciasPanel - Panel de lista de farmacias
- * @component
- */
 function FarmaciasPanel({ farmacias }: { farmacias: Array<{ _id: string; name: string; address?: string; phone?: string }> }) {
   return (
     <div id="panel-farmacias" className="tab-panel active">
@@ -136,7 +108,7 @@ function FarmaciasPanel({ farmacias }: { farmacias: Array<{ _id: string; name: s
             <div className="farmacia-num">#{i + 1}</div>
             <div className="farmacia-name">{farmacia.name}</div>
             <div className="farmacia-address">{farmacia.address || 'Sin dirección'}</div>
-            <div className="farmacia-phone">📞 {farmacia.phone || 'Sin teléfono'}</div>
+            <div className="farmacia-phone">{farmacia.phone || 'Sin teléfono'}</div>
           </div>
         ))}
       </div>
@@ -144,16 +116,12 @@ function FarmaciasPanel({ farmacias }: { farmacias: Array<{ _id: string; name: s
   );
 }
 
-/**
- * MedicamentosPanel - Panel de lista de medicamentos
- * @component
- */
-function MedicamentosPanel({ medicamentos }: { medicamentos: Array<{ 
-  _id: string; 
-  name: string; 
-  lab: string; 
-  active: boolean; 
-  category?: string 
+function MedicamentosPanel({ medicamentos }: { medicamentos: Array<{
+  _id: string;
+  name: string;
+  lab: string;
+  active: boolean;
+  category?: string
 }> }) {
   return (
     <div id="panel-medicamentos" className="tab-panel active">
@@ -175,13 +143,9 @@ function MedicamentosPanel({ medicamentos }: { medicamentos: Array<{
   );
 }
 
-/**
- * PreciosPanel - Panel de tabla de precios
- * @component
- */
-function PreciosPanel({ precios }: { precios: Array<{ 
-  _id: string; 
-  precio: number; 
+function PreciosPanel({ precios }: { precios: Array<{
+  _id: string;
+  precio: number;
   fecha: string;
   medicamentoId?: { name: string };
   farmaciaId?: { name: string };

@@ -56,3 +56,12 @@
     padding: 1.25rem;
   }
 }
+
+/* Imágenes reales en features */
+.feature-icon-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}

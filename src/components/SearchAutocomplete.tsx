@@ -120,7 +120,7 @@ export function SearchAutocomplete({
   };
 
   const etiquetaEstrategia: Record<string, string> = {
-    coincidencia_parcial: '🔍 Nombre',
+    coincidencia_parcial: 'Nombre',
     por_categoria: '📂 Categoría',
     similitud_basica: '🔎 Similar',
   };
@@ -129,7 +129,7 @@ export function SearchAutocomplete({
     <div className="search-wrapper" ref={dropdownRef}>
       <div className="search-input-row">
         <div className="search-input-container">
-          <span className="search-icon">🔍</span>
+          
           <input
             ref={inputRef}
             type="text"

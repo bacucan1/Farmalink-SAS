@@ -1,4 +1,8 @@
 import type { DashboardData } from '../../types';
+import iconBusqueda from '../../assets/icon-busqueda.png';
+import iconIA from '../../assets/icon-ia.png';
+import iconMapa from '../../assets/icon-mapa.png';
+import iconPrecios from '../../assets/icon-precios.png';
 import './Hero.css';
 
 /**
@@ -38,10 +42,10 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
               y recibe recomendaciones inteligentes para tomar decisiones informadas.
             </p>
             <div className="hero-badges">
-              <span className="badge">⚡ Precios en Tiempo Real</span>
-              <span className="badge">🤖 Sugerencias Inteligentes</span>
-              <span className="badge">📍 {data?.farmacias.length || 0} Farmacias en Bogotá</span>
-              <span className="badge">💊 +{data?.medicamentos.length || 0} Medicamentos</span>
+              <span className="badge"><img src={iconPrecios} alt="" className="badge-img" /> Precios en Tiempo Real</span>
+              <span className="badge"><img src={iconIA} alt="" className="badge-img" /> Sugerencias Inteligentes</span>
+              <span className="badge"><img src={iconMapa} alt="" className="badge-img" /> {data?.farmacias.length || 0} Farmacias en Bogotá</span>
+              <span className="badge"><img src={iconBusqueda} alt="" className="badge-img" /> +{data?.medicamentos.length || 0} Medicamentos</span>
             </div>
             <div className="hero-actions">
               <a 
@@ -49,7 +53,7 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
                 className="btn-primary" 
                 onClick={(e) => { e.preventDefault(); onSearchClick(); }}
               >
-                🔍 Buscar Medicamento
+                Buscar Medicamento
               </a>
               <a 
                 href="#" 
@@ -68,14 +72,14 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
             <div className="hero-card-main">
               <div className="hero-card-label">Comparador en vivo</div>
               <div className="hero-search-demo">
-                <span className="icon">🔍</span>
+                <img src={iconBusqueda} alt="" style={{width:"20px",height:"20px",objectFit:"contain"}} />
                 <span>Acetaminofén 500mg...</span>
               </div>
               <div className="price-rows">
                 <div className="price-row best">
                   <div className="price-row-left">
                     <span className="price-row-name">Droguería Chapinero</span>
-                    <span className="price-row-dist">📍 1.2 km · Abierto</span>
+                    <span className="price-row-dist">1.2 km · Abierto</span>
                   </div>
                   <div className="price-row-right">
                     <span className="price-val">$4.800</span>
@@ -85,7 +89,7 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
                 <div className="price-row">
                   <div className="price-row-left">
                     <span className="price-row-name">Farmacias Cruz Verde</span>
-                    <span className="price-row-dist">📍 2.4 km · Abierto</span>
+                    <span className="price-row-dist">2.4 km · Abierto</span>
                   </div>
                   <div className="price-row-right">
                     <span className="price-val">$6.200</span>
@@ -94,7 +98,7 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
                 <div className="price-row">
                   <div className="price-row-left">
                     <span className="price-row-name">Droguería Usaquén</span>
-                    <span className="price-row-dist">📍 3.1 km · Abierto</span>
+                    <span className="price-row-dist">3.1 km · Abierto</span>
                   </div>
                   <div className="price-row-right">
                     <span className="price-val">$7.500</span>
@@ -103,7 +107,7 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
               </div>
             </div>
             <div className="hero-card-floating">
-              <div className="float-icon">💰</div>
+                <img src={iconPrecios} alt="" className="float-icon-img" />
               <div className="float-text">
                 <strong>Ahorrás $2.700</strong>
                 <span>en esta búsqueda</span>

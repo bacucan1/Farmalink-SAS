@@ -293,3 +293,19 @@
     font-size: 1.75rem;
   }
 }
+
+/* Imágenes en badges */
+.badge-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* Imagen flotante de ahorro */
+.float-icon-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}

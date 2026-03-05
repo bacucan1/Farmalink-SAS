@@ -1,3 +1,4 @@
+import logoFarmalink from '../../assets/logo-farmalink.png';
 import './Footer.css';
 
 /**
@@ -23,8 +24,7 @@ export function Footer({ onNavigate }: FooterProps) {
         <div className="footer-grid">
           <div className="footer-col">
             <a className="footer-logo" href="#">
-              <div className="footer-logo-icon">💊</div>
-              <span className="footer-logo-text">FarmaLink</span>
+              <img src={logoFarmalink} alt="FarmaLink" className="footer-logo-img" />
             </a>
             <p className="footer-desc">
               Plataforma inteligente que facilita el acceso a medicamentos mediante 
@@ -57,7 +57,7 @@ export function Footer({ onNavigate }: FooterProps) {
 
         <div className="footer-bottom">
           <span className="footer-copy">© 2025 FarmaLink Solutions. Proyecto académico.</span>
-          <span className="footer-made">Hecho con 💚 por el equipo FarmaLink</span>
+          <span className="footer-made">Hecho con dedicación por el equipo FarmaLink</span>
         </div>
       </div>
     </footer>
