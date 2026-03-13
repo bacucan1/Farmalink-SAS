@@ -2,6 +2,7 @@ import type { DashboardData, Tab } from '../../types';
 import iconDashFarmacias from '../../assets/icon-dash-farmacias.png';
 import iconDashMedicamentos from '../../assets/icon-dash-medicamentos.png';
 import iconDashPrecios from '../../assets/icon-dash-precios.png';
+import { PharmacyMap } from '../common/PharmacyMap';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -102,6 +103,15 @@ function Tabs({ activeTab, onTabChange, data }: {
 function FarmaciasPanel({ farmacias }: { farmacias: Array<{ _id: string; name: string; address?: string; phone?: string }> }) {
   return (
     <div id="panel-farmacias" className="tab-panel active">
+      <div style={{ marginBottom: '2rem' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#2c3e50', marginBottom: '1rem' }}>
+          Encuentra Farmacias Cercanas
+        </h2>
+        <PharmacyMap />
+      </div>
+      <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#2c3e50', marginBottom: '1rem' }}>
+        Todas las Farmacias
+      </h2>
       <div className="cards-grid">
         {farmacias.map((farmacia, i) => (
           <div key={farmacia._id} className="farmacia-card">

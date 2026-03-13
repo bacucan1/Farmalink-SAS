@@ -6,6 +6,7 @@ import authRouter from './auth/authRouter.js';
 import medicamentosRouter from './medicamentos/medicamentosRouter.js';
 import preciosRouter from './precios/preciosRouter.js';
 import sugerenciasRouter from './sugerencias/sugerenciasRouter.js';
+import farmaciasRouter from './farmacias/farmaciasRouter.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -30,17 +31,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/sugerencias', sugerenciasRouter);
 app.use('/api/medicamentos', medicamentosRouter);
 app.use('/api/precios', preciosRouter);
-
-app.get('/api/farmacias', async (_req, res) => {
-  try {
-    const pool = Database.getInstance().getPool();
-    const result = await pool.query('SELECT * FROM farmacias ORDER BY id');
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error fetching farmacias' });
-  }
-});
+app.use('/api/farmacias', farmaciasRouter);
 
 app.get('/api/dashboard', async (_req, res) => {
   try {

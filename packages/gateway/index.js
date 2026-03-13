@@ -16,14 +16,14 @@ app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;
     if (!email) return res.status(400).json({ message: 'Email requerido' });
     if (!password) return res.status(400).json({ message: 'Contraseña requerida' });
-    
+
     let role = 'cliente';
     if (email === 'admin@farmalink.com' && password === 'admin123') {
         role = 'admin';
     } else if (email === 'farmaceutico@farmalink.com' && password === 'farm123') {
         role = 'farmaceutico';
     }
-    
+
     const token = jwt.sign({ email, password, role }, "supersecreto", { expiresIn: '1h' });
     res.json({ token, user: { email, role } });
 });
@@ -56,21 +56,21 @@ function requireAdmin(req, res, next) {
 app.get('/api/medicamentos', async (req, res) => {
     try {
         const query = new URLSearchParams(req.query).toString();
-        const response = await axios.get(`http://localhost:4000/api/medicamentos?${query}`);
+        const response = await axios.get(`http://localhost:3001/api/medicamentos?${query}`);
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend medicamentos' }); }
 });
 
 app.get('/api/medicamentos/:id', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get(`http://localhost:4000/api/medicamentos/${req.params.id}`);
+        const response = await axios.get(`http://localhost:3001/api/medicamentos/${req.params.id}`);
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend medicamentos' }); }
 });
 
 app.post('/api/medicamentos', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.post('http://localhost:4000/api/medicamentos', req.body);
+        const response = await axios.post('http://localhost:3001/api/medicamentos', req.body);
         res.status(201).json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al crear medicamento' });
@@ -79,7 +79,7 @@ app.post('/api/medicamentos', validateJWT, requireAdmin, async (req, res) => {
 
 app.put('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.put(`http://localhost:4000/api/medicamentos/${req.params.id}`, req.body);
+        const response = await axios.put(`http://localhost:3001/api/medicamentos/${req.params.id}`, req.body);
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar medicamento' });
@@ -88,15 +88,26 @@ app.put('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => 
 
 app.delete('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.delete(`http://localhost:4000/api/medicamentos/${req.params.id}`);
+        const response = await axios.delete(`http://localhost:3001/api/medicamentos/${req.params.id}`);
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error al eliminar medicamento' }); }
 });
 
 // Farmacias
+app.get('/api/farmacias/cercanas', async (req, res) => {
+    try {
+        const { lat, lng } = req.query;
+        const response = await axios.get(`http://localhost:3001/api/farmacias/cercanas?lat=${lat}&lng=${lng}`);
+        res.json(response.data);
+    } catch (err) {
+        console.error('Error fetching farmacias cercanas from backend:', err.message);
+        res.status(500).json({ success: false, error: 'Error en backend farmacias cercanas' });
+    }
+});
+
 app.get('/api/farmacias', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get('http://localhost:4000/api/farmacias');
+        const response = await axios.get('http://localhost:3001/api/farmacias');
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend farmacias' }); }
 });
@@ -104,7 +115,7 @@ app.get('/api/farmacias', validateJWT, async (req, res) => {
 // Precios
 app.get('/api/precios', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get('http://localhost:4000/api/precios');
+        const response = await axios.get('http://localhost:3001/api/precios');
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend precios' }); }
 });
@@ -114,7 +125,7 @@ app.get('/api/precios/comparar/:medicamentoId', validateJWT, async (req, res) =>
     try {
         const { medicamentoId } = req.params;
         const orden = req.query.orden || 'asc';
-        const response = await axios.get(`http://localhost:4000/api/precios/comparar/${medicamentoId}?orden=${orden}`);
+        const response = await axios.get(`http://localhost:3001/api/precios/comparar/${medicamentoId}?orden=${orden}`);
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error en comparación de precios' });
@@ -124,7 +135,7 @@ app.get('/api/precios/comparar/:medicamentoId', validateJWT, async (req, res) =>
 // Actualizar precio
 app.put('/api/precios/:id', validateJWT, async (req, res) => {
     try {
-        const response = await axios.put(`http://localhost:4000/api/precios/${req.params.id}`, req.body);
+        const response = await axios.put(`http://localhost:3001/api/precios/${req.params.id}`, req.body);
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar precio' });
@@ -139,7 +150,7 @@ app.get('/api/sugerencias', async (req, res) => {
             return res.json({ success: true, sugerencias: [], estrategiaUsada: '' });
         }
         const query = new URLSearchParams({ q: String(q) }).toString();
-        const response = await axios.get(`http://localhost:4000/api/medicamentos?${query}`);
+        const response = await axios.get(`http://localhost:3001/api/medicamentos?${query}`);
         const medicamentos = response.data || [];
         const sugerencias = medicamentos.slice(0, 10).map((m) => ({
             _id: m._id,

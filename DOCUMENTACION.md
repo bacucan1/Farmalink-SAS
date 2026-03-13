@@ -56,54 +56,6 @@
 
 ---
 
-## Estructura de Archivos
-
-```
-backend/
-├── shared/
-│   ├── db.ts           # Singleton conexión MongoDB
-│   └── errorHandler.ts # Middleware errores centralizado
-├── models/
-│   ├── User.ts         # Modelo User
-│   ├── Farmacia.ts     # Modelo Farmacia
-│   ├── Medicamento.ts  # Modelo Medicamento
-│   └── Precio.ts       # Modelo Precio
-```
-
----
-
-## Uso
-
-### Conexión a MongoDB (Singleton)
-
-```typescript
-import Database from './shared/db';
-
-const db = Database.getInstance();
-await db.connect();
-```
-
-### Modelos
-
-```typescript
-import { User } from './models/User';
-import { Farmacia } from './models/Farmacia';
-import { Medicamento } from './models/Medicamento';
-import { Precio } from './models/Precio';
-```
-
-### Manejo de Errores
-
-```typescript
-import { ErrorHandler, notFound } from './shared/errorHandler';
-
-// Middleware en Express
-app.use(notFound);
-app.use(ErrorHandler.handle);
-```
-
----
-
 ## Seed de Datos de Ejemplo
 
 ### Scripts disponibles en `backend/seed/`
