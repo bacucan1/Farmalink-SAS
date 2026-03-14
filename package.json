@@ -1,0 +1,28 @@
+{
+  "name": "farmalink-sas",
+  "private": true,
+  "packageManager": "npm@10.9.0",
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*",
+    "src"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:frontend": "vite",
+    "dev:backend": "tsx packages/backend/server.ts",
+    "dev:gateway": "cd packages/gateway && npm start",
+    "build": "turbo run build",
+    "build:frontend": "vite build",
+    "build:backend": "tsc -p packages/backend/tsconfig.json",
+    "lint": "turbo run lint",
+    "preview": "vite preview",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.2.0",
+    "eslint": "^9.39.1",
+    "turbo": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
