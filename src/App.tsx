@@ -15,12 +15,6 @@ import { MapView } from './components/map/MapView';
 import { CategoryView } from './components/category/CategoryView';
 import './App.css';
 
-/**
- * Componente principal de la aplicación FarmaLink
- * @component
- * @description Aplicación principal que gestiona las vistas, carga de datos y navegación
- * @returns {JSX.Element} Aplicación completa de FarmaLink
- */
 function App() {
   const [view, setView] = useState<View>('home');
   const [dashboardTab, setDashboardTab] = useState<Tab>('farmacias');
@@ -115,10 +109,7 @@ function App() {
         <div className="view active">
           <Hero
             data={data}
-            onSearchClick={() => {
-              if (!isAuthenticated) { setView('login'); return; }
-              setView('buscar');
-            }}
+            onSearchClick={() => setView('buscar')}
             onDashboardClick={() => {
               if (!isAuthenticated) { setView('login'); return; }
               setView('dashboard');
@@ -129,8 +120,12 @@ function App() {
         </div>
       )}
 
-      {view === 'buscar' && isAuthenticated && (
-        <SearchSection onSelect={handleSelectMed} />
+      {view === 'buscar' && (
+        <SearchSection
+          onSelect={handleSelectMed}
+          isAuthenticated={isAuthenticated}
+          onLoginRequired={() => setView('login')}
+        />
       )}
 
       {view === 'categoria' && (

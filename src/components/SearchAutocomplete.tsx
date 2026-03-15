@@ -11,6 +11,8 @@ interface Sugerencia {
 }
 
 interface SearchAutocompleteProps {
+  /** Callback cuando cambia el texto (para filtros avanzados) */
+  onQueryChange?: (q: string) => void;
   /** Callback cuando el usuario selecciona una sugerencia */
   onSelect?: (sugerencia: Sugerencia) => void;
   placeholder?: string;
@@ -21,6 +23,8 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 export function SearchAutocomplete({
   onSelect,
   placeholder = 'Buscar medicamento...',
+
+  onQueryChange,
 }: SearchAutocompleteProps) {
   const [query, setQuery] = useState('');
   const [sugerencias, setSugerencias] = useState<Sugerencia[]>([]);
@@ -120,6 +124,8 @@ export function SearchAutocomplete({
   };
 
   const etiquetaEstrategia: Record<string, string> = {
+    fuzzy_trgm: '🔍 Fuzzy',
+    fuzzy_js:   '🔍 Fuzzy',
     coincidencia_parcial: 'Nombre',
     por_categoria: '📂 Categoría',
     similitud_basica: '🔎 Similar',
@@ -136,7 +142,7 @@ export function SearchAutocomplete({
             className="search-input"
             placeholder={placeholder}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); onQueryChange?.(e.target.value); }}
             onKeyDown={handleKeyDown}
             onFocus={() => sugerencias.length > 0 && setAbierto(true)}
             autoComplete="off"

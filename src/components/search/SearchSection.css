@@ -49,3 +49,16 @@
     padding: 0 1rem;
   }
 }
+.search-login-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff8e1;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}

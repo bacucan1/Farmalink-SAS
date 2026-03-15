@@ -8,10 +8,10 @@ import preciosRouter from './precios/preciosRouter.js';
 import sugerenciasRouter from './sugerencias/sugerenciasRouter.js';
 import farmaciasRouter from './farmacias/farmaciasRouter.js';
 import categoriasRouter from './categorias/categoriasRouter.js';
-
+import busquedaRouter from './busqueda/busquedaRouter.js';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors({
   origin: true,
@@ -29,13 +29,13 @@ db.connect()
     console.error('❌ Error conectando a PostgreSQL:', err.message);
   });
 
-app.use('/api/auth', authRouter);
-app.use('/api/sugerencias', sugerenciasRouter);
+app.use('/api/auth',         authRouter);
+app.use('/api/sugerencias',  sugerenciasRouter);
 app.use('/api/medicamentos', medicamentosRouter);
-app.use('/api/precios', preciosRouter);
-app.use('/api/farmacias', farmaciasRouter);
-app.use('/api/categorias', categoriasRouter);
-
+app.use('/api/precios',      preciosRouter);
+app.use('/api/farmacias',    farmaciasRouter);
+app.use('/api/categorias',   categoriasRouter);
+app.use('/api/busqueda',     busquedaRouter);  // ← Búsqueda avanzada + fuzzy
 
 app.get('/api/dashboard', async (_req, res) => {
   try {
@@ -45,10 +45,10 @@ app.get('/api/dashboard', async (_req, res) => {
       pool.query('SELECT * FROM medicamentos'),
       pool.query('SELECT * FROM precios'),
     ]);
-    res.json({ 
-      farmacias: farmacias.rows, 
-      medicamentos: medicamentos.rows, 
-      precios: precios.rows 
+    res.json({
+      farmacias:    farmacias.rows,
+      medicamentos: medicamentos.rows,
+      precios:      precios.rows,
     });
   } catch (err) {
     console.error(err);

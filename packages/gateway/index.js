@@ -196,6 +196,27 @@ app.get('/api/sugerencias', async (req, res) => {
     }
 });
 
+// Búsqueda avanzada con fuzzy search y filtros
+app.get('/api/busqueda', async (req, res) => {
+    try {
+        const query = new URLSearchParams(req.query).toString();
+        const response = await axios.get(`http://localhost:3001/api/busqueda?${query}`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ error: 'Error en backend búsqueda' });
+    }
+});
+
+app.get('/api/busqueda/filtros', async (req, res) => {
+    try {
+        const response = await axios.get('http://localhost:3001/api/busqueda/filtros');
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ error: 'Error en backend filtros' });
+    }
+});
+
+
 /* ================= SERVER ================= */
 
 app.listen(PORT, () => {
