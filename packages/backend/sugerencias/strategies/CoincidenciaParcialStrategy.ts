@@ -20,6 +20,8 @@ export class CoincidenciaParcialStrategy implements SugerenciaStrategy {
         lab: med.lab,
         categoria_id: med.categoria_id,
         description: med.description,
+        category: (med as any).categoria_nombre || (med as any).category || '',
+        categoria_nombre: (med as any).categoria_nombre || (med as any).category || '',
         estrategiaUsada: this.nombre,
       }));
   }

@@ -160,6 +160,8 @@ function App() {
         <ProductoDetalle
           medicamento={selectedMed}
           onBack={() => setView('buscar')}
+          onGoHome={() => setView('home')}
+          onGoCategory={(cat) => { setSelectedCategory(cat); setView('categoria'); }}
         />
       )}
 

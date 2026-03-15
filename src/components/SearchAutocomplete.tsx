@@ -56,7 +56,7 @@ export function SearchAutocomplete({
         if (data.success) {
           setSugerencias(data.sugerencias);
           setEstrategia(data.estrategiaUsada ?? '');
-          setAbierto(data.sugerencias.length > 0);
+          setAbierto(true); // abrir siempre para mostrar 'sin coincidencias'
         }
       } catch {
         setSugerencias([]);
@@ -156,7 +156,7 @@ export function SearchAutocomplete({
       )}
 
       {/* Dropdown de sugerencias */}
-      {abierto && sugerencias.length > 0 && (
+      {abierto && query.length >= 2 && !cargando && (
         <div className="search-dropdown">
           <div className="search-dropdown-header">
             <span>Sugerencias</span>
@@ -166,6 +166,11 @@ export function SearchAutocomplete({
               </span>
             )}
           </div>
+          {sugerencias.length === 0 ? (
+            <div className="search-no-results">
+              Sin coincidencias exactas para <strong>"{query}"</strong>
+            </div>
+          ) : (
           <ul className="search-list">
             {sugerencias.map((s, i) => (
               <li
@@ -184,6 +189,7 @@ export function SearchAutocomplete({
               </li>
             ))}
           </ul>
+          )}
         </div>
       )}
 

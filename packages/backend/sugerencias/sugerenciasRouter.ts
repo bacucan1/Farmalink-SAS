@@ -21,9 +21,12 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     }
 
     const pool = Database.getInstance().getPool();
-    const result = await pool.query(
-      'SELECT * FROM medicamentos WHERE active = true'
-    );
+    const result = await pool.query(`
+      SELECT m.*, c.nombre as categoria_nombre
+      FROM medicamentos m
+      LEFT JOIN categorias c ON m.categoria_id = c.id
+      WHERE m.active = true
+    `);
 
     const medicamentos = result.rows.map((m: any) => ({
       _id: m.id.toString(),
@@ -32,6 +35,8 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
       lab: m.lab,
       active: m.active,
       description: m.description,
+      category: m.categoria_nombre || '',
+      categoria_nombre: m.categoria_nombre || '',
       categoria_id: m.categoria_id,
     }));
 

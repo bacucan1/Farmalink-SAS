@@ -5,6 +5,7 @@ export interface SugerenciaResult {
   name: string;
   lab: string;
   category?: string;
+  categoria_nombre?: string;
   description?: string;
   estrategiaUsada: string;
 }
