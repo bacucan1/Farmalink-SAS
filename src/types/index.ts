@@ -5,11 +5,21 @@
  */
 
 /**
+ * Categoría de medicamentos (tabla categorias en PostgreSQL)
+ */
+export interface Categoria {
+  id: number;
+  nombre: string;
+  orden: number;
+}
+
+/**
  * Representa una farmacia registrada en el sistema
  * @interface Farmacia
  */
 export interface Farmacia {
-  /** Identificador único de la farmacia */
+  /** Identificador único de la farmacia (PostgreSQL usa número) */
+  id?: number;
   _id: string;
   /** Nombre comercial de la farmacia */
   name: string;
@@ -19,8 +29,10 @@ export interface Farmacia {
   phone?: string;
   /** Latitud para coordenadas geográficas */
   lat?: number;
+  latitude?: number;
   /** Longitud para coordenadas geográficas */
   lng?: number;
+  longitude?: number;
 }
 
 /**
@@ -29,6 +41,7 @@ export interface Farmacia {
  */
 export interface Medicamento {
   /** Identificador único del medicamento */
+  id?: number;
   _id: string;
   /** Nombre comercial del medicamento */
   name: string;
@@ -38,8 +51,12 @@ export interface Medicamento {
   active: boolean;
   /** Descripción detallada del medicamento */
   description?: string;
-  /** Categoría terapéutica del medicamento */
+  /** Categoría terapéutica (campo legacy) */
   category?: string;
+  /** FK a la categoría (PostgreSQL) */
+  categoria_id?: number;
+  /** Nombre de la categoría (via JOIN) */
+  categoria_nombre?: string;
   /** FK a la farmacia que ofrece este medicamento */
   farmaciaId?: Farmacia | string;
 }
@@ -50,6 +67,7 @@ export interface Medicamento {
  */
 export interface Precio {
   /** Identificador único del precio */
+  id?: number;
   _id: string;
   /** Valor monetario del medicamento */
   precio: number;
@@ -81,12 +99,14 @@ export interface DashboardData {
 export interface Sugerencia {
   /** Identificador único */
   _id: string;
+  id?: number;
   /** Nombre del medicamento */
   name: string;
   /** Laboratorio */
   lab: string;
   /** Categoría terapéutica */
   category?: string;
+  categoria_nombre?: string;
   /** Descripción del medicamento */
   description?: string;
   /** Estrategia utilizada para la sugerencia */
@@ -95,15 +115,31 @@ export interface Sugerencia {
 
 /**
  * Vistas disponibles en la aplicación
- * @typedef {'home' | 'buscar' | 'dashboard' | 'admin'} View
  */
-export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'producto' | 'mapa';
+export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'producto' | 'mapa' | 'categoria';
 
 /**
  * Pestañas del dashboard
- * @typedef {'farmacias' | 'medicamentos' | 'precios'} Tab
  */
 export type Tab = 'farmacias' | 'medicamentos' | 'precios';
+
+/**
+ * Resultado de búsqueda con precios por farmacia
+ * @interface SearchResult
+ */
+export interface SearchResult {
+  /** Medicamento encontrado */
+  medicamento: Medicamento;
+  /** Lista de precios por farmacia */
+  precios: Array<{
+    farmacia: Farmacia;
+    precio: number;
+    fecha: string;
+  }>;
+  /** Precio más bajo encontrado */
+  mejorPrecio?: number;
+}
+
 
 /**
  * Resultado de búsqueda con precios por farmacia

@@ -7,6 +7,8 @@ import medicamentosRouter from './medicamentos/medicamentosRouter.js';
 import preciosRouter from './precios/preciosRouter.js';
 import sugerenciasRouter from './sugerencias/sugerenciasRouter.js';
 import farmaciasRouter from './farmacias/farmaciasRouter.js';
+import categoriasRouter from './categorias/categoriasRouter.js';
+
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -32,6 +34,8 @@ app.use('/api/sugerencias', sugerenciasRouter);
 app.use('/api/medicamentos', medicamentosRouter);
 app.use('/api/precios', preciosRouter);
 app.use('/api/farmacias', farmaciasRouter);
+app.use('/api/categorias', categoriasRouter);
+
 
 app.get('/api/dashboard', async (_req, res) => {
   try {

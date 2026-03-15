@@ -142,6 +142,17 @@ app.put('/api/precios/:id', validateJWT, async (req, res) => {
     }
 });
 
+// Categorías
+app.get('/api/categorias', async (req, res) => {
+    try {
+        const response = await axios.get('http://localhost:3001/api/categorias');
+        res.json(response.data);
+    } catch (err) {
+        console.error('Error fetching categorias:', err.message);
+        res.status(500).json({ error: 'Error en backend categorias' });
+    }
+});
+
 
 // Dashboard - Agrega datos consolidados
 app.get('/api/dashboard', validateJWT, async (req, res) => {

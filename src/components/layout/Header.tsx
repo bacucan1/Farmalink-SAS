@@ -1,46 +1,63 @@
-import type { View } from '../../types';
+import { useState, useEffect, useRef } from 'react';
+import type { View, Categoria } from '../../types';
 import logoFarmalink from '../../assets/logo-farmalink.png';
 import './Header.css';
 
-/**
- * Props para el componente Header
- * @interface HeaderProps
- */
 interface HeaderProps {
-  /** Vista actual de la aplicación */
   currentView: View;
-  /** Callback para cambiar de vista */
   onViewChange: (view: View) => void;
-  /** Indica si el usuario está autenticado */
   isAuthenticated: boolean;
-  /** Rol del usuario autenticado */
   userRole: string;
-  /** Callback para cerrar sesión */
   onLogout: () => void;
+  onCategorySelect: (categoria: string) => void;
 }
 
-/**
- * Header navegación principal de FarmaLink
- * @component
- * @description Barra de navegación responsive con logo, links y call-to-action
- * @param {HeaderProps} props - Propiedades del componente
- * @returns {JSX.Element} Header navegable
- */
-export function Header({ currentView, onViewChange, isAuthenticated, userRole, onLogout }: HeaderProps) {
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+export function Header({ currentView, onViewChange, isAuthenticated, userRole, onLogout, onCategorySelect }: HeaderProps) {
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLLIElement>(null);
+
+  // Cargar categorías desde la API al montar
+  useEffect(() => {
+    fetch(`${API_BASE}/api/categorias`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setCategorias(d.data); })
+      .catch(() => {});
+  }, []);
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleCategoryClick = (nombre: string) => {
+    setDropdownOpen(false);
+    onCategorySelect(nombre);
+    onViewChange('categoria');
+  };
+
   return (
     <header className="header" id="header">
       <nav className="navbar">
         <div className="container navbar-container">
-          <a 
-            className="logo" 
-            href="#" 
+          <a
+            className="logo"
+            href="#"
             onClick={(e) => { e.preventDefault(); onViewChange('home'); }}
           >
             <img src={logoFarmalink} alt="FarmaLink" className="logo-img" />
           </a>
-          
-          <button 
-            className="mobile-menu-btn" 
+
+          <button
+            className="mobile-menu-btn"
             aria-label="Abrir menú"
             onClick={() => {
               const nav = document.querySelector('.nav-links');
@@ -54,43 +71,68 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
 
           <ul className="nav-links">
             <li>
-              <a 
-                onClick={() => onViewChange('home')} 
-                className={currentView === 'home' ? 'active' : ''}
-              >
+              <a onClick={() => onViewChange('home')} className={currentView === 'home' ? 'active' : ''}>
                 Inicio
               </a>
             </li>
             <li>
-              <a 
-                onClick={() => onViewChange('buscar')} 
-                className={currentView === 'buscar' ? 'active' : ''}
-              >
+              <a onClick={() => onViewChange('buscar')} className={currentView === 'buscar' ? 'active' : ''}>
                 Buscar
               </a>
             </li>
-            <li>
-              <a 
-                onClick={() => onViewChange('mapa')} 
-                className={currentView === 'mapa' ? 'active' : ''}
+
+            {/* ── Menú desplegable de Categorías ── */}
+            <li
+              className={`nav-dropdown-wrapper ${currentView === 'categoria' ? 'active-parent' : ''}`}
+              ref={dropdownRef}
+            >
+              <a
+                className={`nav-dropdown-trigger ${currentView === 'categoria' ? 'active' : ''}`}
+                onClick={() => setDropdownOpen(prev => !prev)}
+                aria-haspopup="true"
+                aria-expanded={dropdownOpen}
               >
+                Categorías
+                <span className={`nav-dropdown-arrow ${dropdownOpen ? 'open' : ''}`}>▾</span>
+              </a>
+
+              {dropdownOpen && (
+                <div className="nav-dropdown" role="menu">
+                  <div className="nav-dropdown-header">Categorías de medicamentos</div>
+                  <ul>
+                    {categorias.length === 0 ? (
+                      <li className="nav-dropdown-loading">Cargando...</li>
+                    ) : (
+                      categorias.map(cat => (
+                        <li key={cat.id}>
+                          <button
+                            className="nav-dropdown-item"
+                            onClick={() => handleCategoryClick(cat.nombre)}
+                            role="menuitem"
+                          >
+                            {cat.nombre}
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              )}
+            </li>
+
+            <li>
+              <a onClick={() => onViewChange('mapa')} className={currentView === 'mapa' ? 'active' : ''}>
                 Mapa
               </a>
             </li>
             <li>
-              <a 
-                onClick={() => onViewChange('dashboard')} 
-                className={currentView === 'dashboard' ? 'active' : ''}
-              >
+              <a onClick={() => onViewChange('dashboard')} className={currentView === 'dashboard' ? 'active' : ''}>
                 Dashboard
               </a>
             </li>
             {userRole === 'admin' && (
               <li>
-                <a 
-                  onClick={() => onViewChange('admin')} 
-                  className={currentView === 'admin' ? 'active' : ''}
-                >
+                <a onClick={() => onViewChange('admin')} className={currentView === 'admin' ? 'active' : ''}>
                   Admin
                 </a>
               </li>
@@ -101,10 +143,7 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
                   Cerrar Sesión
                 </button>
               ) : (
-                <a 
-                  className="nav-cta" 
-                  onClick={() => onViewChange('login')}
-                >
+                <a className="nav-cta" onClick={() => onViewChange('login')}>
                   Iniciar Sesión
                 </a>
               )}

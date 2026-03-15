@@ -12,6 +12,7 @@ import Login from './components/auth/Login';
 import { AdminMedicamentos } from './components/AdminMedicamentos';
 import { ProductoDetalle } from './components/product/ProductoDetalle';
 import { MapView } from './components/map/MapView';
+import { CategoryView } from './components/category/CategoryView';
 import './App.css';
 
 /**
@@ -24,6 +25,7 @@ function App() {
   const [view, setView] = useState<View>('home');
   const [dashboardTab, setDashboardTab] = useState<Tab>('farmacias');
   const [selectedMed, setSelectedMed] = useState<Sugerencia | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const token = localStorage.getItem('token');
     return !!token;
@@ -69,7 +71,14 @@ function App() {
   if (loading) {
     return (
       <>
-        <Header currentView={view} onViewChange={setView} isAuthenticated={isAuthenticated} userRole={userRole} onLogout={handleLogout} />
+        <Header 
+          currentView={view} 
+          onViewChange={setView} 
+          isAuthenticated={isAuthenticated} 
+          userRole={userRole} 
+          onLogout={handleLogout} 
+          onCategorySelect={setSelectedCategory}
+        />
         <LoadingState />
       </>
     );
@@ -78,7 +87,14 @@ function App() {
   if (error) {
     return (
       <>
-        <Header currentView={view} onViewChange={setView} isAuthenticated={isAuthenticated} userRole={userRole} onLogout={handleLogout} />
+        <Header 
+          currentView={view} 
+          onViewChange={setView} 
+          isAuthenticated={isAuthenticated} 
+          userRole={userRole} 
+          onLogout={handleLogout} 
+          onCategorySelect={setSelectedCategory}
+        />
         <ErrorState message={error} onRetry={refetch} />
       </>
     );
@@ -86,7 +102,14 @@ function App() {
 
   return (
     <>
-      <Header currentView={view} onViewChange={setView} isAuthenticated={isAuthenticated} userRole={userRole} onLogout={handleLogout} />
+      <Header 
+        currentView={view} 
+        onViewChange={setView} 
+        isAuthenticated={isAuthenticated} 
+        userRole={userRole} 
+        onLogout={handleLogout}
+        onCategorySelect={setSelectedCategory}
+      />
 
       {view === 'home' && (
         <div className="view active">
@@ -108,6 +131,13 @@ function App() {
 
       {view === 'buscar' && isAuthenticated && (
         <SearchSection onSelect={handleSelectMed} />
+      )}
+
+      {view === 'categoria' && (
+        <CategoryView 
+          categoriaInicial={selectedCategory} 
+          onSelect={handleSelectMed} 
+        />
       )}
 
       {view === 'dashboard' && data && isAuthenticated && (

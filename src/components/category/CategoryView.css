@@ -1,0 +1,316 @@
+/* ================================
+   CATEGORY VIEW (ESTILO AMAZON)
+   ================================ */
+
+.catview {
+  min-height: calc(100vh - var(--header-height, 80px));
+  background-color: var(--bg-body, #f4f6f8);
+  padding-bottom: 4rem;
+}
+
+/* ── Hero / Cabecera ── */
+.catview__hero {
+  background: linear-gradient(135deg, var(--primary, #6366f1) 0%, var(--secondary, #8b5cf6) 100%);
+  color: white;
+  padding: 2.5rem 0;
+  margin-bottom: 2rem;
+}
+
+.catview__breadcrumb {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.catview__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.catview__subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ── Botón filtros mobile ── */
+.catview__filter-toggle {
+  display: none;
+  width: 100%;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--text, #333);
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* ── Layout Principal ── */
+.catview__layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+/* ── Sidebar Filtros ── */
+.catview__sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.catview__filter-group {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.catview__filter-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--text, #333);
+}
+
+.catview__filter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.catview__filter-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  color: #555;
+  cursor: pointer;
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.catview__filter-btn:hover {
+  background: #f4f4ff;
+  color: var(--primary, #6366f1);
+}
+
+.catview__filter-btn--active {
+  background: #f4f4ff;
+  color: var(--primary, #6366f1);
+  font-weight: 600;
+}
+
+.catview__toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.catview__toggle-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary, #6366f1);
+}
+
+.catview__toggle-text {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* ── Main / Grid ── */
+.catview__main {
+  flex: 1;
+}
+
+.catview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ── Tarjetas Medicamento ── */
+.catview__card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.catview__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.catview__card--inactive {
+  opacity: 0.7;
+}
+
+.catview__card-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.catview__card--inactive .catview__card-badge {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.catview__card-body {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.catview__card-category {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary, #6366f1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.catview__card-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text, #333);
+  margin: 0 0 0.5rem 0;
+}
+
+.catview__card-lab {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 1rem 0;
+}
+
+.catview__card-desc {
+  font-size: 0.9rem;
+  color: #777;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.catview__card-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.catview__card-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--primary, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.catview__card-btn:hover:not(:disabled) {
+  background: var(--secondary, #8b5cf6);
+}
+
+.catview__card-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* ── Estados (Loading, Empty) ── */
+.catview__loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #666;
+}
+
+.catview__spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary, #6366f1);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.catview__empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.catview__empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.catview__empty h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text, #333);
+}
+
+.catview__empty p {
+  color: #666;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .catview__layout {
+    flex-direction: column;
+  }
+
+  .catview__filter-toggle {
+    display: block;
+  }
+
+  .catview__sidebar {
+    display: none;
+    width: 100%;
+  }
+
+  .catview__sidebar--open {
+    display: flex;
+  }
+}
