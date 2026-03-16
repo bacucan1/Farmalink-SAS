@@ -10,12 +10,45 @@
 .admin-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-tab {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--r-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-tab:hover {
+  background: var(--blue-mist);
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+.admin-tab.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--blue) 100%);
+  color: white;
+  border-color: var(--primary);
+}
+
+.admin-header-actions {
+  margin-bottom: 1.5rem;
 }
 
 .admin-title {

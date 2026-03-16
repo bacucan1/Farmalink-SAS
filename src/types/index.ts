@@ -41,8 +41,7 @@ export interface Farmacia {
  */
 export interface Medicamento {
   /** Identificador único del medicamento */
-  id?: number;
-  _id: string;
+  id: number;
   /** Nombre comercial del medicamento */
   name: string;
   /** Laboratorio fabricante */

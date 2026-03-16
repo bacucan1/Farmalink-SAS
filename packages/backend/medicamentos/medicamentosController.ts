@@ -14,9 +14,13 @@ export async function getAll(req: Request, res: Response): Promise<void> {
     const pool = Database.getInstance().getPool();
 
     let query = `
-      SELECT m.*, c.nombre as categoria_nombre, c.orden as categoria_orden
+      SELECT DISTINCT ON (m.id) 
+             m.*, c.nombre as categoria_nombre, c.orden as categoria_orden,
+             f.id as "farmaciaId", f.name as "farmaciaNombre"
       FROM medicamentos m
       LEFT JOIN categorias c ON m.categoria_id = c.id
+      LEFT JOIN precios p ON m.id = p.medicamento_id
+      LEFT JOIN farmacias f ON p.farmacia_id = f.id
       WHERE 1=1
     `;
     const params: any[] = [];
@@ -38,7 +42,7 @@ export async function getAll(req: Request, res: Response): Promise<void> {
       paramIndex++;
     }
 
-    query += ' ORDER BY m.name ASC';
+    query += ' ORDER BY m.id, m.name ASC';
 
     const result = await pool.query(query, params);
 
@@ -56,9 +60,12 @@ export async function getById(req: Request, res: Response): Promise<void> {
     const pool = Database.getInstance().getPool();
 
     const result = await pool.query(
-      `SELECT m.*, c.nombre as categoria_nombre, c.orden as categoria_orden
+      `SELECT m.*, c.nombre as categoria_nombre, c.orden as categoria_orden,
+              f.id as "farmaciaId", f.name as "farmaciaNombre"
        FROM medicamentos m
        LEFT JOIN categorias c ON m.categoria_id = c.id
+       LEFT JOIN precios p ON m.id = p.medicamento_id
+       LEFT JOIN farmacias f ON p.farmacia_id = f.id
        WHERE m.id = $1`,
       [id]
     );
