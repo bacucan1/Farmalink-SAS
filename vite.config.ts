@@ -12,15 +12,6 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
-    // Proxy: el frontend (https) reenvía /api al gateway (http) internamente
-    // Esto elimina el error "Mixed Content" sin necesitar SSL en el gateway
-    proxy: {
-      '/api': {
-        target: 'http://localhost:4000',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
   },
   plugins: [
     react(),
