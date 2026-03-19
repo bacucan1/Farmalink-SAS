@@ -112,7 +112,7 @@ app.get('/api/farmacias/cercanas', async (req, res) => {
 
 app.get('/api/farmacias', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get('${BACKEND_URL}/api/farmacias');
+        const response = await axios.get(`${BACKEND_URL}/api/farmacias`);
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend farmacias' }); }
 });
@@ -120,7 +120,7 @@ app.get('/api/farmacias', validateJWT, async (req, res) => {
 // Precios
 app.get('/api/precios', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get('${BACKEND_URL}/api/precios');
+        const response = await axios.get(`${BACKEND_URL}/api/precios`);
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend precios' }); }
 });
@@ -150,7 +150,7 @@ app.put('/api/precios/:id', validateJWT, async (req, res) => {
 // Categorías
 app.get('/api/categorias', async (req, res) => {
     try {
-        const response = await axios.get('${BACKEND_URL}/api/categorias');
+        const response = await axios.get(`${BACKEND_URL}/api/categorias`);
         res.json(response.data);
     } catch (err) {
         console.error('Error fetching categorias:', err.message);
@@ -162,7 +162,7 @@ app.get('/api/categorias', async (req, res) => {
 // Dashboard - Agrega datos consolidados
 app.get('/api/dashboard', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get('${BACKEND_URL}/api/dashboard');
+        const response = await axios.get(`${BACKEND_URL}/api/dashboard`);
         res.json(response.data);
     } catch (err) {
         console.error('Error fetching dashboard:', err.message);
@@ -214,7 +214,7 @@ app.get('/api/busqueda', async (req, res) => {
 
 app.get('/api/busqueda/filtros', async (req, res) => {
     try {
-        const response = await axios.get('${BACKEND_URL}/api/busqueda/filtros');
+        const response = await axios.get(`${BACKEND_URL}/api/busqueda/filtros`);
         res.json(response.data);
     } catch (err) {
         res.status(500).json({ error: 'Error en backend filtros' });
