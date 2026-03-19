@@ -4,8 +4,8 @@ import react from '@vitejs/plugin-react'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig({
-  root: '.',
-  publicDir: 'public',
+  root: 'src',
+  publicDir: '../public',
   build: {
     outDir: 'dist',
   },
