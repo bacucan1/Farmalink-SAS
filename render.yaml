@@ -40,7 +40,6 @@ services:
   - type: web
     name: farmalink-frontend
     env: static
-    region: oregon
     plan: free
     rootDir: src
     buildCommand: npm install && npm run build
