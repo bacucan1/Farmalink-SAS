@@ -32,7 +32,7 @@ services:
         fromService:
           type: web
           name: farmalink-backend
-          property: host
+          envVarKey: RENDER_EXTERNAL_URL
 
   # Frontend
   - type: web
