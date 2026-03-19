@@ -24,7 +24,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    basicSsl()
+    ...(process.env.NODE_ENV === 'development' ? [basicSsl()] : [])
   ],
   optimizeDeps: {
     exclude: ['@farmalink/backend', '@farmalink/gateway'],
