@@ -3,7 +3,7 @@ services:
   - type: web
     name: farmalink-backend
     env: node
-    region: oregon  # <--- Corregido
+    region: oregon
     plan: free
     rootDir: packages/backend
     buildCommand: npm install && npm run build
@@ -21,7 +21,7 @@ services:
   - type: web
     name: farmalink-gateway
     env: node
-    region: oregon  # <--- Corregido
+    region: oregon
     plan: free
     rootDir: packages/gateway
     buildCommand: npm install
@@ -34,4 +34,24 @@ services:
         fromService:
           type: web
           name: farmalink-backend
-          property: host # Nota: En 2026 'property: host' es más fiable para comunicación interna
+          property: host
+
+  # Frontend
+  - type: web
+    name: farmalink-frontend
+    env: static
+    region: oregon
+    plan: free
+    rootDir: src
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: farmalink-gateway
+          envVarKey: RENDER_EXTERNAL_URL
