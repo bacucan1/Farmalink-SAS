@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd $PWD && npm install && cd $PWD/src && npm install && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "src/dist",
   "framework": null,
   "rewrites": [
