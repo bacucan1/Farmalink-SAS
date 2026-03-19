@@ -4,7 +4,6 @@ services:
     name: farmalink-backend
     env: node
     region: oregon
-    plan: free
     rootDir: packages/backend
     buildCommand: npm install && npm run build
     startCommand: npm start
@@ -22,7 +21,6 @@ services:
     name: farmalink-gateway
     env: node
     region: oregon
-    plan: free
     rootDir: packages/gateway
     buildCommand: npm install
     startCommand: npm start
