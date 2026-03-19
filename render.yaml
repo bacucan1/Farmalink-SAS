@@ -1,13 +1,9 @@
-# Render Blueprint - Farmalink
-# Solo backend y gateway - el frontend va en Vercel
-# Base de datos: Neon (PostgreSQL serverless)
-
 services:
   # Backend API
   - type: web
     name: farmalink-backend
     env: node
-    region: us-east-1
+    region: oregon  # <--- Corregido
     plan: free
     rootDir: packages/backend
     buildCommand: npm install && npm run build
@@ -17,7 +13,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false  # Configurar en Render con tu URL de Neon
+        sync: false
       - key: JWT_SECRET
         generateValue: true
 
@@ -25,7 +21,7 @@ services:
   - type: web
     name: farmalink-gateway
     env: node
-    region: us-east-1
+    region: oregon  # <--- Corregido
     plan: free
     rootDir: packages/gateway
     buildCommand: npm install
@@ -38,4 +34,4 @@ services:
         fromService:
           type: web
           name: farmalink-backend
-          envVarKey: RENDER_EXTERNAL_URL
+          property: host # Nota: En 2026 'property: host' es más fiable para comunicación interna
