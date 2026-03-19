@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "cd src && npm run dev",
-    "build": "cd src && npm run build",
-    "preview": "cd src && npm run preview"
+    "build": "npm run --prefix src build",
+    "preview": "npm run --prefix src preview"
   }
 }
