@@ -1,7 +1,6 @@
 {
-  "buildCommand": "npm run build --prefix src",
+  "buildCommand": "cd src && npm install && npm run build",
   "outputDirectory": "src/dist",
-  "installCommand": "npm install --prefix src",
   "framework": "vite",
   "rewrites": [
     {
