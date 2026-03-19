@@ -110,6 +110,10 @@ app.get('/api/dashboard', async (_req, res) => {
   }
 });
 
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

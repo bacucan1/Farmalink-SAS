@@ -5,10 +5,15 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 app.use(cors());
 app.use(express.json());
+
+app.get('/health', (_req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 /* ================= LOGIN ================= */
 
@@ -56,21 +61,21 @@ function requireAdmin(req, res, next) {
 app.get('/api/medicamentos', async (req, res) => {
     try {
         const query = new URLSearchParams(req.query).toString();
-        const response = await axios.get(`http://localhost:3001/api/medicamentos?${query}`);
+        const response = await axios.get(`${BACKEND_URL}/api/medicamentos?${query}`);
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend medicamentos' }); }
 });
 
 app.get('/api/medicamentos/:id', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get(`http://localhost:3001/api/medicamentos/${req.params.id}`);
+        const response = await axios.get(`${BACKEND_URL}/api/medicamentos/${req.params.id}`);
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend medicamentos' }); }
 });
 
 app.post('/api/medicamentos', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.post('http://localhost:3001/api/medicamentos', req.body);
+        const response = await axios.post(BACKEND_URL + '/api/medicamentos', req.body);
         res.status(201).json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al crear medicamento' });
@@ -79,7 +84,7 @@ app.post('/api/medicamentos', validateJWT, requireAdmin, async (req, res) => {
 
 app.put('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.put(`http://localhost:3001/api/medicamentos/${req.params.id}`, req.body);
+        const response = await axios.put(`${BACKEND_URL}/api/medicamentos/${req.params.id}`, req.body);
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar medicamento' });
@@ -88,7 +93,7 @@ app.put('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => 
 
 app.delete('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.delete(`http://localhost:3001/api/medicamentos/${req.params.id}`);
+        const response = await axios.delete(`${BACKEND_URL}/api/medicamentos/${req.params.id}`);
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error al eliminar medicamento' }); }
 });
@@ -97,7 +102,7 @@ app.delete('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) 
 app.get('/api/farmacias/cercanas', async (req, res) => {
     try {
         const { lat, lng } = req.query;
-        const response = await axios.get(`http://localhost:3001/api/farmacias/cercanas?lat=${lat}&lng=${lng}`);
+        const response = await axios.get(`${BACKEND_URL}/api/farmacias/cercanas?lat=${lat}&lng=${lng}`);
         res.json(response.data);
     } catch (err) {
         console.error('Error fetching farmacias cercanas from backend:', err.message);
@@ -107,7 +112,7 @@ app.get('/api/farmacias/cercanas', async (req, res) => {
 
 app.get('/api/farmacias', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get('http://localhost:3001/api/farmacias');
+        const response = await axios.get('${BACKEND_URL}/api/farmacias');
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend farmacias' }); }
 });
@@ -115,7 +120,7 @@ app.get('/api/farmacias', validateJWT, async (req, res) => {
 // Precios
 app.get('/api/precios', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get('http://localhost:3001/api/precios');
+        const response = await axios.get('${BACKEND_URL}/api/precios');
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend precios' }); }
 });
@@ -125,7 +130,7 @@ app.get('/api/precios/comparar/:medicamentoId', validateJWT, async (req, res) =>
     try {
         const { medicamentoId } = req.params;
         const orden = req.query.orden || 'asc';
-        const response = await axios.get(`http://localhost:3001/api/precios/comparar/${medicamentoId}?orden=${orden}`);
+        const response = await axios.get(`${BACKEND_URL}/api/precios/comparar/${medicamentoId}?orden=${orden}`);
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error en comparación de precios' });
@@ -135,7 +140,7 @@ app.get('/api/precios/comparar/:medicamentoId', validateJWT, async (req, res) =>
 // Actualizar precio
 app.put('/api/precios/:id', validateJWT, async (req, res) => {
     try {
-        const response = await axios.put(`http://localhost:3001/api/precios/${req.params.id}`, req.body);
+        const response = await axios.put(`${BACKEND_URL}/api/precios/${req.params.id}`, req.body);
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar precio' });
@@ -145,7 +150,7 @@ app.put('/api/precios/:id', validateJWT, async (req, res) => {
 // Categorías
 app.get('/api/categorias', async (req, res) => {
     try {
-        const response = await axios.get('http://localhost:3001/api/categorias');
+        const response = await axios.get('${BACKEND_URL}/api/categorias');
         res.json(response.data);
     } catch (err) {
         console.error('Error fetching categorias:', err.message);
@@ -157,7 +162,7 @@ app.get('/api/categorias', async (req, res) => {
 // Dashboard - Agrega datos consolidados
 app.get('/api/dashboard', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get('http://localhost:3001/api/dashboard');
+        const response = await axios.get('${BACKEND_URL}/api/dashboard');
         res.json(response.data);
     } catch (err) {
         console.error('Error fetching dashboard:', err.message);
@@ -175,12 +180,12 @@ app.get('/api/sugerencias', async (req, res) => {
         const query = new URLSearchParams({ q: String(q) }).toString();
         // Try the dedicated sugerencias endpoint first (returns already formatted data)
         try {
-            const sugResponse = await axios.get(`http://localhost:3001/api/sugerencias?${query}`);
+            const sugResponse = await axios.get(`${BACKEND_URL}/api/sugerencias?${query}`);
             if (sugResponse.data && sugResponse.data.success) {
                 return res.json(sugResponse.data);
             }
         } catch (_e) { /* fallback below */ }
-        const response = await axios.get(`http://localhost:3001/api/medicamentos?${query}`);
+        const response = await axios.get(`${BACKEND_URL}/api/medicamentos?${query}`);
         const medicamentos = response.data?.data || response.data || [];
         const sugerencias = medicamentos.slice(0, 10).map((m) => ({
             _id: m._id || m.id,
@@ -200,7 +205,7 @@ app.get('/api/sugerencias', async (req, res) => {
 app.get('/api/busqueda', async (req, res) => {
     try {
         const query = new URLSearchParams(req.query).toString();
-        const response = await axios.get(`http://localhost:3001/api/busqueda?${query}`);
+        const response = await axios.get(`${BACKEND_URL}/api/busqueda?${query}`);
         res.json(response.data);
     } catch (err) {
         res.status(500).json({ error: 'Error en backend búsqueda' });
@@ -209,7 +214,7 @@ app.get('/api/busqueda', async (req, res) => {
 
 app.get('/api/busqueda/filtros', async (req, res) => {
     try {
-        const response = await axios.get('http://localhost:3001/api/busqueda/filtros');
+        const response = await axios.get('${BACKEND_URL}/api/busqueda/filtros');
         res.json(response.data);
     } catch (err) {
         res.status(500).json({ error: 'Error en backend filtros' });

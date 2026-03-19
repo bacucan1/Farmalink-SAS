@@ -4,6 +4,16 @@ export interface GeocodingResult {
   formattedAddress: string;
 }
 
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+}
+
+interface NominatimReverseResult {
+  display_name: string;
+}
+
 export class GeocodingService {
   private static readonly NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org';
 
@@ -22,7 +32,7 @@ export class GeocodingService {
         throw new Error(`Geocoding failed: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as NominatimResult[];
 
       if (!data || data.length === 0) {
         return null;
@@ -54,7 +64,7 @@ export class GeocodingService {
         throw new Error(`Reverse geocoding failed: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as NominatimReverseResult;
       return data.display_name || null;
     } catch (error) {
       console.error('Reverse geocoding error:', error);
