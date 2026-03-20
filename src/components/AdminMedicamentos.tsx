@@ -344,21 +344,26 @@ export function AdminMedicamentos() {
   }
 
   const filtradosFarmacias = farmacias.filter(f => {
+    if (!f || typeof f.name !== 'string') return false;
+    const searchLower = filtro.toLowerCase();
     return (
-      f.name.toLowerCase().includes(filtro.toLowerCase()) ||
-      (f.address?.toLowerCase().includes(filtro.toLowerCase())) ||
-      (f.phone?.toLowerCase().includes(filtro.toLowerCase()))
+      f.name.toLowerCase().includes(searchLower) ||
+      (f.address?.toLowerCase().includes(searchLower)) ||
+      (f.phone?.toLowerCase().includes(searchLower))
     );
   });
 
   const filtrados = medicamentos.filter(m => {
+    if (!m || typeof m.name !== 'string') return false;
+    const searchLower = filtro.toLowerCase();
     const catNombre = categorias.find(c => c.id === m.categoria_id)?.nombre || m.categoria_nombre || m.category || '';
-    const farNombre = typeof m.farmaciaId === 'object' ? m.farmaciaId.name : (farmacias.find(f => f.id === Number(m.farmaciaId))?.name || '');
+    const farObj = m.farmaciaId;
+    const farNombre = (farObj && typeof farObj === 'object') ? farObj.name : (farmacias.find(f => f.id === Number(m.farmaciaId))?.name || '');
     return (
-      m.name.toLowerCase().includes(filtro.toLowerCase()) ||
-      m.lab.toLowerCase().includes(filtro.toLowerCase()) ||
-      catNombre.toLowerCase().includes(filtro.toLowerCase()) ||
-      farNombre.toLowerCase().includes(filtro.toLowerCase())
+      m.name.toLowerCase().includes(searchLower) ||
+      (m.lab?.toLowerCase().includes(searchLower)) ||
+      catNombre.toLowerCase().includes(searchLower) ||
+      farNombre.toLowerCase().includes(searchLower)
     );
   });
 
@@ -370,7 +375,8 @@ export function AdminMedicamentos() {
   }
 
   function getFarmaciaNombre(med: Medicamento): string {
-    if (typeof med.farmaciaId === 'object') return med.farmaciaId.name;
+    const farObj = med.farmaciaId;
+    if (farObj && typeof farObj === 'object') return farObj.name;
     if ((med as any).farmaciaNombre) return (med as any).farmaciaNombre;
     const far = farmacias.find(f => f.id === Number(med.farmaciaId));
     return far?.name || '—';
@@ -440,8 +446,8 @@ export function AdminMedicamentos() {
               <tbody>
                 {filtrados.length === 0 ? (
                   <tr><td colSpan={6} className="admin-empty">No hay medicamentos</td></tr>
-                ) : filtrados.map(med => (
-                  <tr key={med._id}>
+                ) : filtrados.map((med, idx) => (
+                  <tr key={med._id || med.id || `med-${idx}`}>
                     <td className="td-name">{med.name}</td>
                     <td>{med.lab}</td>
                     <td>{getCategoriaNombre(med)}</td>
@@ -478,8 +484,8 @@ export function AdminMedicamentos() {
               <tbody>
                 {filtradosFarmacias.length === 0 ? (
                   <tr><td colSpan={5} className="admin-empty">No hay farmacias</td></tr>
-                ) : filtradosFarmacias.map(far => (
-                  <tr key={far._id}>
+                ) : filtradosFarmacias.map((far, idx) => (
+                  <tr key={far._id || far.id || `far-${idx}`}>
                     <td className="td-name">{far.name}</td>
                     <td>{far.address || '—'}</td>
                     <td>{far.phone || '—'}</td>
