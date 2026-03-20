@@ -110,16 +110,31 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
     }
 
     const pool = Database.getInstance().getPool();
-    
+
+    // 1. Leer el precio actual antes de modificarlo
+    const currentResult = await pool.query(
+      'SELECT * FROM precios WHERE id = $1',
+      [id]
+    );
+    if (currentResult.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'Precio no encontrado' });
+      return;
+    }
+    const current = currentResult.rows[0];
+
+    // 2. Guardar el cambio en el historial
+    await pool.query(
+      `INSERT INTO historial_precios
+         (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio)
+       VALUES ($1, $2, $3, $4, $5, NOW())`,
+      [id, current.medicamento_id, current.farmacia_id, current.precio, req.body.precio]
+    );
+
+    // 3. Actualizar el precio actual
     const result = await pool.query(
       `UPDATE precios SET precio = $1, fecha = NOW() WHERE id = $2 RETURNING *`,
       [req.body.precio, id]
     );
-
-    if (result.rows.length === 0) {
-      res.status(404).json({ success: false, message: 'Precio no encontrado' });
-      return;
-    }
 
     res.json({
       success: true,
@@ -165,6 +180,137 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('[Precios] Error al crear precio:', error);
     res.status(500).json({ success: false, message: 'Error al crear precio', error });
+  }
+});
+
+// ── Historial de precios (para gráfica tipo Keepa) ───────────────────────────
+
+router.get('/historial/:medicamentoId', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { medicamentoId } = req.params;
+    const pool = Database.getInstance().getPool();
+
+    // Verificar que el medicamento existe
+    const medResult = await pool.query('SELECT id, name, lab FROM medicamentos WHERE id = $1', [medicamentoId]);
+    if (medResult.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'Medicamento no encontrado' });
+      return;
+    }
+
+    // Obtener todos los cambios históricos, ordenados por fecha
+    const historialResult = await pool.query(
+      `SELECT
+         h.id,
+         h.precio_id,
+         h.farmacia_id,
+         f.name  AS farmacia_nombre,
+         f.address AS farmacia_direccion,
+         h.precio_anterior,
+         h.precio_nuevo,
+         h.fecha_cambio
+       FROM historial_precios h
+       JOIN farmacias f ON f.id = h.farmacia_id
+       WHERE h.medicamento_id = $1
+       ORDER BY h.fecha_cambio ASC`,
+      [medicamentoId]
+    );
+
+    // Obtener el precio actual de cada farmacia para agregarlo como último punto
+    const preciosActualesResult = await pool.query(
+      `SELECT
+         p.id,
+         p.farmacia_id,
+         f.name    AS farmacia_nombre,
+         f.address AS farmacia_direccion,
+         p.precio,
+         p.fecha
+       FROM precios p
+       JOIN farmacias f ON f.id = p.farmacia_id
+       WHERE p.medicamento_id = $1`,
+      [medicamentoId]
+    );
+
+    // Construir el mapa de series por farmacia
+    // Estructura: { farmaciaId: { farmaciaId, farmaciaNombre, puntos: [{fecha, precio}] } }
+    const seriesMap: Record<string, {
+      farmaciaId: string;
+      farmaciaNombre: string;
+      farmaciaDireccion: string;
+      puntos: { fecha: string; precio: number }[];
+    }> = {};
+
+    for (const row of historialResult.rows) {
+      const key = row.farmacia_id.toString();
+      if (!seriesMap[key]) {
+        seriesMap[key] = {
+          farmaciaId: key,
+          farmaciaNombre: row.farmacia_nombre,
+          farmaciaDireccion: row.farmacia_direccion,
+          puntos: [],
+        };
+      }
+      // El primer punto de cada cambio usa precio_anterior si es la primera entrada de esa farmacia
+      if (seriesMap[key].puntos.length === 0) {
+        seriesMap[key].puntos.push({ fecha: row.fecha_cambio, precio: row.precio_anterior });
+      }
+      seriesMap[key].puntos.push({ fecha: row.fecha_cambio, precio: row.precio_nuevo });
+    }
+
+    // Agregar el precio actual como último punto
+    for (const actual of preciosActualesResult.rows) {
+      const key = actual.farmacia_id.toString();
+      if (!seriesMap[key]) {
+        // Farmacia sin historial: solo aparece con el precio actual
+        seriesMap[key] = {
+          farmaciaId: key,
+          farmaciaNombre: actual.farmacia_nombre,
+          farmaciaDireccion: actual.farmacia_direccion,
+          puntos: [{ fecha: actual.fecha, precio: actual.precio }],
+        };
+      } else {
+        // Agregar precio actual al final de la serie si no es duplicado
+        const ultimoPunto = seriesMap[key].puntos[seriesMap[key].puntos.length - 1];
+        if (ultimoPunto.precio !== actual.precio) {
+          seriesMap[key].puntos.push({ fecha: actual.fecha, precio: actual.precio });
+        }
+      }
+    }
+
+    const series = Object.values(seriesMap).filter(s => s.puntos.length > 0).map(s => {
+      // Ordenar cronológicamente para evitar líneas hacia atrás si el precio actual tiene fecha antigua
+      s.puntos.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+      
+      // Filtrar duplicados exactos en tiempo, quedándose con el último cambio registrado de ese segundo
+      const unicos: { fecha: string; precio: number }[] = [];
+      for (const p of s.puntos) {
+        if (unicos.length === 0) {
+          unicos.push(p);
+        } else {
+          const prev = unicos[unicos.length - 1];
+          if (new Date(prev.fecha).getTime() === new Date(p.fecha).getTime()) {
+             unicos[unicos.length - 1] = p; // Sobrescribir con el más reciente
+          } else {
+             unicos.push(p);
+          }
+        }
+      }
+      s.puntos = unicos;
+      return s;
+    });
+
+    res.json({
+      success: true,
+      medicamento: {
+        id: medResult.rows[0].id,
+        name: medResult.rows[0].name,
+        lab: medResult.rows[0].lab,
+      },
+      totalCambios: historialResult.rows.length,
+      series,
+    });
+  } catch (error) {
+    console.error('[Precios] Error en historial:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener historial de precios', error });
   }
 });
 

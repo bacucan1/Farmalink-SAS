@@ -137,6 +137,17 @@ app.get('/api/precios/comparar/:medicamentoId', validateJWT, async (req, res) =>
     }
 });
 
+// Historial de precios: GET /api/precios/historial/:medicamentoId
+app.get('/api/precios/historial/:medicamentoId', validateJWT, async (req, res) => {
+    try {
+        const { medicamentoId } = req.params;
+        const response = await axios.get(`${BACKEND_URL}/api/precios/historial/${medicamentoId}`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al obtener historial de precios' });
+    }
+});
+
 // Actualizar precio
 app.put('/api/precios/:id', validateJWT, async (req, res) => {
     try {

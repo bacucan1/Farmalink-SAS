@@ -440,12 +440,109 @@ WHERE p.precio = (
 -- MENSAJE DE ÉXITO
 -- =====================================================
 
+-- =====================================================
+-- 8. HISTORIAL DE PRECIOS
+-- Tabla para registrar cada cambio de precio
+-- =====================================================
+
+CREATE SEQUENCE historial_precios_id_seq;
+
+CREATE TABLE historial_precios (
+    id            BIGINT DEFAULT nextval('historial_precios_id_seq') PRIMARY KEY,
+    precio_id     BIGINT NOT NULL REFERENCES precios(id) ON DELETE CASCADE,
+    medicamento_id BIGINT NOT NULL REFERENCES medicamentos(id),
+    farmacia_id   BIGINT NOT NULL REFERENCES farmacias(id),
+    precio_anterior INTEGER NOT NULL,
+    precio_nuevo   INTEGER NOT NULL,
+    fecha_cambio   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para consultas de historial
+CREATE INDEX idx_historial_medicamento ON historial_precios(medicamento_id);
+CREATE INDEX idx_historial_farmacia    ON historial_precios(farmacia_id);
+CREATE INDEX idx_historial_fecha       ON historial_precios(fecha_cambio DESC);
+CREATE INDEX idx_historial_precio_id   ON historial_precios(precio_id);
+
+-- =====================================================
+-- 9. DATOS HISTÓRICOS DE PRUEBA
+-- Simulamos ~12 meses de cambios de precio
+-- para que la gráfica Keepa tenga datos desde el arranque
+-- =====================================================
+
+-- Acetaminofén 500mg (med 1) — Farmacia Central (precio_id 1)
+INSERT INTO historial_precios (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio) VALUES
+    (1, 1, 1, 1800, 1950, '2024-02-15 10:00:00'),
+    (1, 1, 1, 1950, 2050, '2024-04-01 10:00:00'),
+    (1, 1, 1, 2050, 1980, '2024-06-10 10:00:00'),
+    (1, 1, 1, 1980, 2100, '2024-08-20 10:00:00'),
+    (1, 1, 1, 2100, 2000, '2024-10-05 10:00:00'),
+    (1, 1, 1, 2000, 2100, '2025-01-20 10:00:00');
+
+-- Acetaminofén 500mg (med 1) — Farmacia Norte (precio_id 2)
+INSERT INTO historial_precios (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio) VALUES
+    (2, 1, 2, 1700, 1800, '2024-03-01 10:00:00'),
+    (2, 1, 2, 1800, 1750, '2024-05-15 10:00:00'),
+    (2, 1, 2, 1750, 1850, '2024-07-20 10:00:00'),
+    (2, 1, 2, 1850, 1900, '2024-09-10 10:00:00'),
+    (2, 1, 2, 1900, 1850, '2024-12-01 10:00:00');
+
+-- Ibuprofeno 400mg (med 5) — Farmacia del Sur (precio_id 9)
+INSERT INTO historial_precios (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio) VALUES
+    (9, 5, 3, 2800, 3000, '2024-02-20 10:00:00'),
+    (9, 5, 3, 3000, 3200, '2024-04-15 10:00:00'),
+    (9, 5, 3, 3200, 3100, '2024-06-01 10:00:00'),
+    (9, 5, 3, 3100, 3250, '2024-08-10 10:00:00'),
+    (9, 5, 3, 3250, 3200, '2024-11-20 10:00:00');
+
+-- Ibuprofeno 400mg (med 5) — Premium Torre 80 (precio_id 10)
+INSERT INTO historial_precios (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio) VALUES
+    (10, 5, 4, 3200, 3400, '2024-03-10 10:00:00'),
+    (10, 5, 4, 3400, 3500, '2024-05-20 10:00:00'),
+    (10, 5, 4, 3500, 3300, '2024-07-15 10:00:00'),
+    (10, 5, 4, 3300, 3500, '2024-09-25 10:00:00'),
+    (10, 5, 4, 3500, 3450, '2024-12-15 10:00:00');
+
+-- Amoxicilina 500mg (med 3) — Farmacia Norte (precio_id 5)
+INSERT INTO historial_precios (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio) VALUES
+    (5, 3, 2, 7800, 8200, '2024-02-10 10:00:00'),
+    (5, 3, 2, 8200, 8500, '2024-04-25 10:00:00'),
+    (5, 3, 2, 8500, 8300, '2024-07-01 10:00:00'),
+    (5, 3, 2, 8300, 8600, '2024-09-15 10:00:00'),
+    (5, 3, 2, 8600, 8500, '2024-11-10 10:00:00');
+
+-- Amoxicilina 500mg (med 3) — Farmacia del Sur (precio_id 6)
+INSERT INTO historial_precios (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio) VALUES
+    (6, 3, 3, 8800, 9000, '2024-03-05 10:00:00'),
+    (6, 3, 3, 9000, 9200, '2024-05-18 10:00:00'),
+    (6, 3, 3, 9200, 9100, '2024-08-05 10:00:00'),
+    (6, 3, 3, 9100, 9300, '2024-10-20 10:00:00'),
+    (6, 3, 3, 9300, 9200, '2024-12-22 10:00:00');
+
+-- Omeprazol 20mg (med 9) — Farmacia La 70 (precio_id 17)
+INSERT INTO historial_precios (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio) VALUES
+    (17, 9, 5, 5000, 5300, '2024-02-28 10:00:00'),
+    (17, 9, 5, 5300, 5500, '2024-05-10 10:00:00'),
+    (17, 9, 5, 5500, 5400, '2024-07-22 10:00:00'),
+    (17, 9, 5, 5400, 5600, '2024-10-08 10:00:00'),
+    (17, 9, 5, 5600, 5500, '2025-01-05 10:00:00');
+
+-- Losartán 50mg (med 13) — Farmacia Central (precio_id 33)
+INSERT INTO historial_precios (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio) VALUES
+    (33, 13, 1, 5800, 6200, '2024-02-12 10:00:00'),
+    (33, 13, 1, 6200, 6500, '2024-04-18 10:00:00'),
+    (33, 13, 1, 6500, 6300, '2024-06-25 10:00:00'),
+    (33, 13, 1, 6300, 6600, '2024-09-01 10:00:00'),
+    (33, 13, 1, 6600, 6500, '2024-11-15 10:00:00');
+
+-- Actualizar secuencia
+SELECT setval('historial_precios_id_seq', (SELECT COUNT(*) FROM historial_precios));
+
 DO $$
 BEGIN
     RAISE NOTICE '============================================';
     RAISE NOTICE 'Base de datos FARMALINK creada exitosamente';
     RAISE NOTICE '============================================';
-    RAISE NOTICE 'Tablas creadas: usuarios, categorias, farmacias, medicamentos, precios';
+    RAISE NOTICE 'Tablas creadas: usuarios, categorias, farmacias, medicamentos, precios, historial_precios';
     RAISE NOTICE 'Vistas creadas: vista_precios_actuales, vista_mejores_precios';
     RAISE NOTICE 'Índices creados para optimizar búsquedas';
 END $$;
