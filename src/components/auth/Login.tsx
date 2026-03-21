@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
+import { useToast } from '../../hooks/useToast';
 import './Login.css';
-// import './Login.css';
+
 interface LoginProps {
   onLoginSuccess: () => void;
   onNavigateToRegister: () => void;
@@ -8,72 +9,97 @@ interface LoginProps {
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+// ── Helper: validar formato de email ─────────────────────────────────────────
+function esEmailValido(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
 export default function Login({ onLoginSuccess, onNavigateToRegister: _onNavigateToRegister }: LoginProps) {
-  const [email, setEmail] = useState('');
+  const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error,    setError]    = useState('');
+  const [loading,  setLoading]  = useState(false);
+
+  // PUNTO 4: errores de validación inline por campo
+  const [emailError,    setEmailError]    = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const { addToast } = useToast();
+
+  // ── Validación en tiempo real ─────────────────────────────────────────────
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    if (val && !esEmailValido(val)) {
+      setEmailError('Ingresa un correo electrónico válido (ej: nombre@dominio.com).');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const handlePasswordChange = (val: string) => {
+    setPassword(val);
+    if (val && val.length < 4) {
+      setPasswordError('La contraseña debe tener al menos 4 caracteres.');
+    } else {
+      setPasswordError('');
+    }
+  };
+
+  // ── Bloquear números puros en el email ────────────────────────────────────
+  const handleEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Permitir: todo excepto espacios al inicio
+    if (e.key === ' ' && email.length === 0) e.preventDefault();
+  };
+
+  const doLogin = async (emailVal: string, passVal: string) => {
+    setError('');
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailVal, password: passVal }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        const msg = data.message || 'Correo o contraseña incorrectos.';
+        setError(msg);
+        // PUNTO 4: toast de error de login
+        addToast(msg, 'error');
+        return;
+      }
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      // PUNTO 4: toast de bienvenida
+      addToast(`Bienvenido, ${data.user?.email ?? ''}`, 'success');
+      onLoginSuccess();
+    } catch {
+      const msg = 'Error de conexión. Verifica tu red.';
+      setError(msg);
+      addToast(msg, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Error al iniciar sesión');
-        return;
-      }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      onLoginSuccess();
-    } catch {
-      setError('Error de conexión');
-    } finally {
-      setLoading(false);
-    }
+    // PUNTO 4: validación final antes de enviar
+    if (!email.trim()) { setEmailError('El correo es obligatorio.'); return; }
+    if (!esEmailValido(email)) { setEmailError('Ingresa un correo electrónico válido.'); return; }
+    if (!password) { setPasswordError('La contraseña es obligatoria.'); return; }
+    if (emailError || passwordError) return;
+    await doLogin(email, password);
   };
 
   const handleDemoLogin = async (role: 'user' | 'admin') => {
-    const credentials = role === 'admin' 
-      ? { email: 'admin@farmalink.com', password: 'admin123' }
+    const credentials = role === 'admin'
+      ? { email: 'admin@farmalink.com',    password: 'admin123' }
       : { email: 'user@farmalink.com', password: 'user123' };
-    
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Error al iniciar sesión');
-        return;
-      }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify({ ...data.user, role }));
-      onLoginSuccess();
-    } catch {
-      setError('Error de conexión');
-    } finally {
-      setLoading(false);
-    }
+    await doLogin(credentials.email, credentials.password);
   };
+
+  const hayErrores = !!emailError || !!passwordError;
 
   return (
     <div className="login-container">
@@ -84,20 +110,12 @@ export default function Login({ onLoginSuccess, onNavigateToRegister: _onNavigat
         {error && <div className="login-error">{error}</div>}
 
         <div className="demo-buttons">
-          <button 
-            type="button" 
-            className="demo-btn demo-btn-user" 
-            onClick={() => handleDemoLogin('user')}
-            disabled={loading}
-          >
+          <button type="button" className="demo-btn demo-btn-user"
+            onClick={() => handleDemoLogin('user')} disabled={loading}>
             Demo Usuario
           </button>
-          <button 
-            type="button" 
-            className="demo-btn demo-btn-admin" 
-            onClick={() => handleDemoLogin('admin')}
-            disabled={loading}
-          >
+          <button type="button" className="demo-btn demo-btn-admin"
+            onClick={() => handleDemoLogin('admin')} disabled={loading}>
             Demo Admin
           </button>
         </div>
@@ -106,17 +124,21 @@ export default function Login({ onLoginSuccess, onNavigateToRegister: _onNavigat
           <span>o inicia con tu cuenta</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="login-form" noValidate>
           <div className="form-group">
             <label htmlFor="email">Correo electrónico</label>
             <input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => handleEmailChange(e.target.value)}
+              onKeyDown={handleEmailKeyDown}
               placeholder="tu@email.com"
-              required
+              className={emailError ? 'input-error' : ''}
+              autoComplete="email"
             />
+            {/* PUNTO 4: error inline bajo el campo */}
+            {emailError && <span className="field-error" role="alert">{emailError}</span>}
           </div>
 
           <div className="form-group">
@@ -125,13 +147,15 @@ export default function Login({ onLoginSuccess, onNavigateToRegister: _onNavigat
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => handlePasswordChange(e.target.value)}
               placeholder="••••••••"
-              required
+              className={passwordError ? 'input-error' : ''}
+              autoComplete="current-password"
             />
+            {passwordError && <span className="field-error" role="alert">{passwordError}</span>}
           </div>
 
-          <button type="submit" className="login-btn" disabled={loading}>
+          <button type="submit" className="login-btn" disabled={loading || hayErrores}>
             {loading ? 'Iniciando...' : 'Iniciar Sesión'}
           </button>
         </form>

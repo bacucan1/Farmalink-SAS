@@ -350,7 +350,7 @@ export const PharmacyMap: React.FC<MapProps> = ({ onPharmacySelect, filterPharma
         const allPharmacies = data.data;
         // Si hay filtro activo, mostrar solo las farmacias que venden el producto
         if (filterPharmacyIds && filterPharmacyIds.length > 0) {
-          setPharmacies(allPharmacies.filter((f: any) => f && f.id && filterPharmacyIds.includes(Number(f.id))));
+          setPharmacies(allPharmacies.filter((f: any) => filterPharmacyIds.includes(Number(f.id))));
         } else {
           setPharmacies(allPharmacies);
         }

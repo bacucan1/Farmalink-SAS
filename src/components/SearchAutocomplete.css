@@ -226,3 +226,82 @@
 .search-no-results strong {
   color: #374151;
 }
+
+/* ══════════════════════════════════════════════
+   PUNTO 4 — Adiciones de usabilidad
+   ══════════════════════════════════════════════ */
+
+/* Fila input + botón */
+.search-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+/* Ícono de lupa siempre visible */
+.search-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 16px;
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Espacio para el ícono izquierdo */
+.search-input {
+  padding-left: 44px !important;
+}
+
+/* Botón Buscar */
+.search-submit-btn {
+  padding: 0 22px;
+  background: #0B7DB8;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.1s;
+  min-width: 96px;
+}
+.search-submit-btn:hover:not(:disabled) { background: #0a6fa3; }
+.search-submit-btn:active:not(:disabled) { transform: scale(0.97); }
+.search-submit-btn:disabled { background: #93c5fd; cursor: not-allowed; }
+
+/* Error de red */
+.search-error-state {
+  padding: 20px 16px;
+  text-align: center;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+/* Sin resultados — tip extra */
+.search-no-results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.search-no-results-tip {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Hint de teclado */
+.search-keyboard-hint {
+  padding: 8px 16px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .search-input-row { flex-direction: column; }
+  .search-submit-btn { width: 100%; padding: 12px; border-radius: 10px; }
+}

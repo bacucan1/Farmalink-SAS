@@ -1,9 +1,10 @@
 .login-container {
-  min-height: calc(100vh - 200px);
+  min-height: calc(100vh - 80px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  padding-top: calc(80px + 2rem); /* PUNTO 4: compensar header fijo */
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
@@ -162,4 +163,31 @@
   padding: 0 1rem;
   color: #999;
   font-size: 0.85rem;
+}
+
+/* ── PUNTO 4: validación de formulario ─────────────────────── */
+.form-group input.input-error {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+  background: #fff5f5;
+}
+
+.field-error {
+  display: block;
+  font-size: 12px;
+  color: #dc2626;
+  font-weight: 500;
+  margin-top: 3px;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-4px); }
+  75%       { transform: translateX(4px); }
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

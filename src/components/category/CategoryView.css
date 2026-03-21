@@ -5,6 +5,7 @@
 .catview {
   min-height: calc(100vh - var(--header-height, 80px));
   background-color: var(--bg-body, #f4f6f8);
+  padding-top: 80px;   /* PUNTO 4: compensar header fijo */
   padding-bottom: 4rem;
 }
 
@@ -313,4 +314,49 @@
   .catview__sidebar--open {
     display: flex;
   }
+}
+
+/* ── PUNTO 4: breadcrumb clicable ─────────────────────────────── */
+.catview__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  margin-bottom: 0.5rem;
+}
+
+.catview__crumb-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.catview__crumb-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.catview__crumb-inactive {
+  cursor: default;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.catview__crumb-inactive:hover {
+  background: none;
+}
+
+.catview__crumb-sep {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.catview__crumb-current {
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 500;
 }

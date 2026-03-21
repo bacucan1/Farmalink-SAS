@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useToast } from '../hooks/useToast';
 import './AdminMedicamentos.css';
 
 interface Categoria {
@@ -103,8 +104,25 @@ export function AdminMedicamentos() {
   const [confirmDelete, setConfirmDelete] = useState<Medicamento | null>(null);
   const [confirmDeleteFarmacia, setConfirmDeleteFarmacia] = useState<Farmacia | null>(null);
 
+  // PUNTO 4: sistema de toasts para feedback de todas las acciones
+  const { addToast } = useToast();
+  // Ref para tooltip de prevención de error en teléfono
+  const phoneTooltipRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latTooltipRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lngTooltipRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [phoneTooltip, setPhoneTooltip] = useState(false);
+  const [latTooltip,   setLatTooltip]   = useState(false);
+  const [lngTooltip,   setLngTooltip]   = useState(false);
+
   // Filtro
   const [filtro, setFiltro] = useState('');
+
+  // PUNTO 4: helpers para tooltips de prevención de error
+  function mostrarTooltipCampo(setter: (v: boolean) => void, ref: { current: ReturnType<typeof setTimeout> | null }) {
+    setter(true);
+    if (ref.current) clearTimeout(ref.current);
+    ref.current = setTimeout(() => setter(false), 2500);
+  }
 
   useEffect(() => { loadAll(); }, []);
 
@@ -131,6 +149,7 @@ export function AdminMedicamentos() {
       setCategorias(Array.isArray(catData.data) ? catData.data : Array.isArray(catData) ? catData : []);
     } catch {
       setError('Error al cargar datos');
+      addToast('Error al cargar datos. Verifica tu conexión.', 'error');
       setMedicamentos([]);
       setFarmacias([]);
       setCategorias([]);
@@ -140,8 +159,9 @@ export function AdminMedicamentos() {
   }
 
   function showSuccess(msg: string) {
-    setSuccessMsg(msg);
-    setTimeout(() => setSuccessMsg(''), 3000);
+    // PUNTO 4: reemplazado por toast global
+    addToast(msg, 'success');
+    setSuccessMsg(''); // compatibilidad
   }
 
   function abrirCrear() {
@@ -248,6 +268,7 @@ export function AdminMedicamentos() {
       showSuccess('🗑️ Medicamento eliminado');
     } catch {
       setError('Error al eliminar');
+      addToast('Error al eliminar el medicamento.', 'error');
     }
   }
 
@@ -340,30 +361,32 @@ export function AdminMedicamentos() {
       showSuccess('🗑️ Farmacia eliminada');
     } catch {
       setError('Error al eliminar');
+      addToast('Error al eliminar la farmacia.', 'error');
     }
   }
 
   const filtradosFarmacias = farmacias.filter(f => {
-    if (!f || typeof f.name !== 'string') return false;
-    const searchLower = filtro.toLowerCase();
+    if (!f?.name) return false;
+    const q = filtro.toLowerCase();
     return (
-      f.name.toLowerCase().includes(searchLower) ||
-      (f.address?.toLowerCase().includes(searchLower)) ||
-      (f.phone?.toLowerCase().includes(searchLower))
+      f.name.toLowerCase().includes(q) ||
+      (f.address?.toLowerCase().includes(q)) ||
+      (f.phone?.toLowerCase().includes(q))
     );
   });
 
   const filtrados = medicamentos.filter(m => {
-    if (!m || typeof m.name !== 'string') return false;
-    const searchLower = filtro.toLowerCase();
+    // PUNTO 4 FIX: proteger con optional chaining — m.name puede ser null
+    // si el JOIN con precios devuelve una fila incompleta
+    if (!m?.name) return false;
     const catNombre = categorias.find(c => c.id === m.categoria_id)?.nombre || m.categoria_nombre || m.category || '';
-    const farObj = m.farmaciaId;
-    const farNombre = (farObj && typeof farObj === 'object') ? farObj.name : (farmacias.find(f => f.id === Number(m.farmaciaId))?.name || '');
+    const farNombre = typeof m.farmaciaId === 'object' ? (m.farmaciaId?.name || '') : (farmacias.find(f => f.id === Number(m.farmaciaId))?.name || '');
+    const q = filtro.toLowerCase();
     return (
-      m.name.toLowerCase().includes(searchLower) ||
-      (m.lab?.toLowerCase().includes(searchLower)) ||
-      catNombre.toLowerCase().includes(searchLower) ||
-      farNombre.toLowerCase().includes(searchLower)
+      m.name.toLowerCase().includes(q) ||
+      (m.lab || '').toLowerCase().includes(q) ||
+      catNombre.toLowerCase().includes(q) ||
+      farNombre.toLowerCase().includes(q)
     );
   });
 
@@ -375,8 +398,8 @@ export function AdminMedicamentos() {
   }
 
   function getFarmaciaNombre(med: Medicamento): string {
-    const farObj = med.farmaciaId;
-    if (farObj && typeof farObj === 'object') return farObj.name;
+    // PUNTO 4 FIX: farmaciaId puede ser objeto con name null (medicamento sin farmacia)
+    if (typeof med.farmaciaId === 'object' && med.farmaciaId?.name) return med.farmaciaId.name;
     if ((med as any).farmaciaNombre) return (med as any).farmaciaNombre;
     const far = farmacias.find(f => f.id === Number(med.farmaciaId));
     return far?.name || '—';
@@ -446,8 +469,8 @@ export function AdminMedicamentos() {
               <tbody>
                 {filtrados.length === 0 ? (
                   <tr><td colSpan={6} className="admin-empty">No hay medicamentos</td></tr>
-                ) : filtrados.map((med, idx) => (
-                  <tr key={med._id || med.id || `med-${idx}`}>
+                ) : filtrados.map(med => (
+                  <tr key={med._id}>
                     <td className="td-name">{med.name}</td>
                     <td>{med.lab}</td>
                     <td>{getCategoriaNombre(med)}</td>
@@ -484,8 +507,8 @@ export function AdminMedicamentos() {
               <tbody>
                 {filtradosFarmacias.length === 0 ? (
                   <tr><td colSpan={5} className="admin-empty">No hay farmacias</td></tr>
-                ) : filtradosFarmacias.map((far, idx) => (
-                  <tr key={far._id || far.id || `far-${idx}`}>
+                ) : filtradosFarmacias.map(far => (
+                  <tr key={far._id}>
                     <td className="td-name">{far.name}</td>
                     <td>{far.address || '—'}</td>
                     <td>{far.phone || '—'}</td>
@@ -616,11 +639,26 @@ export function AdminMedicamentos() {
               </div>
               <div className="form-group">
                 <label>Teléfono</label>
+                <div style={{ position: 'relative' }}>
                 <input 
                   value={farmaciaForm.phone} 
-                  onChange={e => setFarmaciaForm({ ...farmaciaForm, phone: e.target.value })} 
+                  onChange={e => setFarmaciaForm({ ...farmaciaForm, phone: e.target.value })}
+                  onKeyDown={e => {
+                    const ok = ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight',' '];
+                    if (!ok.includes(e.key) && !/^\d$/.test(e.key)) {
+                      e.preventDefault();
+                      mostrarTooltipCampo(setPhoneTooltip, phoneTooltipRef);
+                    }
+                  }}
                   placeholder="Ej: 300 123 4567" 
                 />
+                {phoneTooltip && (
+                  <div className="admin-field-tooltip">
+                    <span className="admin-tooltip-icon">!</span>
+                    Solo se aceptan números en el teléfono.
+                  </div>
+                )}
+              </div>
               </div>
               <div className="form-group full-width">
                 <label>Dirección</label>
@@ -632,23 +670,53 @@ export function AdminMedicamentos() {
               </div>
               <div className="form-group">
                 <label>Latitud</label>
-                <input 
-                  type="number"
-                  step="any"
-                  value={farmaciaForm.lat} 
-                  onChange={e => setFarmaciaForm({ ...farmaciaForm, lat: e.target.value })} 
-                  placeholder="Ej: 4.7110" 
-                />
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    type="number"
+                    step="any"
+                    value={farmaciaForm.lat} 
+                    onChange={e => setFarmaciaForm({ ...farmaciaForm, lat: e.target.value })}
+                    onKeyDown={e => {
+                      const ok = ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','.', '-'];
+                      if (!ok.includes(e.key) && !/^\d$/.test(e.key)) {
+                        e.preventDefault();
+                        mostrarTooltipCampo(setLatTooltip, latTooltipRef);
+                      }
+                    }}
+                    placeholder="Ej: 4.7110" 
+                  />
+                  {latTooltip && (
+                    <div className="admin-field-tooltip">
+                      <span className="admin-tooltip-icon">!</span>
+                      Solo se aceptan números decimales para coordenadas.
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="form-group">
                 <label>Longitud</label>
-                <input 
-                  type="number"
-                  step="any"
-                  value={farmaciaForm.lng} 
-                  onChange={e => setFarmaciaForm({ ...farmaciaForm, lng: e.target.value })} 
-                  placeholder="Ej: -74.0721" 
-                />
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    type="number"
+                    step="any"
+                    value={farmaciaForm.lng} 
+                    onChange={e => setFarmaciaForm({ ...farmaciaForm, lng: e.target.value })}
+                    onKeyDown={e => {
+                      const ok = ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','.', '-'];
+                      if (!ok.includes(e.key) && !/^\d$/.test(e.key)) {
+                        e.preventDefault();
+                        mostrarTooltipCampo(setLngTooltip, lngTooltipRef);
+                      }
+                    }}
+                    placeholder="Ej: -74.0721" 
+                  />
+                  {lngTooltip && (
+                    <div className="admin-field-tooltip">
+                      <span className="admin-tooltip-icon">!</span>
+                      Solo se aceptan números decimales para coordenadas.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

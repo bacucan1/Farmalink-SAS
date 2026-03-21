@@ -50,7 +50,7 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
             <div className="hero-actions">
               <a 
                 href="#" 
-                className="btn-primary" 
+                className="btn-secondary" 
                 onClick={(e) => { e.preventDefault(); onSearchClick(); }}
               >
                 Buscar Medicamento
@@ -60,7 +60,7 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
                 className="btn-secondary" 
                 onClick={(e) => { e.preventDefault(); onDashboardClick(); }}
               >
-                Ver Dashboard →
+                Ver Dashboard 
               </a>
             </div>
           </div>

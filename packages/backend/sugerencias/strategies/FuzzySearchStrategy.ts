@@ -37,18 +37,15 @@ export class FuzzySearchStrategy implements SugerenciaStrategy {
            c.nombre AS categoria_nombre,
            GREATEST(
              word_similarity($1, m.name),
-             word_similarity($1, m.lab),
-             word_similarity($1, COALESCE(m.description, ''))
+             word_similarity($1, m.lab)
            ) AS score
          FROM medicamentos m
          LEFT JOIN categorias c ON m.categoria_id = c.id
          WHERE m.active = true
            AND (
-             word_similarity($1, m.name)                         > 0.15
-             OR word_similarity($1, m.lab)                       > 0.15
-             OR word_similarity($1, COALESCE(m.description, '')) > 0.15
-             OR m.name ILIKE $2
-             OR m.lab  ILIKE $2
+             word_similarity($1, m.name) > 0.35
+             OR word_similarity($1, m.lab) > 0.35
+             OR (LENGTH($1) >= 4 AND m.name ILIKE $2)
            )
          ORDER BY score DESC
          LIMIT 15`,

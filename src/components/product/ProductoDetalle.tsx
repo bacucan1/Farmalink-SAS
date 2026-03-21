@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Sugerencia } from '../../types';
 import { PharmacyMap } from '../common/PharmacyMap';
+import { useToast } from '../../hooks/useToast';
 import './ProductoDetalle.css';
 
 const GATEWAY = import.meta.env.VITE_API_URL || '';
@@ -544,6 +545,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
   const [imgTried, setImgTried] = useState<'png' | 'jpg' | 'placeholder'>('png');
   const [selectedFarmacia, setSelectedFarmacia] = useState<PrecioFarmacia | null>(null);
 
+  const { addToast } = useToast();
   const category = getCategory(medicamento);
   const catColor = getCategoryColor(category);
   const farmaciaIds = precios.map(p => Number(p.farmaciaId)).filter(n => !isNaN(n) && n > 0);
@@ -609,6 +611,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
         }
       } catch (err) {
         console.error('Error precios:', err);
+        addToast('Error al cargar precios. Verifica tu conexión.', 'error');
       } finally {
         setLoadingPrecios(false);
       }

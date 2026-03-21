@@ -6,35 +6,33 @@ const router = Router();
 /**
  * GET /api/busqueda
  *
- * Búsqueda avanzada de medicamentos con:
- *  - Fuzzy Search via pg_trgm (tolerancia a errores ortográficos)
- *  - Filtros combinables: categoría, laboratorio, rango de precios, disponibilidad
- *  - Ordenamiento: relevancia | precio_asc | precio_desc | nombre
- *  - Paginación: page, limit
+ * DOS PASADAS con unaccent (elimina problema de tildes):
  *
- * Query params:
- *  q           - Texto de búsqueda fuzzy (opcional)
- *  categoria   - Nombre de categoría (parcial, case-insensitive)
- *  precioMin   - Precio mínimo en COP
- *  precioMax   - Precio máximo en COP
- *  disponible  - "true" = tiene precios registrados | "false" = sin precios
- *  lab         - Laboratorio (parcial, case-insensitive)
- *  orden       - relevancia | precio_asc | precio_desc | nombre  (default: relevancia)
- *  page        - Página (default: 1)
- *  limit       - Resultados por página (default: 10, max: 50)
+ *  PASADA 1 — unaccent(m.name) ILIKE unaccent('%q%')
+ *    "acetaminofen" → unaccent → encuentra "Acetaminofén" ✅
+ *    Si devuelve resultados → usar esos, NO ir a pasada 2.
+ *
+ *  PASADA 2 — Fuzzy pg_trgm umbral 0.6 (solo si pasada 1 vacía)
+ *    "acetaminofn" → ILIKE falla, fuzzy rescata
+ *    "hola"        → ILIKE falla, fuzzy 0.6 tampoco → vacío ✅
+ *    "pelota"      → ILIKE falla, fuzzy 0.6 tampoco → vacío ✅
  */
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const pool = Database.getInstance().getPool();
 
-    // Activar pg_trgm (idempotente)
+    // Activar extensiones necesarias (idempotente)
     await pool.query('CREATE EXTENSION IF NOT EXISTS pg_trgm').catch(() => {});
+    await pool.query('CREATE EXTENSION IF NOT EXISTS unaccent').catch(() => {});
 
-    // ── Leer parámetros ────────────────────────────────────────────────────
-    const q         = ((req.query.q         as string) || '').trim();
-    const categoria = ((req.query.categoria as string) || '').trim();
-    const lab       = ((req.query.lab       as string) || '').trim();
-    const orden     = ((req.query.orden     as string) || 'relevancia').toLowerCase();
+    // DEBUG TEMPORAL — quitar después de diagnosticar
+    console.log('\n══════════════════════════════════');
+    console.log('[Búsqueda] Query recibida:', req.query.q);
+
+    const q          = ((req.query.q         as string) || '').trim();
+    const categoria  = ((req.query.categoria as string) || '').trim();
+    const lab        = ((req.query.lab       as string) || '').trim();
+    const orden      = ((req.query.orden     as string) || 'relevancia').toLowerCase();
     const disponible = req.query.disponible as string | undefined;
     const precioMin  = req.query.precioMin ? parseInt(req.query.precioMin as string) : null;
     const precioMax  = req.query.precioMax ? parseInt(req.query.precioMax as string) : null;
@@ -42,137 +40,173 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     const limit      = Math.min(50, Math.max(1, parseInt((req.query.limit as string) || '10')));
     const offset     = (page - 1) * limit;
 
-    const params: any[] = [];
-    let   pi = 1; // índice de parámetro
-
-    // ── Score de similitud fuzzy ───────────────────────────────────────────
-    let scoreExpr = '1.0';
-    if (q) {
-      scoreExpr = `GREATEST(
-        word_similarity($${pi}, m.name),
-        word_similarity($${pi}, m.lab),
-        word_similarity($${pi}, COALESCE(m.description, ''))
-      )`;
-      params.push(q);
-      pi++;
-    }
-
-    // Subquery: precio mínimo por medicamento
     const precioSub = `(SELECT MIN(p2.precio) FROM precios p2 WHERE p2.medicamento_id = m.id)`;
 
+    // ── Filtros extra reutilizables (categoría, lab, precios, disponibilidad) ──
+    function buildExtraFilters(startPi: number) {
+      const extraParams: any[] = [];
+      let extraSql = '';
+      let pi = startPi;
+
+      if (categoria) {
+        extraSql += ` AND unaccent(c.nombre) ILIKE unaccent($${pi})`;
+        extraParams.push(`%${categoria}%`);
+        pi++;
+      }
+      if (lab) {
+        extraSql += ` AND unaccent(m.lab) ILIKE unaccent($${pi})`;
+        extraParams.push(`%${lab}%`);
+        pi++;
+      }
+      if (disponible === 'true') {
+        extraSql += ` AND EXISTS (SELECT 1 FROM precios p3 WHERE p3.medicamento_id = m.id)`;
+      } else if (disponible === 'false') {
+        extraSql += ` AND NOT EXISTS (SELECT 1 FROM precios p3 WHERE p3.medicamento_id = m.id)`;
+      }
+      if (precioMin !== null && !isNaN(precioMin)) {
+        extraSql += ` AND ${precioSub} >= $${pi}`;
+        extraParams.push(precioMin);
+        pi++;
+      }
+      if (precioMax !== null && !isNaN(precioMax)) {
+        extraSql += ` AND ${precioSub} <= $${pi}`;
+        extraParams.push(precioMax);
+        pi++;
+      }
+
+      return { extraSql, extraParams, pi };
+    }
+
     // ── SELECT base ────────────────────────────────────────────────────────
-    let sql = `
-      SELECT
-        m.id,
-        m.name,
-        m.lab,
-        m.active,
-        m.description,
-        m.categoria_id,
-        c.nombre                    AS categoria_nombre,
-        ${scoreExpr}                AS score,
-        ${precioSub}                AS precio_minimo,
-        COUNT(DISTINCT pr.farmacia_id) AS farmacias_count
-      FROM medicamentos m
-      LEFT JOIN categorias c ON m.categoria_id = c.id
-      LEFT JOIN precios pr   ON pr.medicamento_id = m.id
-      WHERE m.active = true
-    `;
+    function buildSelect(scoreExpr: string): string {
+      return `
+        SELECT
+          m.id, m.name, m.lab, m.active, m.description, m.categoria_id,
+          c.nombre                       AS categoria_nombre,
+          ${scoreExpr}                   AS score,
+          ${precioSub}                   AS precio_minimo,
+          COUNT(DISTINCT pr.farmacia_id) AS farmacias_count
+        FROM medicamentos m
+        LEFT JOIN categorias c ON m.categoria_id = c.id
+        LEFT JOIN precios pr   ON pr.medicamento_id = m.id
+        WHERE m.active = true
+      `;
+    }
 
-    // ── Filtro fuzzy ───────────────────────────────────────────────────────
+    const groupBy  = ` GROUP BY m.id, m.name, m.lab, m.active, m.description, m.categoria_id, c.nombre`;
+
+    function buildOrder(hasQ: boolean): string {
+      switch (orden) {
+        case 'precio_asc':  return ` ORDER BY precio_minimo ASC NULLS LAST`;
+        case 'precio_desc': return ` ORDER BY precio_minimo DESC NULLS LAST`;
+        case 'nombre':      return ` ORDER BY m.name ASC`;
+        default:            return hasQ ? ` ORDER BY score DESC, m.name ASC` : ` ORDER BY m.name ASC`;
+      }
+    }
+
+    let finalRows:  any[] = [];
+    let finalTotal = 0;
+    let metodo     = 'sin_query';
+
     if (q) {
-      sql += ` AND (
-        word_similarity($1, m.name)                         > 0.1
-        OR word_similarity($1, m.lab)                       > 0.1
-        OR word_similarity($1, COALESCE(m.description,''))  > 0.1
-        OR m.name ILIKE $${pi}
-        OR m.lab  ILIKE $${pi}
-      )`;
-      params.push(`%${q}%`);
-      pi++;
+      // ════════════════════════════════════════════════════════════════════
+      // PASADA 1 — unaccent ILIKE (exacto, ignora tildes y mayúsculas)
+      // ════════════════════════════════════════════════════════════════════
+      const p1Params: any[] = [`%${q}%`]; // $1
+      let p1Pi = 2;
+
+      const { extraSql: e1, extraParams: ep1, pi: p1Pi2 } = buildExtraFilters(p1Pi);
+      p1Pi = p1Pi2;
+
+      const p1Base = buildSelect('1.0') +
+        ` AND (unaccent(m.name) ILIKE unaccent($1) OR unaccent(m.lab) ILIKE unaccent($1))` +
+        e1 + groupBy + buildOrder(true);
+
+      const allP1 = [...p1Params, ...ep1];
+
+      console.log('[Búsqueda] SQL Pasada 1 (ILIKE):', p1Base.replace(/\s+/g,' ').trim());
+      console.log('[Búsqueda] Params Pasada 1:', allP1);
+      const c1 = await pool.query(`SELECT COUNT(*) FROM (${p1Base}) AS sub`, allP1);
+      const totalP1 = parseInt(c1.rows[0].count);
+      console.log('[Búsqueda] Pasada 1 resultados:', totalP1);
+
+      if (totalP1 > 0) {
+        // Pasada 1 exitosa — usar solo estos resultados
+        metodo = 'ilike_exacto';
+        finalTotal = totalP1;
+        const p1Pag = p1Base + ` LIMIT $${p1Pi} OFFSET $${p1Pi + 1}`;
+        const r1 = await pool.query(p1Pag, [...allP1, limit, offset]);
+        finalRows = r1.rows;
+      } else {
+        // ══════════════════════════════════════════════════════════════════
+        // PASADA 2 — Fuzzy pg_trgm umbral 0.6 (solo si pasada 1 = vacío)
+        // ══════════════════════════════════════════════════════════════════
+        console.log('[Búsqueda] Pasada 1 vacía → intentando fuzzy con umbral 0.6');
+        metodo = 'fuzzy_fallback';
+        const p2Params: any[] = [q]; // $1 para word_similarity
+        let p2Pi = 2;
+
+        const scoreExpr = `GREATEST(word_similarity($1, m.name), word_similarity($1, m.lab))`;
+        const { extraSql: e2, extraParams: ep2, pi: p2Pi2 } = buildExtraFilters(p2Pi);
+        p2Pi = p2Pi2;
+
+        const p2Base = buildSelect(scoreExpr) +
+          ` AND (
+              word_similarity($1, m.name) > 0.6
+              OR word_similarity($1, m.lab)  > 0.6
+           )` +
+          e2 + groupBy + buildOrder(true);
+
+        const allP2 = [...p2Params, ...ep2];
+
+        console.log('[Búsqueda] SQL Pasada 2 (Fuzzy):', p2Base.replace(/\s+/g,' ').trim());
+        console.log('[Búsqueda] Params Pasada 2:', allP2);
+        const c2 = await pool.query(`SELECT COUNT(*) FROM (${p2Base}) AS sub`, allP2);
+        finalTotal = parseInt(c2.rows[0].count);
+        console.log('[Búsqueda] Pasada 2 resultados:', finalTotal);
+
+        if (finalTotal > 0) {
+          const p2Pag = p2Base + ` LIMIT $${p2Pi} OFFSET $${p2Pi + 1}`;
+          const r2 = await pool.query(p2Pag, [...allP2, limit, offset]);
+          finalRows = r2.rows;
+        }
+      }
+
+    } else {
+      // ── Sin query → todos con filtros extra ───────────────────────────
+      metodo = 'sin_query';
+      const { extraSql, extraParams, pi } = buildExtraFilters(1);
+
+      const sqlNoQ = buildSelect('1.0') + extraSql + groupBy + buildOrder(false);
+      const cNoQ   = await pool.query(`SELECT COUNT(*) FROM (${sqlNoQ}) AS sub`, extraParams);
+      finalTotal   = parseInt(cNoQ.rows[0].count);
+
+      const sqlPag = sqlNoQ + ` LIMIT $${pi} OFFSET $${pi + 1}`;
+      const rNoQ   = await pool.query(sqlPag, [...extraParams, limit, offset]);
+      finalRows    = rNoQ.rows;
     }
 
-    // ── Filtro por categoría ───────────────────────────────────────────────
-    if (categoria) {
-      sql += ` AND c.nombre ILIKE $${pi}`;
-      params.push(`%${categoria}%`);
-      pi++;
-    }
-
-    // ── Filtro por laboratorio ─────────────────────────────────────────────
-    if (lab) {
-      sql += ` AND m.lab ILIKE $${pi}`;
-      params.push(`%${lab}%`);
-      pi++;
-    }
-
-    // ── Filtro por disponibilidad ──────────────────────────────────────────
-    if (disponible === 'true') {
-      sql += ` AND EXISTS (SELECT 1 FROM precios p3 WHERE p3.medicamento_id = m.id)`;
-    } else if (disponible === 'false') {
-      sql += ` AND NOT EXISTS (SELECT 1 FROM precios p3 WHERE p3.medicamento_id = m.id)`;
-    }
-
-    // ── Filtro por rango de precios ────────────────────────────────────────
-    if (precioMin !== null && !isNaN(precioMin)) {
-      sql += ` AND ${precioSub} >= $${pi}`;
-      params.push(precioMin);
-      pi++;
-    }
-    if (precioMax !== null && !isNaN(precioMax)) {
-      sql += ` AND ${precioSub} <= $${pi}`;
-      params.push(precioMax);
-      pi++;
-    }
-
-    sql += ` GROUP BY m.id, m.name, m.lab, m.active, m.description, m.categoria_id, c.nombre`;
-
-    // ── Ordenamiento ───────────────────────────────────────────────────────
-    switch (orden) {
-      case 'precio_asc':
-        sql += ` ORDER BY precio_minimo ASC NULLS LAST`;
-        break;
-      case 'precio_desc':
-        sql += ` ORDER BY precio_minimo DESC NULLS LAST`;
-        break;
-      case 'nombre':
-        sql += ` ORDER BY m.name ASC`;
-        break;
-      default: // relevancia
-        sql += q ? ` ORDER BY score DESC, m.name ASC` : ` ORDER BY m.name ASC`;
-    }
-
-    // ── Conteo total para paginación ───────────────────────────────────────
-    const countResult = await pool.query(
-      `SELECT COUNT(*) FROM (${sql}) AS sub`,
-      params
-    );
-    const total = parseInt(countResult.rows[0].count);
-
-    // ── Paginación ─────────────────────────────────────────────────────────
-    sql += ` LIMIT $${pi} OFFSET $${pi + 1}`;
-    params.push(limit, offset);
-
-    const result = await pool.query(sql, params);
-
+    console.log('[Búsqueda] Método usado:', metodo, '| Total final:', finalTotal);
+    console.log('══════════════════════════════════\n');
     res.json({
       success: true,
-      query: q || null,
+      query:   q || null,
+      metodo,
       filtros: {
-        categoria:   categoria   || null,
-        lab:         lab         || null,
-        precioMin:   precioMin   ?? null,
-        precioMax:   precioMax   ?? null,
-        disponible:  disponible  ?? null,
+        categoria:  categoria  || null,
+        lab:        lab        || null,
+        precioMin:  precioMin  ?? null,
+        precioMax:  precioMax  ?? null,
+        disponible: disponible ?? null,
         orden,
       },
       paginacion: {
         page,
         limit,
-        total,
-        totalPaginas: Math.ceil(total / limit),
+        total: finalTotal,
+        totalPaginas: Math.ceil(finalTotal / limit),
       },
-      data: result.rows.map((row: any) => ({
+      data: finalRows.map((row: any) => ({
         id:               row.id,
         name:             row.name,
         lab:              row.lab,
@@ -187,19 +221,12 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 
   } catch (error: any) {
     console.error('[Búsqueda] Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error en la búsqueda avanzada',
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: 'Error en la búsqueda', error: error.message });
   }
 });
 
 /**
  * GET /api/busqueda/filtros
- *
- * Devuelve los valores disponibles para poblar los controles del frontend:
- * categorías con conteo, laboratorios y rango de precios actual en BD.
  */
 router.get('/filtros', async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -215,16 +242,12 @@ router.get('/filtros', async (_req: Request, res: Response): Promise<void> => {
       `),
       pool.query(`
         SELECT DISTINCT lab, COUNT(*) AS total
-        FROM medicamentos
-        WHERE active = true
-        GROUP BY lab
-        ORDER BY lab ASC
+        FROM medicamentos WHERE active = true
+        GROUP BY lab ORDER BY lab ASC
       `),
       pool.query(`
-        SELECT
-          MIN(precio)          AS precio_min,
-          MAX(precio)          AS precio_max,
-          ROUND(AVG(precio))   AS precio_promedio
+        SELECT MIN(precio) AS precio_min, MAX(precio) AS precio_max,
+               ROUND(AVG(precio)) AS precio_promedio
         FROM precios
       `),
     ]);
@@ -242,12 +265,7 @@ router.get('/filtros', async (_req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('[Búsqueda/filtros] Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al obtener filtros',
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: 'Error al obtener filtros', error: error.message });
   }
 });
 

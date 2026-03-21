@@ -7,6 +7,8 @@ interface CategoryViewProps {
   categoriaInicial?: string;
   /** Callback al seleccionar un medicamento para ver su detalle */
   onSelect?: (med: Sugerencia) => void;
+  /** Callback para volver al inicio (breadcrumb) */
+  onGoHome?: () => void;
 }
 
 type RangoPrecio = 'todos' | 'bajo' | 'medio' | 'alto';
@@ -20,11 +22,20 @@ const PRECIO_LABELS: Record<RangoPrecio, string> = {
   alto:   'Más de $50.000',
 };
 
-export function CategoryView({ categoriaInicial, onSelect }: CategoryViewProps) {
+export function CategoryView({ categoriaInicial, onSelect, onGoHome }: CategoryViewProps) {
   const [categorias, setCategorias]           = useState<Categoria[]>([]);
   const [medicamentos, setMedicamentos]       = useState<Medicamento[]>([]);
   const [categoriaActiva, setCategoriaActiva] = useState<string>(categoriaInicial || '');
   const [soloDiponibles, setSoloDisponibles]  = useState(true);
+
+  // PUNTO 4 FIX: sincronizar categoriaInicial cuando cambia desde el Header dropdown
+  // Sin esto, navegar Header→Categoría→Analgésicos y luego Header→Antiinflamatorios
+  // no actualizaba la vista porque el estado local no se sincronizaba con la prop
+  useEffect(() => {
+    if (categoriaInicial !== undefined) {
+      setCategoriaActiva(categoriaInicial || '');
+    }
+  }, [categoriaInicial]);
   const [rangoPrecio, setRangoPrecio]         = useState<RangoPrecio>('todos');
   const [cargando, setCargando]               = useState(false);
   const [sidebarMobile, setSidebarMobile]     = useState(false);
@@ -78,9 +89,17 @@ export function CategoryView({ categoriaInicial, onSelect }: CategoryViewProps) 
       {/* ── Cabecera ── */}
       <div className="catview__hero">
         <div className="container">
-          <div className="catview__breadcrumb">
-            Inicio › Categorías {categoriaActiva && `› ${categoriaActiva}`}
-          </div>
+          <nav className="catview__breadcrumb" aria-label="Ruta de navegación">
+            <button className="catview__crumb-btn" onClick={onGoHome}>Inicio</button>
+            <span className="catview__crumb-sep" aria-hidden="true">›</span>
+            <span className="catview__crumb-btn catview__crumb-inactive">Categorías</span>
+            {categoriaActiva && (
+              <>
+                <span className="catview__crumb-sep" aria-hidden="true">›</span>
+                <span className="catview__crumb-current">{categoriaActiva}</span>
+              </>
+            )}
+          </nav>
           <h1 className="catview__title">
             {categoriaActiva || 'Todos los medicamentos'}
           </h1>

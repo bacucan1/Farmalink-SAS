@@ -13,7 +13,12 @@ import { AdminMedicamentos } from './components/AdminMedicamentos';
 import { ProductoDetalle } from './components/product/ProductoDetalle';
 import { MapView } from './components/map/MapView';
 import { CategoryView } from './components/category/CategoryView';
+// PUNTO 4: breadcrumb global
+import { Breadcrumb } from './components/common/Breadcrumb';
 import './App.css';
+
+// Vistas que ya tienen su propio breadcrumb interno o no lo necesitan
+const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria'];
 
 function App() {
   const [view, setView] = useState<View>('home');
@@ -105,6 +110,12 @@ function App() {
         onCategorySelect={setSelectedCategory}
       />
 
+      {/* PUNTO 4: breadcrumb global — aparece en todas las secciones excepto
+          home, login, producto y categoria (que tienen el suyo propio) */}
+      {!VIEWS_SIN_BREADCRUMB.includes(view) && (
+        <Breadcrumb view={view} onGoHome={() => setView('home')} />
+      )}
+
       {view === 'home' && (
         <div className="view active">
           <Hero
@@ -131,7 +142,8 @@ function App() {
       {view === 'categoria' && (
         <CategoryView 
           categoriaInicial={selectedCategory} 
-          onSelect={handleSelectMed} 
+          onSelect={handleSelectMed}
+          onGoHome={() => setView('home')}
         />
       )}
 
