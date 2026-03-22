@@ -115,7 +115,7 @@ export interface Sugerencia {
 /**
  * Vistas disponibles en la aplicación
  */
-export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'producto' | 'mapa' | 'categoria';
+export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'registro' | 'producto' | 'mapa' | 'categoria';
 
 /**
  * Pestañas del dashboard

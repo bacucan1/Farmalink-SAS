@@ -12,7 +12,7 @@ interface HeaderProps {
   onCategorySelect: (categoria: string) => void;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 export function Header({ currentView, onViewChange, isAuthenticated, userRole, onLogout, onCategorySelect }: HeaderProps) {
   const [categorias, setCategorias] = useState<Categoria[]>([]);

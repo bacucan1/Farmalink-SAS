@@ -201,6 +201,53 @@ app.get('/api/sugerencias', async (req, res) => {
     }
 });
 
+/* ================= USUARIOS (solo admin) ================= */
+
+app.get('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.get(`${BACKEND_URL}/api/usuarios`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ error: 'Error en backend usuarios' });
+    }
+});
+
+app.get('/api/usuarios/:id', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.get(`${BACKEND_URL}/api/usuarios/${req.params.id}`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al obtener usuario' });
+    }
+});
+
+app.post('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.post(`${BACKEND_URL}/api/usuarios`, req.body);
+        res.status(201).json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al crear usuario' });
+    }
+});
+
+app.put('/api/usuarios/:id', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.put(`${BACKEND_URL}/api/usuarios/${req.params.id}`, req.body);
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar usuario' });
+    }
+});
+
+app.delete('/api/usuarios/:id', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.delete(`${BACKEND_URL}/api/usuarios/${req.params.id}`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al eliminar usuario' });
+    }
+});
+
 // Búsqueda avanzada con fuzzy search y filtros
 app.get('/api/busqueda', async (req, res) => {
     try {

@@ -9,12 +9,14 @@ import { SearchSection } from './components/search/SearchSection';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { LoadingState, ErrorState } from './components/common/LoadingError';
 import Login from './components/auth/Login';
+import Register from './components/auth/Register';
 import { AdminMedicamentos } from './components/AdminMedicamentos';
 import { ProductoDetalle } from './components/product/ProductoDetalle';
 import { MapView } from './components/map/MapView';
 import { CategoryView } from './components/category/CategoryView';
 // PUNTO 4: breadcrumb global
 import { Breadcrumb } from './components/common/Breadcrumb';
+import { ProtectedRoute } from './components/common/ProtectedRoute';
 import './App.css';
 
 // Vistas que ya tienen su propio breadcrumb interno o no lo necesitan
@@ -22,6 +24,7 @@ const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria'];
 
 function App() {
   const [view, setView] = useState<View>('home');
+  const [prevView, setPrevView] = useState<View>('home'); // vista antes del login
   const [dashboardTab, setDashboardTab] = useState<Tab>('farmacias');
   const [selectedMed, setSelectedMed] = useState<Sugerencia | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -42,7 +45,17 @@ function App() {
     const role = user ? JSON.parse(user).role : '';
     setUserRole(role);
     setIsAuthenticated(true);
-    setView(role === 'admin' ? 'admin' : 'dashboard');
+    // Volver a la vista anterior si venía de una sección protegida
+    if (prevView && prevView !== 'login' && prevView !== 'home') {
+      setView(prevView);
+    } else {
+      setView(role === 'admin' ? 'admin' : 'dashboard');
+    }
+  };
+
+  const goToLogin = (from: View) => {
+    setPrevView(from);
+    setView('login');
   };
 
   const handleLogout = () => {
@@ -132,50 +145,71 @@ function App() {
       )}
 
       {view === 'buscar' && (
-        <SearchSection
-          onSelect={handleSelectMed}
-          isAuthenticated={isAuthenticated}
-          onLoginRequired={() => setView('login')}
-        />
+        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('buscar')} onGoHome={() => setView('home')} viewLabel="Buscar">
+          <SearchSection
+            onSelect={handleSelectMed}
+            isAuthenticated={isAuthenticated}
+            onLoginRequired={() => goToLogin('buscar')}
+          />
+        </ProtectedRoute>
       )}
 
       {view === 'categoria' && (
-        <CategoryView 
-          categoriaInicial={selectedCategory} 
-          onSelect={handleSelectMed}
-          onGoHome={() => setView('home')}
-        />
+        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('categoria')} onGoHome={() => setView('home')} viewLabel="Categorías">
+          <CategoryView 
+            categoriaInicial={selectedCategory} 
+            onSelect={handleSelectMed}
+            onGoHome={() => setView('home')}
+          />
+        </ProtectedRoute>
       )}
 
-      {view === 'dashboard' && data && isAuthenticated && (
-        <Dashboard
-          data={data}
-          activeTab={dashboardTab}
-          onTabChange={handleTabChange}
-        />
+      {view === 'dashboard' && (
+        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('dashboard')} onGoHome={() => setView('home')} viewLabel="Dashboard">
+          {data && (
+            <Dashboard
+              data={data}
+              activeTab={dashboardTab}
+              onTabChange={handleTabChange}
+            />
+          )}
+        </ProtectedRoute>
       )}
 
-      {view === 'admin' && userRole === 'admin' && isAuthenticated && (
-        <AdminMedicamentos />
+      {view === 'admin' && (
+        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('admin')} onGoHome={() => setView('home')} requireRole="admin" userRole={userRole} viewLabel="Panel de Administración">
+          <AdminMedicamentos />
+        </ProtectedRoute>
       )}
 
       {view === 'mapa' && (
-        <MapView />
+        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('mapa')} onGoHome={() => setView('home')} viewLabel="Mapa">
+          <MapView />
+        </ProtectedRoute>
       )}
 
       {view === 'producto' && selectedMed && (
-        <ProductoDetalle
-          medicamento={selectedMed}
-          onBack={() => setView('buscar')}
-          onGoHome={() => setView('home')}
-          onGoCategory={(cat) => { setSelectedCategory(cat); setView('categoria'); }}
-        />
+        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('producto')} onGoHome={() => setView('home')} viewLabel="Detalle del Medicamento">
+          <ProductoDetalle
+            medicamento={selectedMed}
+            onBack={() => setView('buscar')}
+            onGoHome={() => setView('home')}
+            onGoCategory={(cat) => { setSelectedCategory(cat); setView('categoria'); }}
+          />
+        </ProtectedRoute>
       )}
 
       {view === 'login' && (
         <Login 
           onLoginSuccess={handleLoginSuccess} 
-          onNavigateToRegister={() => {}} 
+          onNavigateToRegister={() => setView('registro')} 
+        />
+      )}
+
+      {view === 'registro' && (
+        <Register
+          onRegisterSuccess={handleLoginSuccess}
+          onNavigateToLogin={() => setView('login')}
         />
       )}
 

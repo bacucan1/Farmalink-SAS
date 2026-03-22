@@ -13,7 +13,7 @@ interface CategoryViewProps {
 
 type RangoPrecio = 'todos' | 'bajo' | 'medio' | 'alto';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 const PRECIO_LABELS: Record<RangoPrecio, string> = {
   todos:  'Todos los precios',

@@ -565,3 +565,79 @@
   from { opacity: 0; transform: translateY(-3px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ================================
+   BADGES DE ROL DE USUARIO
+   ================================ */
+
+.badge-admin {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.badge-farm {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-cliente {
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+/* ================================
+   AVATAR + NOMBRE DE USUARIO
+   ================================ */
+
+.user-avatar-name {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary, #6366f1), var(--blue, #4f46e5));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* ================================
+   SECCIÓN INTERNA (USUARIOS)
+   ================================ */
+
+.admin-section {
+  margin-top: 0.5rem;
+}
+
+.admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text, #1a1a2e);
+  margin: 0;
+}
+
+.admin-section-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-3, #888);
+  margin: 0.25rem 0 0 0;
+}

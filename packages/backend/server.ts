@@ -9,6 +9,7 @@ import sugerenciasRouter from './sugerencias/sugerenciasRouter.js';
 import farmaciasRouter from './farmacias/farmaciasRouter.js';
 import categoriasRouter from './categorias/categoriasRouter.js';
 import busquedaRouter from './busqueda/busquedaRouter.js';
+import usuariosRouter from './usuarios/usuariosRouter.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -36,6 +37,7 @@ app.use('/api/precios',      preciosRouter);
 app.use('/api/farmacias',    farmaciasRouter);
 app.use('/api/categorias',   categoriasRouter);
 app.use('/api/busqueda',     busquedaRouter);  // ← Búsqueda avanzada + fuzzy
+app.use('/api/usuarios',    usuariosRouter);   // ← Gestión de usuarios
 
 app.get('/api/dashboard', async (_req, res) => {
   try {

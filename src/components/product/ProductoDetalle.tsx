@@ -4,7 +4,7 @@ import { PharmacyMap } from '../common/PharmacyMap';
 import { useToast } from '../../hooks/useToast';
 import './ProductoDetalle.css';
 
-const GATEWAY = import.meta.env.VITE_API_URL || '';
+const GATEWAY = (import.meta as any).env?.VITE_API_URL || '';
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 

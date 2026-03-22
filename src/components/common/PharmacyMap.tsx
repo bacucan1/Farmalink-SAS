@@ -6,7 +6,7 @@ import './PharmacyMap.css';
 
 
 // Usa el proxy de Vite (relativo) — sin Mixed Content
-const GATEWAY = import.meta.env.VITE_API_URL || '';
+const GATEWAY = (import.meta as any).env?.VITE_API_URL || '';
 
 // Fix for default marker icons in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;

@@ -4,7 +4,7 @@ import type { DashboardData } from '../types';
 /**
  * Configuración del API
  */
-const GATEWAY = import.meta.env.VITE_API_URL || '';
+const GATEWAY = (import.meta as any).env?.VITE_API_URL || '';
 
 const TOKEN_KEY = 'token'; // Unified with Login.tsx storage key
 

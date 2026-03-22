@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../../hooks/useToast';
 import './SearchAutocomplete.css';
 
 interface Sugerencia {
@@ -19,7 +19,7 @@ interface SearchAutocompleteProps {
   placeholder?: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 export function SearchAutocomplete({
   onSelect,

@@ -40,7 +40,7 @@ interface FiltrosBusquedaProps {
   onSelect: (med: Sugerencia) => void;
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 const FILTROS_VACIOS: FiltrosState = {
   categoria: '', lab: '', precioMin: '', precioMax: '',

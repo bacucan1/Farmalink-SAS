@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../hooks/useToast';
+import { AdminUsuarios } from './admin/AdminUsuarios';
 import './AdminMedicamentos.css';
 
 interface Categoria {
@@ -60,7 +61,7 @@ const EMPTY_FORM: FormData = {
 
 const TOKEN_KEY = 'token';
 
-const GATEWAY = import.meta.env.VITE_API_URL || '';
+const GATEWAY = (import.meta as any).env?.VITE_API_URL || '';
 
 async function getToken(): Promise<string> {
   let token = localStorage.getItem(TOKEN_KEY);
@@ -78,7 +79,7 @@ async function getToken(): Promise<string> {
 }
 
 export function AdminMedicamentos() {
-  const [activeTab, setActiveTab] = useState<'medicamentos' | 'farmacias'>('medicamentos');
+  const [activeTab, setActiveTab] = useState<'medicamentos' | 'farmacias' | 'usuarios'>('medicamentos');
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [farmacias, setFarmacias] = useState<Farmacia[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -413,7 +414,7 @@ export function AdminMedicamentos() {
         <div>
           <h2 className="admin-title">⚙️ Panel de Administración</h2>
           <p className="admin-subtitle">
-            {activeTab === 'medicamentos' ? 'Gestión de medicamentos' : 'Gestión de farmacias'}
+            {activeTab === 'medicamentos' ? 'Gestión de medicamentos' : activeTab === 'farmacias' ? 'Gestión de farmacias' : 'Gestión de usuarios'}
           </p>
         </div>
         <div className="admin-tabs">
@@ -429,30 +430,42 @@ export function AdminMedicamentos() {
           >
             🏥 Farmacias
           </button>
+          <button 
+            className={`admin-tab ${activeTab === 'usuarios' ? 'active' : ''}`}
+            onClick={() => setActiveTab('usuarios')}
+          >
+            👥 Usuarios
+          </button>
         </div>
       </div>
 
-      <div className="admin-header-actions">
-        {activeTab === 'medicamentos' ? (
-          <button className="btn-nuevo" onClick={abrirCrear}>+ Nuevo Medicamento</button>
-        ) : (
-          <button className="btn-nuevo" onClick={abrirCrearFarmacia}>+ Nueva Farmacia</button>
-        )}
-      </div>
+      {activeTab !== 'usuarios' && (
+        <div className="admin-header-actions">
+          {activeTab === 'medicamentos' ? (
+            <button className="btn-nuevo" onClick={abrirCrear}>+ Nuevo Medicamento</button>
+          ) : (
+            <button className="btn-nuevo" onClick={abrirCrearFarmacia}>+ Nueva Farmacia</button>
+          )}
+        </div>
+      )}
 
       {error && <div className="admin-error">{error}</div>}
       {successMsg && <div className="admin-success">{successMsg}</div>}
 
-      <input
-        className="admin-filtro"
-        placeholder={activeTab === 'medicamentos' 
-          ? "Filtrar por nombre, laboratorio o categoría..." 
-          : "Filtrar por nombre, dirección o teléfono..."}
-        value={filtro}
-        onChange={e => setFiltro(e.target.value)}
-      />
+      {activeTab !== 'usuarios' && (
+        <input
+          className="admin-filtro"
+          placeholder={activeTab === 'medicamentos'
+            ? "Filtrar por nombre, laboratorio o categoría..."
+            : "Filtrar por nombre, dirección o teléfono..."}
+          value={filtro}
+          onChange={e => setFiltro(e.target.value)}
+        />
+      )}
 
-      {activeTab === 'medicamentos' ? (
+      {activeTab === 'usuarios' && <AdminUsuarios />}
+
+      {activeTab === 'medicamentos' && (
         <>
           <div className="admin-table-wrapper">
             <table className="admin-table">
@@ -491,7 +504,9 @@ export function AdminMedicamentos() {
           </div>
           <p className="admin-count">Total: {filtrados.length} medicamentos</p>
         </>
-      ) : (
+      )}
+
+      {activeTab === 'farmacias' && (
         <>
           <div className="admin-table-wrapper">
             <table className="admin-table">

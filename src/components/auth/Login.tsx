@@ -7,14 +7,14 @@ interface LoginProps {
   onNavigateToRegister: () => void;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = (import.meta as any).env?.VITE_API_URL || '';
 
 // ── Helper: validar formato de email ─────────────────────────────────────────
 function esEmailValido(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-export default function Login({ onLoginSuccess, onNavigateToRegister: _onNavigateToRegister }: LoginProps) {
+export default function Login({ onLoginSuccess, onNavigateToRegister }: LoginProps) {
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [error,    setError]    = useState('');
@@ -162,7 +162,7 @@ export default function Login({ onLoginSuccess, onNavigateToRegister: _onNavigat
 
         <p className="login-footer">
           ¿No tienes cuenta?{' '}
-          <button type="button" className="link-btn" onClick={_onNavigateToRegister}>
+          <button type="button" className="link-btn" onClick={onNavigateToRegister}>
             Regístrate
           </button>
         </p>
