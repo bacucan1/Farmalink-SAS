@@ -209,13 +209,14 @@
 .precios-table {
   background: white;
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .precios-table-header {
   display: grid;
   grid-template-columns: 2fr 2fr 1fr 1fr;
+  min-width: 600px;
   gap: 1rem;
   padding: 1rem 1.5rem;
   background: var(--bg-2);
@@ -226,6 +227,7 @@
 .precio-row {
   display: grid;
   grid-template-columns: 2fr 2fr 1fr 1fr;
+  min-width: 600px;
   gap: 1rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
@@ -279,15 +281,7 @@
 
   .precios-table-header,
   .precio-row {
-    grid-template-columns: 1fr 1fr;
     font-size: 0.875rem;
-  }
-
-  .precios-table-header span:nth-child(3),
-  .precios-table-header span:nth-child(4),
-  .precio-row .precio-val-cell,
-  .precio-row .precio-fecha {
-    display: none;
   }
 }
 

@@ -507,12 +507,6 @@
   .form-grid {
     grid-template-columns: 1fr;
   }
-  .admin-table th:nth-child(3),
-  .admin-table td:nth-child(3),
-  .admin-table th:nth-child(4),
-  .admin-table td:nth-child(4) {
-    display: none;
-  }
 }
 
 /* ── PUNTO 4: tooltips de prevención de error ────────────────── */
