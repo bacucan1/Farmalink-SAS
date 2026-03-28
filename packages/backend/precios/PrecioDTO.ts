@@ -4,6 +4,7 @@
 
 export interface UpdatePrecioDTO {
   precio: number;
+  medicamento_id?: number;
 }
 
 export interface PrecioComparacionDTO {
@@ -39,6 +40,10 @@ export function validateUpdatePrecio(body: any): string[] {
     errors.push('precio: debe ser un número');
   } else if (body.precio < 0) {
     errors.push('precio: no puede ser negativo');
+  }
+
+  if (body.medicamento_id !== undefined && typeof body.medicamento_id !== 'number') {
+    errors.push('medicamento_id: debe ser un número');
   }
 
   return errors;

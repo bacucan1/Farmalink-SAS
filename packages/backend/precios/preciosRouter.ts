@@ -3,6 +3,7 @@ import Database from '../shared/db.js';
 import { PrecioStrategyFactory } from './PrecioStrategyFactory.js';
 import { PrecioItem } from './strategies/PrecioStrategy.js';
 import { validateUpdatePrecio } from './PrecioDTO.js';
+import { PrecioHistorialService } from './PrecioHistorialService.js';
 
 const router = Router();
 
@@ -111,7 +112,6 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
 
     const pool = Database.getInstance().getPool();
 
-    // 1. Leer el precio actual antes de modificarlo
     const currentResult = await pool.query(
       'SELECT * FROM precios WHERE id = $1',
       [id]
@@ -122,18 +122,106 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
     }
     const current = currentResult.rows[0];
 
-    // 2. Guardar el cambio en el historial
-    await pool.query(
-      `INSERT INTO historial_precios
-         (precio_id, medicamento_id, farmacia_id, precio_anterior, precio_nuevo, fecha_cambio)
-       VALUES ($1, $2, $3, $4, $5, NOW())`,
-      [id, current.medicamento_id, current.farmacia_id, current.precio, req.body.precio]
-    );
+    if (req.body.medicamento_id && Number(req.body.medicamento_id) !== Number(current.medicamento_id)) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'El medicamento_id no coincide con el precio especificado' 
+      });
+      return;
+    }
 
-    // 3. Actualizar el precio actual
+    const quienCambio = req.body.quien_cambio || req.body.userEmail || req.headers['x-user-email'] as string || 'sistema';
+
+    await PrecioHistorialService.registrarCambio({
+      precio_id: id,
+      medicamento_id: current.medicamento_id,
+      farmacia_id: current.farmacia_id,
+      precio_anterior: current.precio,
+      precio_nuevo: req.body.precio,
+      quien_cambio: quienCambio,
+    });
+
     const result = await pool.query(
       `UPDATE precios SET precio = $1, fecha = NOW() WHERE id = $2 RETURNING *`,
       [req.body.precio, id]
+    );
+
+    const medResult = await pool.query(
+      'SELECT name, lab FROM medicamentos WHERE id = $1',
+      [current.medicamento_id]
+    );
+    const farResult = await pool.query(
+      'SELECT name, address FROM farmacias WHERE id = $1',
+      [current.farmacia_id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Precio actualizado correctamente',
+      data: {
+        ...result.rows[0],
+        medicamento: medResult.rows[0],
+        farmacia: farResult.rows[0],
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error al actualizar precio', error });
+  }
+});
+
+router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id: paramId } = req.params;
+    const idString = Array.isArray(paramId) ? paramId[0] : paramId;
+    const id = parseInt(idString);
+
+    if (isNaN(id)) {
+      res.status(400).json({ success: false, message: 'ID inválido' });
+      return;
+    }
+
+    const pool = Database.getInstance().getPool();
+
+    const currentResult = await pool.query('SELECT * FROM precios WHERE id = $1', [id]);
+    if (currentResult.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'Precio no encontrado' });
+      return;
+    }
+    const current = currentResult.rows[0];
+
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+
+    if (req.body.precio !== undefined) {
+      updates.push(`precio = $${paramIndex++}`);
+      values.push(req.body.precio);
+    }
+
+    if (updates.length === 0) {
+      res.status(400).json({ success: false, message: 'No hay campos para actualizar' });
+      return;
+    }
+
+    const quienCambio = req.body.quien_cambio || req.body.userEmail || req.headers['x-user-email'] as string || 'sistema';
+
+    if (req.body.precio !== undefined && req.body.precio !== current.precio) {
+      await PrecioHistorialService.registrarCambio({
+        precio_id: id,
+        medicamento_id: current.medicamento_id,
+        farmacia_id: current.farmacia_id,
+        precio_anterior: current.precio,
+        precio_nuevo: req.body.precio,
+        quien_cambio: quienCambio,
+      });
+    }
+
+    updates.push(`fecha = NOW()`);
+    values.push(id);
+
+    const result = await pool.query(
+      `UPDATE precios SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+      values
     );
 
     res.json({

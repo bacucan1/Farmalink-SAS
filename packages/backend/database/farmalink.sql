@@ -454,6 +454,7 @@ CREATE TABLE historial_precios (
     farmacia_id   BIGINT NOT NULL REFERENCES farmacias(id),
     precio_anterior INTEGER NOT NULL,
     precio_nuevo   INTEGER NOT NULL,
+    quien_cambio  VARCHAR(255),
     fecha_cambio   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
