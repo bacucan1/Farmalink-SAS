@@ -5,33 +5,22 @@ import iconMapa from '../../assets/icon-mapa.png';
 import iconPrecios from '../../assets/icon-precios.png';
 import './Hero.css';
 
-/**
- * Props para el componente Hero
- * @interface HeroProps
- */
 interface HeroProps {
-  /** Datos del dashboard con estadísticas */
   data: DashboardData | null;
-  /** Callback para cambiar a vista de búsqueda */
   onSearchClick: () => void;
-  /** Callback para cambiar a vista de dashboard */
   onDashboardClick: () => void;
 }
 
-/**
- * Hero - Sección principal de la página de inicio
- * @component
- * @description Sección hero con headline, búsqueda demo, tarjetas de precios y estadísticas
- * @param {HeroProps} props - Propiedades del componente
- * @returns {JSX.Element} Sección hero con contenido principal
- */
 export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
   return (
     <section className="hero">
       <div className="container">
         <div className="hero-grid">
           <div className="hero-text fade-up visible">
-            <div className="hero-eyebrow">Plataforma inteligente de salud</div>
+            <div className="hero-eyebrow">
+              <span className="hero-eyebrow-line" aria-hidden="true"></span>
+              Plataforma inteligente de salud
+            </div>
             <h1 className="hero-title">
               Encuentra medicamentos al<br />
               <span>mejor precio</span><br />
@@ -42,31 +31,53 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
               y recibe recomendaciones inteligentes para tomar decisiones informadas.
             </p>
             <div className="hero-badges">
-              <span className="badge"><img src={iconPrecios} alt="" className="badge-img" /> Precios en Tiempo Real</span>
-              <span className="badge"><img src={iconIA} alt="" className="badge-img" /> Sugerencias Inteligentes</span>
-              <span className="badge"><img src={iconMapa} alt="" className="badge-img" /> {data?.farmacias.length || 0} Farmacias en Bogotá</span>
-              <span className="badge"><img src={iconBusqueda} alt="" className="badge-img" /> +{data?.medicamentos.length || 0} Medicamentos</span>
+              <span className="badge">
+                <img src={iconPrecios} alt="" className="badge-img" /> Precios en Tiempo Real
+              </span>
+              <span className="badge">
+                <img src={iconIA} alt="" className="badge-img" /> Sugerencias Inteligentes
+              </span>
+              <span className="badge">
+                <img src={iconMapa} alt="" className="badge-img" /> {data?.farmacias.length || 0} Farmacias en Bogotá
+              </span>
+              <span className="badge">
+                <img src={iconBusqueda} alt="" className="badge-img" /> +{data?.medicamentos.length || 0} Medicamentos
+              </span>
             </div>
+
+            {/* ── Botones mejorados: llamativos, con iconos y animación ── */}
             <div className="hero-actions">
-              <a 
-                href="#" 
-                className="btn-secondary" 
+              <a
+                href="#"
+                className="btn-primary"
                 onClick={(e) => { e.preventDefault(); onSearchClick(); }}
+                aria-label="Ir al buscador de medicamentos"
               >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                </svg>
                 Buscar Medicamento
               </a>
-              <a 
-                href="#" 
-                className="btn-secondary" 
+              <a
+                href="#"
+                className="btn-secondary"
                 onClick={(e) => { e.preventDefault(); onDashboardClick(); }}
+                aria-label="Ver el dashboard de estadísticas"
               >
-                Ver Dashboard 
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7"/>
+                  <rect x="14" y="3" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/>
+                </svg>
+                Ver Dashboard
               </a>
             </div>
           </div>
 
-          <div 
-            className="hero-visual fade-up visible" 
+          <div
+            className="hero-visual fade-up visible"
             style={{ transitionDelay: '0.2s' }}
           >
             <div className="hero-card-main">
@@ -107,7 +118,7 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
               </div>
             </div>
             <div className="hero-card-floating">
-                <img src={iconPrecios} alt="" className="float-icon-img" />
+              <img src={iconPrecios} alt="" className="float-icon-img" />
               <div className="float-text">
                 <strong>Ahorrás $2.700</strong>
                 <span>en esta búsqueda</span>

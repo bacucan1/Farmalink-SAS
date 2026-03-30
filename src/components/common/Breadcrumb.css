@@ -9,6 +9,11 @@
   z-index: 90;
 }
 
+/* Empuja el contenido para que no quede tapado por header (72px) + breadcrumb (~41px) */
+.app-breadcrumb + * {
+  scroll-margin-top: 120px;
+}
+
 .app-breadcrumb-inner {
   display: flex;
   align-items: center;

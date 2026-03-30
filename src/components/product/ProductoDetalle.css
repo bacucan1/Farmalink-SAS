@@ -5,7 +5,7 @@
 .pd-view {
   background: #f4f6f9;
   min-height: 100vh;
-  padding-top: 80px;   /* compensa el header fijo */
+  padding-top: 80px;
   padding-bottom: 60px;
 }
 
@@ -46,12 +46,12 @@
 /* ── Hero ── */
 .pd-hero {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 320px 1fr;
   gap: 28px;
   background: white;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   border: 1px solid #e9ecef;
   margin-bottom: 20px;
 }
@@ -60,7 +60,7 @@
 .pd-img-wrap {
   position: relative;
   background: #f8fafc;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #e9ecef;
   overflow: hidden;
   aspect-ratio: 1;
@@ -89,7 +89,7 @@
 /* Panel info */
 .pd-info      { display: flex; flex-direction: column; gap: 12px; }
 .pd-lab       { margin: 0; font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-.pd-name      { margin: 0; font-size: 1.9rem; font-weight: 800; color: #1a202c; line-height: 1.2; font-family: var(--font-display, system-ui); }
+.pd-name      { margin: 0; font-size: 1.85rem; font-weight: 800; color: #1a202c; line-height: 1.2; font-family: var(--font-display, system-ui); }
 .pd-divider   { border: none; border-top: 1px solid #f1f5f9; margin: 0; }
 
 /* Skeleton */
@@ -117,7 +117,7 @@
 .pd-old-price em { font-style: normal; font-size: 0.78rem; }
 .pd-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .pd-main-price {
-  font-size: 2.3rem; font-weight: 900; color: #1a202c;
+  font-size: 2.2rem; font-weight: 900; color: #1a202c;
   font-family: var(--font-display, system-ui); line-height: 1;
 }
 .pd-main-price--selected { color: #0B7DB8 !important; }
@@ -166,9 +166,9 @@
 /* Botones de acción */
 .pd-action-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
 .pd-action-btn {
-  flex: 1; min-width: 150px;
+  flex: 1; min-width: 140px;
   display: flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 11px 18px; border-radius: 50px;
+  padding: 12px 16px; border-radius: 50px;
   font-size: 0.88rem; font-weight: 700; cursor: pointer;
   transition: all 0.22s; border: 1.5px solid;
   font-family: inherit;
@@ -199,7 +199,7 @@
 .pd-chart-section,
 .pd-map-section,
 .pd-prices-section {
-  background: white; border-radius: 14px;
+  background: white; border-radius: 16px;
   border: 1px solid #e9ecef; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   overflow: hidden; margin-bottom: 20px;
 }
@@ -209,8 +209,8 @@
 }
 .pd-section-header p { margin: 0; font-size: 0.81rem; color: #94a3b8; }
 
-/* ── Gráfico ── */
-.chart-wrap { padding: 14px 18px 18px; }
+/* ── Gráfico de barras ── */
+.chart-wrap { padding: 14px 18px 18px; overflow-x: auto; }
 .price-chart { display: block; overflow: visible; }
 .chart-legend {
   display: flex; flex-wrap: wrap; gap: 12px;
@@ -241,7 +241,304 @@
 }
 .chart-stat strong { font-size: 0.92rem; font-weight: 800; }
 
-/* ── Tabla de precios ── */
+/* ═══════════════════════════════════════════════════
+   HISTORIAL DE PRECIOS – REDISEÑADO (Punto 8)
+   ═══════════════════════════════════════════════════ */
+
+/* Contenedor principal del historial */
+.history-chart-wrap {
+  padding: 0 !important;
+}
+
+/* Barra de herramientas de tiempo */
+.history-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.history-toolbar-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.history-time-btns {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.history-time-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+}
+
+.history-time-btn:hover {
+  background: #f1f5f9;
+  color: #374151;
+}
+
+.history-time-btn--active {
+  background: #0B7DB8;
+  color: white;
+  border-color: #0B7DB8;
+}
+
+/* Área del gráfico SVG */
+.history-svg-area {
+  padding: 8px 16px 4px;
+  overflow-x: auto;
+  /* Scrollbar visible */
+  scrollbar-width: thin;
+  scrollbar-color: #0B7DB8 #f1f5f9;
+}
+
+.history-svg-area::-webkit-scrollbar {
+  height: 4px;
+}
+.history-svg-area::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+.history-svg-area::-webkit-scrollbar-thumb {
+  background: #0B7DB8;
+  border-radius: 4px;
+}
+
+/* Leyenda de farmacias */
+.history-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 10px 20px 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.history-leg-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 3px 8px 3px 4px;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.history-leg-item:hover {
+  background: #f8fafc;
+}
+
+.history-leg-item--hidden {
+  opacity: 0.4;
+}
+
+.history-leg-line {
+  width: 20px;
+  height: 3px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.history-leg-name {
+  font-size: 0.76rem;
+  color: #4b5563;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Estadísticas del historial */
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #f1f5f9;
+  border-top: 1px solid #f1f5f9;
+}
+
+.history-stat {
+  background: #fafbfc;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+}
+
+.history-stat__label {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.history-stat__value {
+  font-size: 0.94rem;
+  font-weight: 900;
+  color: #1a202c;
+}
+
+.history-stat__value--green { color: #16a34a; }
+.history-stat__value--red   { color: #dc2626; }
+.history-stat__value--blue  { color: #0B7DB8; }
+
+/* Tooltip del historial */
+.history-tooltip {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 8px;
+  padding: 8px 12px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  pointer-events: none;
+  min-width: 160px;
+}
+
+.history-tooltip-date {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.history-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: white;
+  padding: 1px 0;
+}
+
+.history-tooltip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.history-tooltip-price {
+  font-weight: 700;
+  margin-left: auto;
+}
+
+/* Estado vacío del historial */
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.history-empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.3;
+}
+
+.history-empty h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
+  margin: 0;
+}
+
+.history-empty p {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+/* Tabla resumen de precios por farmacia (mobile-friendly) */
+.history-table-wrap {
+  overflow-x: auto;
+  padding: 0 16px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 400px;
+}
+
+.history-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  border-bottom: 2px solid #f1f5f9;
+  white-space: nowrap;
+}
+
+.history-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f8fafc;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.history-table tr:hover td {
+  background: #f8fafc;
+}
+
+.history-farm-name {
+  font-weight: 700;
+  color: #1a202c;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-farm-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.history-price-cell {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.history-trend-up   { color: #dc2626; }
+.history-trend-down { color: #16a34a; }
+.history-trend-flat { color: #94a3b8; }
+
+/* ── Tabla de precios actuales ── */
 .pd-prices-hd {
   display: flex; align-items: flex-start; justify-content: space-between;
   padding: 18px 22px 14px; border-bottom: 1px solid #f1f5f9; gap: 12px;
@@ -288,11 +585,11 @@
 .pd-price-list { padding: 14px; display: flex; flex-direction: column; gap: 9px; }
 .pd-card {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px; border-radius: 10px; border: 1px solid #e9ecef;
+  padding: 14px 16px; border-radius: 12px; border: 1px solid #e9ecef;
   background: white; position: relative; gap: 12px;
   cursor: pointer; transition: all 0.18s;
 }
-.pd-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.06); transform: translateX(2px); }
+.pd-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.07); transform: translateX(2px); }
 .pd-card--best {
   background: linear-gradient(135deg,#f4fff0,#ecfce3);
   border-color: rgba(102,184,46,0.35);
@@ -314,9 +611,9 @@
 
 .pd-card-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 .pd-farm-avatar {
-  width: 40px; height: 40px; flex-shrink: 0;
+  width: 42px; height: 42px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: #f8fafc; border: 1px solid #e9ecef; border-radius: 9px;
+  background: #f8fafc; border: 1px solid #e9ecef; border-radius: 10px;
   color: #64748b;
 }
 .pd-farm-info { min-width: 0; flex: 1; }
@@ -338,17 +635,145 @@
   font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 50px;
 }
 
-/* ── Responsive ── */
+/* ══════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════ */
 @media (max-width: 860px) {
   .pd-hero { grid-template-columns: 1fr; gap: 18px; }
-  .pd-img-wrap { max-width: 300px; margin: 0 auto; }
-  .pd-name { font-size: 1.55rem; }
-  .pd-main-price { font-size: 1.85rem; }
+  .pd-img-wrap { max-width: 280px; margin: 0 auto; }
+  .pd-name { font-size: 1.5rem; }
+  .pd-main-price { font-size: 1.75rem; }
   .chart-summary { grid-template-columns: repeat(2,1fr); }
+  .history-stats { grid-template-columns: repeat(2, 1fr); }
 }
+
+@media (max-width: 640px) {
+  .history-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .history-time-btns {
+    gap: 3px;
+  }
+
+  .history-time-btn {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+
+  .history-toolbar {
+    padding: 12px 14px 10px;
+  }
+
+  .pd-section-header {
+    padding: 14px 16px 12px;
+  }
+}
+
 @media (max-width: 560px) {
-  .pd-hero { padding: 18px 14px; }
+  .pd-hero { padding: 16px 14px; }
+
   .pd-action-btns { flex-direction: column; }
+  .pd-action-btn  { min-width: auto; }
+
   .pd-card { flex-direction: column; align-items: flex-start; }
-  .pd-card-right { align-self: stretch; flex-direction: row; justify-content: space-between; align-items: center; }
+  .pd-card-right {
+    align-self: stretch;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .pd-prices-hd {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pd-sort-btn {
+    align-self: flex-start;
+  }
+
+  /* Historial en mobile */
+  .history-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .history-stat {
+    padding: 10px 12px;
+  }
+
+  .history-stat__value {
+    font-size: 0.85rem;
+  }
+
+  .chart-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .history-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Dark mode overrides */
+html.dark-mode .pd-view {
+  background: #0f172a;
+}
+
+html.dark-mode .pd-hero,
+html.dark-mode .pd-chart-section,
+html.dark-mode .pd-map-section,
+html.dark-mode .pd-prices-section {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark-mode .pd-name { color: #f1f5f9; }
+html.dark-mode .pd-main-price { color: #f1f5f9; }
+html.dark-mode .pd-crumb-current { color: #94a3b8; }
+html.dark-mode .pd-section-header h2 { color: #f1f5f9; }
+
+html.dark-mode .pd-specs,
+html.dark-mode .pd-desc-block,
+html.dark-mode .chart-summary {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark-mode .pd-img-wrap {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark-mode .pd-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark-mode .pd-card:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+}
+
+html.dark-mode .pd-farm-info h4 { color: #f1f5f9; }
+html.dark-mode .pd-price { color: #f1f5f9; }
+
+html.dark-mode .pd-farm-avatar {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark-mode .history-stat { background: #1e293b; }
+html.dark-mode .history-stat__value { color: #f1f5f9; }
+
+html.dark-mode .pd-action-btn.pd-chart-btn {
+  background: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+html.dark-mode .pd-skel {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
 }

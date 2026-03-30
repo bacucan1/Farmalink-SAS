@@ -57,7 +57,10 @@
   --r-full: 999px;
 }
 
-* {
+/* ────────────────────────────────
+   RESET
+   ──────────────────────────────── */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -66,6 +69,9 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  /* Scrollbar visible siempre (incluyendo mobile via overlay) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--bg-2);
 }
 
 body {
@@ -75,6 +81,8 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Overflow-y auto para que aparezca scrollbar en mobile */
+  overflow-y: auto;
 }
 
 #root {
@@ -84,7 +92,9 @@ body {
   text-align: left;
 }
 
-/* Scrollbar */
+/* ────────────────────────────────
+   SCROLLBAR – diseño original
+   ──────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -98,14 +108,18 @@ body {
   border-radius: 3px;
 }
 
-/* Container */
+/* ────────────────────────────────
+   CONTAINER
+   ──────────────────────────────── */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
-/* Links */
+/* ────────────────────────────────
+   LINKS
+   ──────────────────────────────── */
 a {
   font-weight: 500;
   color: var(--primary);
@@ -117,7 +131,9 @@ a:hover {
   color: var(--primary-dark);
 }
 
-/* Buttons */
+/* ────────────────────────────────
+   BUTTONS
+   ──────────────────────────────── */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -127,23 +143,18 @@ button {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.25s;
+  /* Mejor tap target en mobile */
+  min-height: 36px;
 }
 
-button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
 }
 
-/* View states */
-.view {
-  display: none;
-}
-
-.view.active {
-  display: block;
-}
-
-/* Fade animation */
+/* ────────────────────────────────
+   ANIMACIONES
+   ──────────────────────────────── */
 .fade-up {
   opacity: 0;
   transform: translateY(24px);
@@ -155,13 +166,67 @@ button:focus-visible {
   transform: translateY(0);
 }
 
-/* Responsive visibility */
+/* ────────────────────────────────
+   RESPONSIVE
+   ──────────────────────────────── */
 @media (max-width: 768px) {
   html {
-    font-size: 14px;
+    font-size: 15px;
   }
   
   .container {
     padding: 0 16px;
   }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+
+  .container {
+    padding: 0 14px;
+  }
+}
+
+/* ────────────────────────────────
+   MOBILE TOUCH TARGETS
+   ──────────────────────────────── */
+@media (max-width: 768px) {
+  /* Asegurar tap targets mínimos de 44px */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  /* Botones pequeños (badges, pills) quedan excluidos */
+  .badge,
+  .footer-badge,
+  .pd-best-tag,
+  .pd-count-badge,
+  .pd-discount-pill,
+  .pd-strategy,
+  .history-time-btn,
+  .a11y-close {
+    min-height: unset;
+  }
+}
+
+/* ────────────────────────────────
+   SELECTION
+   ──────────────────────────────── */
+::selection {
+  background: rgba(102, 184, 46, 0.2);
+  color: var(--primary-dark);
+}
+
+/* ────────────────────────────────
+   IMAGES
+   ──────────────────────────────── */
+img {
+  max-width: 100%;
+  height: auto;
 }

@@ -338,23 +338,23 @@ function PriceHistoryChart({ series }: { series: SerieHistorial[] }) {
 
   return (
     <div ref={containerRef} className="chart-wrap history-chart-wrap">
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', marginBottom: '8px', paddingRight: '20px' }}>
-        {(['1W', '1M', '3M', '6M', '1Y', 'ALL'] as const).map(r => (
-          <button
-            key={r}
-            onClick={() => setTimeRange(r)}
-            style={{
-              padding: '2px 10px', fontSize: '11px', borderRadius: '12px',
-              border: timeRange === r ? 'none' : '1px solid #cbd5e1',
-              background: timeRange === r ? '#0B7DB8' : 'transparent',
-              color: timeRange === r ? 'white' : '#64748b',
-              cursor: 'pointer', fontWeight: 600
-            }}
-          >
-            {r === 'ALL' ? 'Todo' : r === '1W' ? '1 Sem' : r === '1M' ? '1 Mes' : r === '1Y' ? '1 Año' : r}
-          </button>
-        ))}
+      {/* ── Barra de herramientas de tiempo ── */}
+      <div className="history-toolbar">
+        <span className="history-toolbar-title">📈 Evolución de precios</span>
+        <div className="history-time-btns">
+          {(['1W', '1M', '3M', '6M', '1Y', 'ALL'] as const).map(r => (
+            <button
+              key={r}
+              onClick={() => setTimeRange(r)}
+              className={`history-time-btn ${timeRange === r ? 'history-time-btn--active' : ''}`}
+            >
+              {r === 'ALL' ? 'Todo' : r === '1W' ? '1 Sem' : r === '1M' ? '1 Mes' : r === '1Y' ? '1 Año' : r}
+            </button>
+          ))}
+        </div>
       </div>
+      {/* ── Área del SVG con scroll horizontal en mobile ── */}
+      <div className="history-svg-area">
       <svg
         width={width}
         height={svgH}
@@ -504,28 +504,59 @@ function PriceHistoryChart({ series }: { series: SerieHistorial[] }) {
         )}
       </svg>
 
-      <div className="chart-legend history-legend">
+      </div>{/* end history-svg-area */}
+
+      {/* ── Leyenda de farmacias clicable ── */}
+      <div className="history-legend">
         {filteredSeries.map((serie, si) => (
-          <span 
-            key={serie.farmaciaId} 
-            className="chart-leg"
-            style={{ 
-              cursor: 'pointer', 
-              opacity: hiddenSeries.has(serie.farmaciaId) ? 0.4 : 1,
-              textDecoration: hiddenSeries.has(serie.farmaciaId) ? 'line-through' : 'none'
-            }}
+          <span
+            key={serie.farmaciaId}
+            className={`history-leg-item ${hiddenSeries.has(serie.farmaciaId) ? 'history-leg-item--hidden' : ''}`}
             onClick={() => {
               const newSet = new Set(hiddenSeries);
               if (newSet.has(serie.farmaciaId)) newSet.delete(serie.farmaciaId);
               else newSet.add(serie.farmaciaId);
               setHiddenSeries(newSet);
             }}
+            title={hiddenSeries.has(serie.farmaciaId) ? 'Mostrar' : 'Ocultar'}
           >
-            <span className="chart-leg-dot" style={{ background: HISTORY_COLORS[si % HISTORY_COLORS.length] }} />
-            {serie.farmaciaNombre.length > 22 ? serie.farmaciaNombre.slice(0, 21) + '…' : serie.farmaciaNombre}
+            <span className="history-leg-line" style={{ background: HISTORY_COLORS[si % HISTORY_COLORS.length] }} />
+            <span className="history-leg-name">
+              {serie.farmaciaNombre.length > 26 ? serie.farmaciaNombre.slice(0, 25) + '…' : serie.farmaciaNombre}
+            </span>
           </span>
         ))}
       </div>
+
+      {/* ── Estadísticas del historial ── */}
+      {visibleSeries.length > 0 && (() => {
+        const allPreciosHist = visibleSeries.flatMap(s => s.puntos.map(p => p.precio));
+        const minHist  = Math.min(...allPreciosHist);
+        const maxHist  = Math.max(...allPreciosHist);
+        const avgHist  = allPreciosHist.reduce((a, b) => a + b, 0) / allPreciosHist.length;
+        const spread   = maxHist - minHist;
+        const fmt = (v: number) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
+        return (
+          <div className="history-stats">
+            <div className="history-stat">
+              <span className="history-stat__label">Precio Mín.</span>
+              <strong className="history-stat__value history-stat__value--green">{fmt(minHist)}</strong>
+            </div>
+            <div className="history-stat">
+              <span className="history-stat__label">Precio Máx.</span>
+              <strong className="history-stat__value history-stat__value--red">{fmt(maxHist)}</strong>
+            </div>
+            <div className="history-stat">
+              <span className="history-stat__label">Promedio</span>
+              <strong className="history-stat__value history-stat__value--blue">{fmt(avgHist)}</strong>
+            </div>
+            <div className="history-stat">
+              <span className="history-stat__label">Diferencia</span>
+              <strong className="history-stat__value">{fmt(spread)}</strong>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

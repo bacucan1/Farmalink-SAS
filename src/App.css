@@ -8,3 +8,6 @@
 @import './components/common/LoadingError.css';
 
 /* Legacy support - imports from existing styles */
+
+/* Dark mode global — debe ir al final para mayor especificidad */
+@import './darkmode.css';

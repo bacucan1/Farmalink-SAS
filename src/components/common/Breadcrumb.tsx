@@ -1,9 +1,3 @@
-/**
- * Breadcrumb.tsx — Migajas de pan globales (Punto 4)
- * Se renderiza desde App.tsx para todas las secciones
- * excepto home, login, producto y categoria (tienen la suya propia).
- */
-
 import type { View } from '../../types';
 import './Breadcrumb.css';
 
@@ -26,9 +20,13 @@ export function Breadcrumb({ view, onGoHome }: BreadcrumbProps) {
   return (
     <nav className="app-breadcrumb" aria-label="Ruta de navegación">
       <div className="container app-breadcrumb-inner">
-        <button className="app-crumb-btn" onClick={onGoHome}>Inicio</button>
+        <button className="app-crumb-btn" onClick={onGoHome} aria-label="Ir al inicio">
+          Inicio
+        </button>
         <span className="app-crumb-sep" aria-hidden="true">›</span>
-        <span className="app-crumb-current">{label}</span>
+        <span className="app-crumb-current" data-view={view} aria-current="page">
+          {label}
+        </span>
       </div>
     </nav>
   );
