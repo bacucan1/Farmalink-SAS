@@ -17,6 +17,8 @@ import { CategoryView } from './components/category/CategoryView';
 // PUNTO 4: breadcrumb global
 import { Breadcrumb } from './components/common/Breadcrumb';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
+// PUNTO 5: módulo de cuenta de usuario
+import MiCuenta from './components/settings/MiCuenta';
 import './App.css';
 
 // Vistas que ya tienen su propio breadcrumb interno o no lo necesitan
@@ -145,13 +147,11 @@ function App() {
       )}
 
       {view === 'buscar' && (
-        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('buscar')} onGoHome={() => setView('home')} viewLabel="Buscar">
-          <SearchSection
-            onSelect={handleSelectMed}
-            isAuthenticated={isAuthenticated}
-            onLoginRequired={() => goToLogin('buscar')}
-          />
-        </ProtectedRoute>
+        <SearchSection
+          onSelect={handleSelectMed}
+          isAuthenticated={isAuthenticated}
+          onLoginRequired={() => goToLogin('buscar')}
+        />
       )}
 
       {view === 'categoria' && (
@@ -211,6 +211,13 @@ function App() {
           onRegisterSuccess={handleLoginSuccess}
           onNavigateToLogin={() => setView('login')}
         />
+      )}
+
+      {/* PUNTO 5: vista de gestión de cuenta */}
+      {view === 'settings' && (
+        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('settings')} onGoHome={() => setView('home')} viewLabel="Mi cuenta">
+          <MiCuenta onGoHome={() => setView('home')} />
+        </ProtectedRoute>
       )}
 
       <Footer onNavigate={(viewName) => setView(viewName as View)} />

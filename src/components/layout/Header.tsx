@@ -176,9 +176,14 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
               )}
               <li className="nav-cta-item">
                 {isAuthenticated ? (
-                  <button className="nav-logout" onClick={() => { onLogout(); setMobileOpen(false); }}>
-                    Cerrar Sesión
-                  </button>
+                  <>
+                    <a onClick={() => handleNavClick('settings')} className={`nav-mi-cuenta ${currentView === 'settings' ? 'active' : ''}`} title="Mi cuenta">
+                      Mi cuenta
+                    </a>
+                    <button className="nav-logout" onClick={() => { onLogout(); setMobileOpen(false); }}>
+                      Cerrar Sesión
+                    </button>
+                  </>
                 ) : (
                   <a className="nav-cta" onClick={() => handleNavClick('login')}>
                     Iniciar Sesión

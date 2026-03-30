@@ -6,6 +6,7 @@ const LABELS: Partial<Record<View, string>> = {
   dashboard: 'Dashboard',
   admin:     'Administración',
   mapa:      'Mapa de farmacias',
+  settings:  'Mi cuenta',
 };
 
 interface BreadcrumbProps {

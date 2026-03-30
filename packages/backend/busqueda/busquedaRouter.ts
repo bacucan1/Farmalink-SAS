@@ -25,10 +25,6 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     await pool.query('CREATE EXTENSION IF NOT EXISTS pg_trgm').catch(() => {});
     await pool.query('CREATE EXTENSION IF NOT EXISTS unaccent').catch(() => {});
 
-    // DEBUG TEMPORAL — quitar después de diagnosticar
-    console.log('\n══════════════════════════════════');
-    console.log('[Búsqueda] Query recibida:', req.query.q);
-
     const q          = ((req.query.q         as string) || '').trim();
     const categoria  = ((req.query.categoria as string) || '').trim();
     const lab        = ((req.query.lab       as string) || '').trim();
@@ -124,11 +120,8 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 
       const allP1 = [...p1Params, ...ep1];
 
-      console.log('[Búsqueda] SQL Pasada 1 (ILIKE):', p1Base.replace(/\s+/g,' ').trim());
-      console.log('[Búsqueda] Params Pasada 1:', allP1);
       const c1 = await pool.query(`SELECT COUNT(*) FROM (${p1Base}) AS sub`, allP1);
       const totalP1 = parseInt(c1.rows[0].count);
-      console.log('[Búsqueda] Pasada 1 resultados:', totalP1);
 
       if (totalP1 > 0) {
         // Pasada 1 exitosa — usar solo estos resultados
@@ -141,7 +134,6 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
         // ══════════════════════════════════════════════════════════════════
         // PASADA 2 — Fuzzy pg_trgm umbral 0.6 (solo si pasada 1 = vacío)
         // ══════════════════════════════════════════════════════════════════
-        console.log('[Búsqueda] Pasada 1 vacía → intentando fuzzy con umbral 0.6');
         metodo = 'fuzzy_fallback';
         const p2Params: any[] = [q]; // $1 para word_similarity
         let p2Pi = 2;
@@ -159,11 +151,8 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 
         const allP2 = [...p2Params, ...ep2];
 
-        console.log('[Búsqueda] SQL Pasada 2 (Fuzzy):', p2Base.replace(/\s+/g,' ').trim());
-        console.log('[Búsqueda] Params Pasada 2:', allP2);
         const c2 = await pool.query(`SELECT COUNT(*) FROM (${p2Base}) AS sub`, allP2);
         finalTotal = parseInt(c2.rows[0].count);
-        console.log('[Búsqueda] Pasada 2 resultados:', finalTotal);
 
         if (finalTotal > 0) {
           const p2Pag = p2Base + ` LIMIT $${p2Pi} OFFSET $${p2Pi + 1}`;
@@ -186,8 +175,6 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
       finalRows    = rNoQ.rows;
     }
 
-    console.log('[Búsqueda] Método usado:', metodo, '| Total final:', finalTotal);
-    console.log('══════════════════════════════════\n');
     res.json({
       success: true,
       query:   q || null,

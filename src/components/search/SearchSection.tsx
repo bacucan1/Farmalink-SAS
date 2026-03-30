@@ -71,7 +71,6 @@ export function SearchSection({ onSelect, isAuthenticated = false, onLoginRequir
     setDropdownOpen(false);
     setSugerencias([]);
     setInputValue(med.name);
-    if (!isAuthenticated) { onLoginRequired?.(); return; }
     onSelect?.(med);
   };
 
@@ -178,7 +177,6 @@ export function SearchSection({ onSelect, isAuthenticated = false, onLoginRequir
           <FiltrosBusqueda
             query={queryActivo}
             onSelect={med => {
-              if (!isAuthenticated) { onLoginRequired?.(); return; }
               onSelect?.(med);
             }}
           />

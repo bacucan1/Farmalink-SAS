@@ -201,33 +201,27 @@ app.get('/api/sugerencias', async (req, res) => {
     }
 });
 
-/* ================= PERFIL DE USUARIO (usuario autenticado) ================= */
+/* ================= USUARIOS ================= */
 
-// GET /api/usuarios/perfil - Obtener perfil propio
-app.get('/api/usuarios/perfil', validateJWT, async (req, res) => {
+// GET /api/usuarios/me — cualquier usuario autenticado puede ver su propio perfil
+// IMPORTANTE: debe ir ANTES de /:id para que Express no lo capture como id="me"
+app.get('/api/usuarios/me', validateJWT, async (req, res) => {
+    console.log('[Gateway] GET /api/usuarios/me — email:', req.user.email);
     try {
-        const response = await axios.get(`${BACKEND_URL}/api/usuarios/perfil`, {
-            headers: { 'x-user-email': req.user.email }
-        });
-        res.json(response.data);
+        const response = await axios.get(`${BACKEND_URL}/api/usuarios`);
+        const todos = response.data?.data || [];
+        const usuario = todos.find(u => u.email === req.user.email);
+        if (!usuario) {
+            console.warn('[Gateway] /me — email no encontrado en BD:', req.user.email);
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+        console.log('[Gateway] /me — usuario encontrado, id:', usuario.id);
+        res.json({ success: true, data: usuario });
     } catch (err) {
-        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al obtener perfil' });
+        console.error('[Gateway] Error en GET /me:', err.message);
+        res.status(500).json({ error: 'Error al obtener perfil' });
     }
 });
-
-// PUT /api/usuarios/perfil - Actualizar perfil propio
-app.put('/api/usuarios/perfil', validateJWT, async (req, res) => {
-    try {
-        const response = await axios.put(`${BACKEND_URL}/api/usuarios/perfil`, req.body, {
-            headers: { 'x-user-email': req.user.email }
-        });
-        res.json(response.data);
-    } catch (err) {
-        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar perfil' });
-    }
-});
-
-/* ================= USUARIOS (solo admin) ================= */
 
 app.get('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
     try {
@@ -256,9 +250,27 @@ app.post('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
     }
 });
 
-app.put('/api/usuarios/:id', validateJWT, requireAdmin, async (req, res) => {
+// PUT /api/usuarios/:id — el propio usuario puede editarse; admin puede editar a cualquiera
+app.put('/api/usuarios/:id', validateJWT, async (req, res) => {
+    const idObjetivo = parseInt(req.params.id);
+    console.log(`[Gateway] PUT /api/usuarios/${idObjetivo} — solicitante: ${req.user.email} (rol: ${req.user.role})`);
+
+    if (req.user.role !== 'admin') {
+        try {
+            const lista = await axios.get(`${BACKEND_URL}/api/usuarios`);
+            const yo = (lista.data?.data || []).find(u => u.email === req.user.email);
+            if (!yo || Number(yo.id) !== Number(idObjetivo)) {
+                console.warn(`[Gateway] PUT denegado: ${req.user.email} intentó editar id:${idObjetivo}`);
+                return res.status(403).json({ success: false, message: 'No tienes permiso para editar este usuario' });
+            }
+        } catch {
+            return res.status(500).json({ error: 'Error al verificar identidad' });
+        }
+    }
+
     try {
         const response = await axios.put(`${BACKEND_URL}/api/usuarios/${req.params.id}`, req.body);
+        console.log(`[Gateway] PUT /api/usuarios/${idObjetivo} — OK`);
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar usuario' });

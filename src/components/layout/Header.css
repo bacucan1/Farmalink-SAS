@@ -138,6 +138,25 @@
   color: white;
 }
 
+/* PUNTO 5: enlace Mi Cuenta en la barra de navegación */
+.nav-mi-cuenta {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  transition: background 0.18s, color 0.18s;
+  white-space: nowrap;
+}
+
+.nav-mi-cuenta:hover,
+.nav-mi-cuenta.active {
+  background: rgba(11, 125, 184, 0.1);
+  color: var(--primary);
+}
+
 /* ── Mobile Menu Button ── */
 .mobile-menu-btn {
   display: none;
@@ -288,6 +307,9 @@
     margin-top: 0.5rem;
     padding-top: 0.5rem;
     border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .nav-cta {

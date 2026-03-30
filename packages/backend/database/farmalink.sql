@@ -125,7 +125,8 @@ INSERT INTO usuarios (id, name, email, password, role, created_at) VALUES
     (4, 'Ana Martínez Torres', 'ana.martinez@farmalink.com', '$2a$10$xQZ8h9K3pL2mV1nW5xY0zO4jK8X5Y6Z7A8B9C0D1E2F3G4H5I6J7K8L', 'farmaceutico', '2024-01-10 09:15:00'),
     (5, 'Luis Fernando Gómez', 'admin@farmalink.com', '$2a$10$xQZ8h9K3pL2mV1nW5xY0zO4jK8X5Y6Z7A8B9C0D1E2F3G4H5I6J7K8L', 'admin', '2023-12-01 00:00:00'),
     (6, 'Laura Ramírez Castro', 'laura.ramirez@email.com', '$2a$10$xQZ8h9K3pL2mV1nW5xY0zO4jK8X5Y6Z7A8B9C0D1E2F3G4H5I6J7K8L', 'cliente', '2024-03-01 16:20:00'),
-    (7, 'Pedro Sánchez Molina', 'pedro.sanchez@farmalink.com', '$2a$10$xQZ8h9K3pL2mV1nW5xY0zO4jK8X5Y6Z7A8B9C0D1E2F3G4H5I6J7K8L', 'farmaceutico', '2024-02-15 11:30:00');
+    (7, 'Pedro Sánchez Molina', 'pedro.sanchez@farmalink.com', '$2a$10$xQZ8h9K3pL2mV1nW5xY0zO4jK8X5Y6Z7A8B9C0D1E2F3G4H5I6J7K8L', 'farmaceutico', '2024-02-15 11:30:00'),
+    (8, 'Usuario Demo', 'user@farmalink.com', '$2a$10$xQZ8h9K3pL2mV1nW5xY0zO4jK8X5Y6Z7A8B9C0D1E2F3G4H5I6J7K8L', 'cliente', '2024-01-01 00:00:00');
 
 -- --------------------------------------------------
 -- Farmacias

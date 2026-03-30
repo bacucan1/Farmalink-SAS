@@ -8,7 +8,6 @@ import {
 } from './MedicamentoDTO.js';
 
 export async function getAll(req: Request, res: Response): Promise<void> {
-  console.log('📥 Petición GET /api/medicamentos recibida');
   try {
     const { category, active, lab } = req.query;
     const pool = Database.getInstance().getPool();
@@ -46,7 +45,6 @@ export async function getAll(req: Request, res: Response): Promise<void> {
 
     const result = await pool.query(query, params);
 
-    console.log('✅ Medicamentos encontrados:', result.rows.length);
     res.json({ success: true, total: result.rows.length, data: result.rows });
   } catch (error) {
     console.error('❌ Error en GET /api/medicamentos:', error);
