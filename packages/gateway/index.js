@@ -201,6 +201,32 @@ app.get('/api/sugerencias', async (req, res) => {
     }
 });
 
+/* ================= PERFIL DE USUARIO (usuario autenticado) ================= */
+
+// GET /api/usuarios/perfil - Obtener perfil propio
+app.get('/api/usuarios/perfil', validateJWT, async (req, res) => {
+    try {
+        const response = await axios.get(`${BACKEND_URL}/api/usuarios/perfil`, {
+            headers: { 'x-user-email': req.user.email }
+        });
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al obtener perfil' });
+    }
+});
+
+// PUT /api/usuarios/perfil - Actualizar perfil propio
+app.put('/api/usuarios/perfil', validateJWT, async (req, res) => {
+    try {
+        const response = await axios.put(`${BACKEND_URL}/api/usuarios/perfil`, req.body, {
+            headers: { 'x-user-email': req.user.email }
+        });
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar perfil' });
+    }
+});
+
 /* ================= USUARIOS (solo admin) ================= */
 
 app.get('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
