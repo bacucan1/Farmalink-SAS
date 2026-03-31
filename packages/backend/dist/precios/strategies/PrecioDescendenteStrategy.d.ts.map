@@ -1,0 +1,1 @@
+{"version":3,"file":"PrecioDescendenteStrategy.d.ts","sourceRoot":"","sources":["../../../precios/strategies/PrecioDescendenteStrategy.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,UAAU,EAAE,MAAM,qBAAqB,CAAC;AAEjE;;;;GAIG;AACH,qBAAa,yBAA0B,YAAW,cAAc;IAC9D,MAAM,SAAwB;IAE9B,OAAO,CAAC,OAAO,EAAE,UAAU,EAAE,GAAG,UAAU,EAAE;CAG7C"}

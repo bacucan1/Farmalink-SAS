@@ -1,0 +1,1 @@
+{"version":3,"file":"IPrecioHistorial.d.ts","sourceRoot":"","sources":["../../models/IPrecioHistorial.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,gBAAgB;IAC/B,EAAE,EAAE,MAAM,CAAC;IACX,SAAS,EAAE,MAAM,CAAC;IAClB,cAAc,EAAE,MAAM,CAAC;IACvB,WAAW,EAAE,MAAM,CAAC;IACpB,eAAe,EAAE,MAAM,CAAC;IACxB,YAAY,EAAE,MAAM,CAAC;IACrB,YAAY,EAAE,IAAI,CAAC;CACpB"}

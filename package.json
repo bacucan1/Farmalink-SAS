@@ -1,0 +1,10 @@
+{
+  "name": "farmalink-sas",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "cd src && npm run dev",
+    "build": "npm run --prefix src build",
+    "preview": "npm run --prefix src preview"
+  }
+}

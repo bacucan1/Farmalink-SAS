@@ -1,0 +1,53 @@
+services:
+  # Backend API
+  - type: web
+    name: farmalink-backend
+    env: node
+    region: oregon
+    rootDir: packages/backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+
+  # Gateway
+  - type: web
+    name: farmalink-gateway
+    env: node
+    region: oregon
+    rootDir: packages/gateway
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: farmalink-backend
+          envVarKey: RENDER_EXTERNAL_URL
+
+  # Frontend
+  - type: web
+    name: farmalink-frontend
+    env: static
+    rootDir: src
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: farmalink-gateway
+          envVarKey: RENDER_EXTERNAL_URL

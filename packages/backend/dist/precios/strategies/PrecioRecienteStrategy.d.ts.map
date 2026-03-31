@@ -1,0 +1,1 @@
+{"version":3,"file":"PrecioRecienteStrategy.d.ts","sourceRoot":"","sources":["../../../precios/strategies/PrecioRecienteStrategy.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,UAAU,EAAE,MAAM,qBAAqB,CAAC;AAEjE;;;;GAIG;AACH,qBAAa,sBAAuB,YAAW,cAAc;IAC3D,MAAM,SAAqB;IAE3B,OAAO,CAAC,OAAO,EAAE,UAAU,EAAE,GAAG,UAAU,EAAE;CAK7C"}
