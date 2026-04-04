@@ -242,8 +242,16 @@ export function FiltrosBusqueda({ query, onSelect }: FiltrosBusquedaProps) {
     setFiltros(FILTROS_VACIOS);
     setErrores({});
     setPage(1);
-    setResultados([]);
-    setBuscado(false);
+    const q = queryRef.current?.trim() ?? '';
+    // Mantener la búsqueda activa: volver a consultar sin filtros en lugar de borrar resultados.
+    if (q.length >= 2) {
+      buscar(FILTROS_VACIOS, 1);
+    } else {
+      setResultados([]);
+      setTotal(0);
+      setTotalPaginas(1);
+      setBuscado(false);
+    }
     addToast('Filtros eliminados.', 'info', 2000);
   };
 

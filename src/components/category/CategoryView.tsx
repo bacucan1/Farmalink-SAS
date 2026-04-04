@@ -207,7 +207,7 @@ export function CategoryView({ categoriaInicial, onSelect, onGoHome }: CategoryV
                         {med.categoria_nombre || med.category || 'Sin categoría'}
                       </span>
                       <h3 className="catview__card-name">{med.name}</h3>
-                      <p className="catview__card-lab">🏭 {med.lab}</p>
+                      <p className="catview__card-lab"> {med.lab}</p>
                       {med.description && (
                         <p className="catview__card-desc">{med.description}</p>
                       )}

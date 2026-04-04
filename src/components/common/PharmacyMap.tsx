@@ -388,7 +388,7 @@ export const PharmacyMap: React.FC<MapProps> = ({ onPharmacySelect, filterPharma
         <div className="legend-grid-horizontal">
           <div className="legend-item">
             <span className="legend-color" style={{ background: '#0B7DB8' }}></span>
-            <span>🏠 Tu ubicación</span>
+            <span> Tu ubicación</span>
           </div>
           <div className="legend-item">
             <span className="legend-color" style={{ background: '#66B82E' }}></span>
@@ -436,7 +436,7 @@ export const PharmacyMap: React.FC<MapProps> = ({ onPharmacySelect, filterPharma
                     </div>
                     <div className="pharmacy-info-body">
                       <p><span className="info-icon" aria-hidden="true">•</span> {pharmacy.address}</p>
-                      <p><span className="info-icon">📞</span> {pharmacy.phone}</p>
+                      <p><span className="info-icon"></span> {pharmacy.phone}</p>
                     </div>
                     <div className="pharmacy-actions">
                       <button
@@ -557,7 +557,7 @@ export const PharmacyMap: React.FC<MapProps> = ({ onPharmacySelect, filterPharma
               <Popup className="user-location-popup" closeButton={false}>
                 <div className="user-popup-content">
                   <div className="user-popup-header">
-                    <span className="user-home-icon">🏠</span>
+                    <span className="user-home-icon"></span>
                     <strong>Tu Ubicación</strong>
                   </div>
                   <p className="user-popup-status">Estás aquí actualmente</p>
@@ -594,7 +594,7 @@ export const PharmacyMap: React.FC<MapProps> = ({ onPharmacySelect, filterPharma
                     <h4 className="popup-title">{pharmacy.name}</h4>
                     <div className="popup-details">
                       <p><span className="icon" aria-hidden="true">•</span> {pharmacy.address}</p>
-                      <p><span className="icon">📞</span> {pharmacy.phone}</p>
+                      <p><span className="icon"></span> {pharmacy.phone}</p>
                     </div>
                     <button
                       className="popup-route-btn"
@@ -602,7 +602,7 @@ export const PharmacyMap: React.FC<MapProps> = ({ onPharmacySelect, filterPharma
                         handleTriggerRoute(pharmacy, e);
                       }}
                     >
-                      {routeCoords && activePharmacy?.id === pharmacy.id ? '🗺️ Actualizar' : '🗺️ Trazar Ruta Ahora'}
+                      {routeCoords && activePharmacy?.id === pharmacy.id ? ' Actualizar' : ' Trazar Ruta Ahora'}
                     </button>
                   </div>
                 </Popup>

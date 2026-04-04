@@ -32,20 +32,20 @@ export function Footer({ onNavigate }: FooterProps) {
                 para los ciudadanos de Bogotá.
               </p>
               <div className="footer-tagline">
-                <span className="footer-tagline-icon" aria-hidden="true">•</span>
+                <span className="footer-tagline-icon" aria-hidden="true"></span>
                 Encuentra. Compara. Ahorra.
               </div>
               {/* Redes sociales / badges */}
               <div className="footer-badges">
                 <span className="footer-badge footer-badge--green">Datos Seguros</span>
-                <span className="footer-badge footer-badge--blue">⚡ Tiempo Real</span>
+                <span className="footer-badge footer-badge--blue"> Tiempo Real</span>
               </div>
             </div>
 
             {/* ── Columna Navegación ── */}
             <div className="footer-col">
               <h4 className="footer-col-title">
-                <span className="footer-col-icon">🧭</span>
+                <span className="footer-col-icon"></span>
                 Navegación
               </h4>
               <ul className="footer-links">
@@ -80,29 +80,29 @@ export function Footer({ onNavigate }: FooterProps) {
             {/* ── Columna Contacto ── */}
             <div className="footer-col">
               <h4 className="footer-col-title">
-                <span className="footer-col-icon">📬</span>
+                <span className="footer-col-icon"></span>
                 Contacto
               </h4>
               <ul className="footer-contact-list">
                 <li className="footer-contact-item">
-                  <span className="footer-contact-icon" aria-hidden="true">•</span>
+                  <span className="footer-contact-icon" aria-hidden="true"></span>
                   <div>
                     <strong>Ubicación</strong>
                     <span>Bogotá, Colombia</span>
                   </div>
                 </li>
                 <li className="footer-contact-item">
-                  <span className="footer-contact-icon">✉️</span>
+                  <span className="footer-contact-icon"></span>
                   <div>
                     <strong>Email</strong>
                     <span>contacto@farmalink.co</span>
                   </div>
                 </li>
                 <li className="footer-contact-item">
-                  <span className="footer-contact-icon">📞</span>
+                  <span className="footer-contact-icon"></span>
                   <div>
                     <strong>Soporte</strong>
-                    <span>Lun–Vie 8am–6pm</span>
+                    <span>Lunes a Viernes 8am – 6pm</span>
                   </div>
                 </li>
               </ul>
@@ -111,7 +111,7 @@ export function Footer({ onNavigate }: FooterProps) {
             {/* ── Columna Tech Stack ── */}
             <div className="footer-col">
               <h4 className="footer-col-title">
-                <span className="footer-col-icon" aria-hidden="true">•</span>
+                <span className="footer-col-icon" aria-hidden="true"></span>
                 Tecnología
               </h4>
               <ul className="footer-tech-list">
@@ -156,7 +156,7 @@ export function Footer({ onNavigate }: FooterProps) {
             </span>
             <span className="footer-divider-dot">·</span>
             <span className="footer-made">
-              Hecho con <span className="footer-heart">❤️</span> por el equipo FarmaLink
+              Hecho <span className="footer-heart"></span> por el equipo FarmaLink
             </span>
           </div>
         </div>

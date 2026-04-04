@@ -720,6 +720,21 @@ html.dark-mode .pd-specs {
 html.dark-mode .pd-spec-label { color: #6b7280; }
 html.dark-mode .pd-spec-value { color: #f9fafb; }
 
+/* Pastilla "búsqueda avanzada": el valor hereda texto claro sobre fondo violeta claro — sin contraste */
+html.dark-mode .pd-spec-value.pd-strategy {
+  background: rgba(139, 92, 246, 0.28);
+  color: #ede9fe;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+}
+
+/* "Disponible en N farmacias" seguía en gris oscuro (#374151) sobre card oscura */
+html.dark-mode .pd-availability {
+  color: #cbd5e1;
+}
+html.dark-mode .pd-availability strong {
+  color: #f9fafb;
+}
+
 html.dark-mode .pd-desc-block {
   background: #111827;
   border-left-color: var(--primary);

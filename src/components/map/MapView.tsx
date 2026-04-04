@@ -33,13 +33,13 @@ export function MapView() {
               Geolocalización en tiempo real
             </div>
             <div className="map-pill">
-              <span>🗺️</span> Rutas puerta a puerta
+              <span></span> Rutas puerta a puerta
             </div>
             <div className="map-pill">
-              <span>🚗</span> Auto · Bus · A pie
+              <span></span> Auto · Bus · A pie
             </div>
             <div className="map-pill">
-              <span>⏱️</span> Tiempo de llegada estimado
+              <span></span> Tiempo de llegada estimado
             </div>
           </div>
         </div>
