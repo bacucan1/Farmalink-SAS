@@ -406,8 +406,8 @@ app.get('/api/busqueda/filtros', async (req, res) => {
 
 
 
-// Historial de precios: GET /api/precios/historial/:medicamentoId
-app.get('/api/precios/historial/:medicamentoId', validateJWT, async (req, res) => {
+// Historial de precios: GET /api/precios/historial/:medicamentoId (público)
+app.get('/api/precios/historial/:medicamentoId', async (req, res) => {
     try {
         const { medicamentoId } = req.params;
         const response = await axios.get(`${BACKEND_URL}/api/precios/historial/${medicamentoId}`);

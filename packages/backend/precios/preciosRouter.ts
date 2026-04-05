@@ -312,7 +312,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 
 // ── Historial de precios (para gráfica tipo Keepa) ───────────────────────────
 
-router.get('/historial/:medicamentoId', requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.get('/historial/:medicamentoId', async (req: Request, res: Response): Promise<void> => {
   try {
     const { medicamentoId } = req.params;
     const pool = Database.getInstance().getPool();
