@@ -201,6 +201,16 @@ app.get('/api/dashboard', validateJWT, async (req, res) => {
     }
 });
 
+// Home público - datos mínimos sin autenticación
+app.get('/api/home', async (req, res) => {
+    try {
+        const response = await axios.get(`${BACKEND_URL}/api/home`);
+        res.json(response.data);
+    } catch {
+        res.json({ success: true, farmCount: 0, categorias: [] });
+    }
+});
+
 // Sugerencias (búsqueda de medicamentos)
 app.get('/api/sugerencias', async (req, res) => {
     try {

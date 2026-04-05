@@ -1,21 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DashboardData } from '../types';
 
-/**
- * Configuración del API
- */
 const GATEWAY = (import.meta as any).env?.VITE_API_URL || '';
+const TOKEN_KEY = 'token';
 
-const TOKEN_KEY = 'token'; // Unified with Login.tsx storage key
+function isAuthenticated(): boolean {
+  const token = localStorage.getItem(TOKEN_KEY);
+  return !!(token && token !== 'undefined' && token.trim().length > 10);
+}
 
-/**
- * Obtiene el token de autenticación
- * Si no existe, realiza login automático
- * @returns {Promise<string>} Token de autenticación
- */
 async function getToken(): Promise<string> {
   let token = localStorage.getItem(TOKEN_KEY);
-  // Si quedó "undefined" guardado por un login fallido anterior, hay que reintentar.
   if (!token || token === 'undefined' || token.trim().length < 10) {
     const res = await fetch(`${GATEWAY}/api/auth/login`, {
       method: 'POST',
@@ -32,10 +27,6 @@ async function getToken(): Promise<string> {
   return token!;
 }
 
-/**
- * Hook personalizado para manejar datos del dashboard
- * @returns {Object} Estado y funciones del hook
- */
 export function useDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,32 +36,39 @@ export function useDashboard() {
     setLoading(true);
     setError(null);
     
+    const auth = isAuthenticated();
+    const endpoint = auth ? '/api/dashboard' : '/api/home';
+    const isProtected = auth;
+    
     try {
-      const token = await getToken();
-      const res = await fetch(`${GATEWAY}/api/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (!res.ok) {
-        // Si el token es inválido (por ejemplo, quedó como "undefined"), reintentar con un login nuevo.
-        if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem(TOKEN_KEY);
-          const token2 = await getToken();
-          const res2 = await fetch(`${GATEWAY}/api/dashboard`, {
-            headers: { Authorization: `Bearer ${token2}` }
-          });
-          if (!res2.ok) {
-            throw new Error('Error fetching data');
+      if (isProtected) {
+        const token = await getToken();
+        const res = await fetch(`${GATEWAY}${endpoint}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem(TOKEN_KEY);
+            const token2 = await getToken();
+            const res2 = await fetch(`${GATEWAY}/api/dashboard`, {
+              headers: { Authorization: `Bearer ${token2}` }
+            });
+            if (!res2.ok) throw new Error('Error fetching data');
+            const d = await res2.json();
+            setData(d);
+            return;
           }
-          const dashboardData2 = await res2.json();
-          setData(dashboardData2);
-          return;
+          throw new Error('Error fetching data');
         }
-        throw new Error('Error fetching data');
+        const d = await res.json();
+        setData(d);
+      } else {
+        const res = await fetch(`${GATEWAY}${endpoint}`);
+        if (!res.ok) throw new Error('Error fetching data');
+        const d = await res.json();
+        setData(d);
       }
-      
-      const dashboardData = await res.json();
-      setData(dashboardData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
