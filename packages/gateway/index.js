@@ -128,7 +128,7 @@ app.get('/api/farmacias/cercanas', async (req, res) => {
     }
 });
 
-app.get('/api/farmacias', validateJWT, async (req, res) => {
+app.get('/api/farmacias', async (req, res) => {
     try {
         const response = await axios.get(`${BACKEND_URL}/api/farmacias`);
         res.json(response.data);
