@@ -5,6 +5,7 @@ import { verifyPassword } from '../shared/password.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecreto';
+console.log('[AuthRouter] JWT_SECRET loaded:', JWT_SECRET ? 'YES (length: ' + JWT_SECRET.length + ')' : 'NO');
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;

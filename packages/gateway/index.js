@@ -5,9 +5,12 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecreto';
+
+console.log('[Gateway] JWT_SECRET loaded:', JWT_SECRET ? 'YES (length: ' + JWT_SECRET.length + ')' : 'NO');
+console.log('[Gateway] BACKEND_URL:', BACKEND_URL);
 
 app.use(cors());
 app.use(express.json());
@@ -20,13 +23,16 @@ app.get('/health', (_req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
     try {
+        console.log('[Gateway] Login - requesting:', BACKEND_URL + '/api/auth/login');
         const response = await axios.post(`${BACKEND_URL}/api/auth/login`, req.body);
         const d = response.data;
+        console.log('[Gateway] Login response - token present:', !!d.token, 'user present:', !!d.user);
         if (d.token && d.user) {
             return res.json({ token: d.token, user: d.user });
         }
         res.json(d);
     } catch (err) {
+        console.log('[Gateway] Login error:', err.response?.status, err.response?.data);
         const status = err.response?.status || 401;
         const data = err.response?.data || { message: 'Error de autenticación' };
         res.status(status).json(data);
@@ -56,13 +62,17 @@ app.post('/api/auth/register', async (req, res) => {
 
 function validateJWT(req, res, next) {
     const authHeader = req.headers.authorization;
+    console.log('[Gateway] validateJWT - authHeader:', authHeader ? 'present' : 'missing');
     if (!authHeader) return res.status(401).json({ message: 'Token requerido' });
     const token = authHeader.split(' ')[1];
+    console.log('[Gateway] validateJWT - token length:', token?.length);
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('[Gateway] validateJWT - decoded:', decoded);
         req.user = decoded;
         next();
-    } catch {
+    } catch (err) {
+        console.log('[Gateway] validateJWT - error:', err.message);
         return res.status(403).json({ message: 'Token inválido' });
     }
 }
