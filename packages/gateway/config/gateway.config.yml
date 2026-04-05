@@ -10,7 +10,7 @@ apiEndpoints:
       - '/api/*'
 serviceEndpoints:
   backend:
-    url: 'https://farmalink-backend.onrender.com'
+    url: ${BACKEND_URL}
 policies:
   - proxy
 pipelines:
