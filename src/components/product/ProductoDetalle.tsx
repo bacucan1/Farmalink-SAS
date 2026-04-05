@@ -576,10 +576,120 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
   const [imgTried, setImgTried] = useState<'png' | 'jpg' | 'placeholder'>('png');
   const [selectedFarmacia, setSelectedFarmacia] = useState<PrecioFarmacia | null>(null);
 
+  // States para Formulario de Precios
+  const [showPriceForm, setShowPriceForm] = useState(false);
+  const [farmaciasList, setFarmaciasList] = useState<{id: string|number, name: string}[]>([]);
+  const [loadingFarmacias, setLoadingFarmacias] = useState(false);
+  const [formFarmaciaId, setFormFarmaciaId] = useState('');
+  const [formPrecio, setFormPrecio] = useState('');
+  const [savingPrice, setSavingPrice] = useState(false);
+  const isAdmin = !!localStorage.getItem('token');
+
   const { addToast } = useToast();
   const category = getCategory(medicamento);
   const catColor = getCategoryColor(category);
   const farmaciaIds = precios.map(p => Number(p.farmaciaId)).filter(n => !isNaN(n) && n > 0);
+
+  const loadFarmacias = async () => {
+    if (farmaciasList.length > 0) return;
+    setLoadingFarmacias(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${GATEWAY}/api/farmacias`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const lista = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+        setFarmaciasList(lista);
+      }
+    } catch {
+      addToast('Error cargando lista de farmacias', 'error');
+    } finally {
+      setLoadingFarmacias(false);
+    }
+  };
+
+  const handleTogglePriceForm = () => {
+    setShowPriceForm(v => {
+      const next = !v;
+      if (next) loadFarmacias();
+      return next;
+    });
+  };
+
+  const handleSavePrice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formFarmaciaId || !formPrecio) {
+      addToast('Completa todos los campos obligatorios.', 'error');
+      return;
+    }
+    const precioNum = Number(formPrecio);
+    if (isNaN(precioNum) || precioNum <= 0) {
+      addToast('El precio debe ser un número válido mayor a 0.', 'error');
+      return;
+    }
+
+    // Priorizar medicamento.id (número), si no existe usar _id convertido a número
+    const medId = medicamento.id ?? Number(medicamento._id);
+    if (!medId || isNaN(Number(medId))) {
+      addToast('No se pudo identificar el medicamento correctamente.', 'error');
+      return;
+    }
+    
+    setSavingPrice(true);
+    try {
+      const token = localStorage.getItem('token');
+      const payload = {
+        medicamento_id: Number(medId),
+        farmacia_id: Number(formFarmaciaId),
+        precio: precioNum
+      };
+      const res = await fetch(`${GATEWAY}/api/precios`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const farName = farmaciasList.find(f => String(f.id) === formFarmaciaId)?.name || 'Farmacia';
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        addToast(errData?.message || 'Error al guardar el precio en el servidor.', 'error');
+      } else {
+        addToast('Precio guardado correctamente.', 'success');
+        
+        // Actualización reactiva local (solo si el servidor respondió bien)
+        setPrecios(prev => {
+          const next = [...prev];
+          const existIdx = next.findIndex(p => p.farmaciaId === formFarmaciaId);
+          const nuevoPrecio = {
+            farmaciaId: formFarmaciaId,
+            farmaciaNombre: farName,
+            farmaciaAddress: '',
+            precio: precioNum,
+            fecha: new Date().toISOString()
+          };
+          if (existIdx >= 0) {
+            next[existIdx] = nuevoPrecio;
+          } else {
+            next.push(nuevoPrecio);
+          }
+          return next;
+        });
+        
+        setFormPrecio('');
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Error al conectar con el servidor.', 'error');
+    } finally {
+      setSavingPrice(false);
+    }
+  };
 
   const handleImgError = () => {
     if (imgTried === 'png') {
@@ -873,6 +983,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
             </button>
           )}
         </div>
+
 
         {loadingPrecios && (
           <div className="pd-skeletons">{[1, 2, 3].map(i => <div key={i} className="pd-skel" />)}</div>

@@ -79,7 +79,7 @@ async function getToken(): Promise<string> {
 }
 
 export function AdminMedicamentos() {
-  const [activeTab, setActiveTab] = useState<'medicamentos' | 'farmacias' | 'usuarios'>('medicamentos');
+  const [activeTab, setActiveTab] = useState<'medicamentos' | 'farmacias' | 'usuarios' | 'precios'>('medicamentos');
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [farmacias, setFarmacias] = useState<Farmacia[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -117,6 +117,12 @@ export function AdminMedicamentos() {
 
   // Filtro
   const [filtro, setFiltro] = useState('');
+
+  // Formulario de edición de precios
+  const [precioMedId, setPrecioMedId] = useState('');
+  const [precioFarId, setPrecioFarId] = useState('');
+  const [precioValor, setPrecioValor] = useState('');
+  const [savingPrecio, setSavingPrecio] = useState(false);
 
   // PUNTO 4: helpers para tooltips de prevención de error
   function mostrarTooltipCampo(setter: (v: boolean) => void, ref: { current: ReturnType<typeof setTimeout> | null }) {
@@ -418,19 +424,25 @@ export function AdminMedicamentos() {
           </p>
         </div>
         <div className="admin-tabs">
-          <button 
+          <button
             className={`admin-tab ${activeTab === 'medicamentos' ? 'active' : ''}`}
             onClick={() => setActiveTab('medicamentos')}
           >
             💊 Medicamentos
           </button>
-          <button 
+          <button
+            className={`admin-tab admin-tab--prices ${activeTab === 'precios' ? 'active' : ''}`}
+            onClick={() => setActiveTab('precios')}
+          >
+            ✏️ Editar
+          </button>
+          <button
             className={`admin-tab ${activeTab === 'farmacias' ? 'active' : ''}`}
             onClick={() => setActiveTab('farmacias')}
           >
             🏥 Farmacias
           </button>
-          <button 
+          <button
             className={`admin-tab ${activeTab === 'usuarios' ? 'active' : ''}`}
             onClick={() => setActiveTab('usuarios')}
           >
@@ -439,7 +451,7 @@ export function AdminMedicamentos() {
         </div>
       </div>
 
-      {activeTab !== 'usuarios' && (
+      {activeTab !== 'usuarios' && activeTab !== 'precios' && (
         <div className="admin-header-actions">
           {activeTab === 'medicamentos' ? (
             <button className="btn-nuevo" onClick={abrirCrear}>+ Nuevo Medicamento</button>
@@ -452,7 +464,7 @@ export function AdminMedicamentos() {
       {error && <div className="admin-error">{error}</div>}
       {successMsg && <div className="admin-success">{successMsg}</div>}
 
-      {activeTab !== 'usuarios' && (
+      {activeTab !== 'usuarios' && activeTab !== 'precios' && (
         <input
           className="admin-filtro"
           placeholder={activeTab === 'medicamentos'
@@ -464,6 +476,87 @@ export function AdminMedicamentos() {
       )}
 
       {activeTab === 'usuarios' && <AdminUsuarios />}
+
+      {activeTab === 'precios' && (
+        <div className="admin-precios-panel">
+          <p className="admin-precios-desc">Selecciona un medicamento y una farmacia para registrar o actualizar su precio.</p>
+          <form
+            className="admin-precios-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const precioNum = Number(precioValor);
+              if (!precioMedId || !precioFarId || !precioValor || isNaN(precioNum) || precioNum <= 0) {
+                addToast('Completa todos los campos con valores válidos.', 'error');
+                return;
+              }
+              setSavingPrecio(true);
+              try {
+                const token = await getToken();
+                const res = await fetch(`${GATEWAY}/api/precios`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                  body: JSON.stringify({
+                    medicamento_id: Number(precioMedId),
+                    farmacia_id: Number(precioFarId),
+                    precio: precioNum,
+                  }),
+                });
+                if (res.ok) {
+                  addToast('Precio guardado correctamente.', 'success');
+                  setPrecioValor('');
+                } else {
+                  const err = await res.json().catch(() => ({}));
+                  addToast(err?.message || 'Error al guardar el precio.', 'error');
+                }
+              } catch {
+                addToast('Error de conexión.', 'error');
+              } finally {
+                setSavingPrecio(false);
+              }
+            }}
+          >
+            <div className="admin-precios-field">
+              <label>Medicamento *</label>
+              <select value={precioMedId} onChange={e => setPrecioMedId(e.target.value)}>
+                <option value="">— Seleccionar medicamento —</option>
+                {medicamentos.map(m => (
+                  <option key={m.id ?? m._id} value={m.id ?? m._id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-precios-field">
+              <label>Farmacia *</label>
+              <select value={precioFarId} onChange={e => setPrecioFarId(e.target.value)}>
+                <option value="">— Seleccionar farmacia —</option>
+                {farmacias.map(f => (
+                  <option key={f.id ?? f._id} value={f.id ?? f._id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-precios-field">
+              <label>Precio (COP) *</label>
+              <div className="admin-precios-price-wrap">
+                <span className="admin-precios-currency">$</span>
+                <input
+                  type="number"
+                  value={precioValor}
+                  onChange={e => setPrecioValor(e.target.value)}
+                  placeholder="Ej. 15000"
+                  min="1"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="admin-precios-btn-save"
+              disabled={savingPrecio || !precioMedId || !precioFarId || !precioValor}
+            >
+              {savingPrecio ? 'Guardando...' : 'Guardar precio'}
+            </button>
+          </form>
+          <p className="admin-precios-hint">ℹ️ Si ya existe un precio para esa farmacia, se actualizará automáticamente.</p>
+        </div>
+      )}
 
       {activeTab === 'medicamentos' && (
         <>

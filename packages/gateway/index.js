@@ -125,6 +125,19 @@ app.get('/api/precios', validateJWT, async (req, res) => {
     } catch { res.status(500).json({ error: 'Error en backend precios' }); }
 });
 
+app.post('/api/precios', validateJWT, async (req, res) => {
+    try {
+        const response = await axios.post(`${BACKEND_URL}/api/precios`, req.body, {
+            headers: {
+                'x-user-email': req.user?.email || 'sistema'
+            }
+        });
+        res.status(response?.status || 201).json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al procesar precio' });
+    }
+});
+
 // Comparar precios: GET /api/precios/comparar/:medicamentoId?orden=asc|desc|reciente
 app.get('/api/precios/comparar/:medicamentoId', validateJWT, async (req, res) => {
     try {
