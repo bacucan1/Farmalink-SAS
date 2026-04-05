@@ -160,6 +160,10 @@ function App() {
             data={data}
             onSearchClick={() => goView('buscar')}
             onDashboardClick={() => {
+              if (!isAuthenticated) {
+                goView('login');
+                return;
+              }
               goView('dashboard');
               setDashboardTab('farmacias');
             }}

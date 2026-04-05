@@ -49,7 +49,7 @@ export async function getAll(req: Request, res: Response): Promise<void> {
 
     res.json({ success: true, total: result.rows.length, data: result.rows });
   } catch (error) {
-    console.error('❌ Error en GET /api/medicamentos:', error);
+    console.error(' Error en GET /api/medicamentos:', error);
     res.status(500).json({ success: false, message: 'Error al obtener medicamentos', error });
   }
 }

@@ -635,6 +635,142 @@
   font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 50px;
 }
 
+/* ── Acciones del header de precios ── */
+.pd-prices-hd-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Botón "Editar" admin */
+.pd-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.pd-edit-btn:hover {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+.pd-edit-btn--active {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+  box-shadow: 0 0 0 3px rgba(252,211,77,0.25);
+}
+
+/* Panel del formulario de admin (desplegable bajo el header) */
+.pd-admin-price-panel {
+  margin: 0 22px 14px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  padding: 14px 16px 16px;
+}
+
+.pd-admin-panel-label {
+  margin: 0 0 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pd-price-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.pd-price-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pd-price-form-group label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pd-price-form-group select,
+.pd-price-form-group input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  font-size: 0.88rem;
+  font-family: inherit;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pd-price-form-group select:focus,
+.pd-price-form-group input:focus {
+  border-color: #0B7DB8;
+  box-shadow: 0 0 0 3px rgba(11,125,184,0.15);
+}
+
+.pd-price-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pd-price-currency {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.pd-price-input-wrap input {
+  padding-left: 26px;
+  width: 100%;
+}
+
+.pd-price-btn-save {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #0B7DB8;
+  color: white;
+  border: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  height: 40px;
+}
+.pd-price-btn-save:hover {
+  background: #08669b;
+  box-shadow: 0 4px 12px rgba(11,125,184,0.3);
+}
+.pd-price-btn-save:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 /* ══════════════════════════════
    RESPONSIVE
    ══════════════════════════════ */
@@ -648,6 +784,24 @@
 }
 
 @media (max-width: 640px) {
+  .pd-price-form {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-prices-hd {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .pd-prices-hd-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .pd-admin-price-panel {
+    margin: 0 14px 12px;
+  }
+
   .history-stats {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -776,4 +930,17 @@ html.dark-mode .pd-action-btn.pd-chart-btn {
 html.dark-mode .pd-skel {
   background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
   background-size: 200% 100%;
+}
+
+html.dark-mode .pd-admin-price-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+}
+html.dark-mode .pd-admin-toggle-btn { color: #cbd5e1; }
+html.dark-mode .pd-admin-toggle-btn:hover { background: #334155; color: #f1f5f9; }
+html.dark-mode .pd-price-form-group select,
+html.dark-mode .pd-price-form-group input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
 }

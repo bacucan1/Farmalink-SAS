@@ -107,6 +107,56 @@ html.dark-mode .admin-table tbody tr:nth-child(even) td {
   background: rgba(55,65,81,0.4);
 }
 
+/* Panel "Editar" — registro/actualización de precios (tab Editar) */
+html.dark-mode .admin-precios-panel {
+  background: #1f2937;
+  border-color: #374151;
+  color-scheme: dark;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+html.dark-mode .admin-precios-desc {
+  color: #d1d5db;
+}
+
+html.dark-mode .admin-precios-field label {
+  color: #e5e7eb;
+}
+
+html.dark-mode .admin-precios-field select,
+html.dark-mode .admin-precios-field input {
+  background: #111827;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+html.dark-mode .admin-precios-field select:focus,
+html.dark-mode .admin-precios-field input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.22);
+  background: #111827;
+}
+
+html.dark-mode .admin-precios-currency {
+  color: #9ca3af;
+}
+
+html.dark-mode .admin-precios-btn-save:hover {
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+html.dark-mode .admin-precios-btn-save:disabled {
+  background: #4b5563;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+html.dark-mode .admin-precios-hint {
+  color: #9ca3af;
+  opacity: 1;
+}
+
 /* Badges de rol */
 html.dark-mode .badge-admin {
   background: rgba(251,191,36,0.15);

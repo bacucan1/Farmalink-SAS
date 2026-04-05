@@ -189,30 +189,59 @@ router.patch('/:id', async (req, res) => {
 });
 router.post('/', async (req, res) => {
     try {
-        const { medicamento_id, farmacia_id, precio } = req.body;
+        const { medicamento_id, farmacia_id, precio, userEmail } = req.body;
         if (!medicamento_id || !farmacia_id || precio === undefined) {
             res.status(400).json({ success: false, message: 'medicamento_id, farmacia_id y precio son requeridos' });
             return;
         }
+        const medIdNum = parseInt(String(medicamento_id), 10);
+        const farIdNum = parseInt(String(farmacia_id), 10);
+        const precioNum = Math.round(Number(precio));
+        if (isNaN(medIdNum) || isNaN(farIdNum) || isNaN(precioNum) || precioNum <= 0) {
+            res.status(400).json({ success: false, message: 'Los valores de medicamento_id, farmacia_id y precio deben ser números válidos' });
+            return;
+        }
         const pool = Database.getInstance().getPool();
-        const medResult = await pool.query('SELECT id FROM medicamentos WHERE id = $1', [medicamento_id]);
+        const medResult = await pool.query('SELECT id FROM medicamentos WHERE id = $1', [medIdNum]);
         if (medResult.rows.length === 0) {
             res.status(404).json({ success: false, message: 'Medicamento no encontrado' });
             return;
         }
-        const farResult = await pool.query('SELECT id FROM farmacias WHERE id = $1', [farmacia_id]);
+        const farResult = await pool.query('SELECT id FROM farmacias WHERE id = $1', [farIdNum]);
         if (farResult.rows.length === 0) {
             res.status(404).json({ success: false, message: 'Farmacia no encontrada' });
             return;
         }
-        const result = await pool.query(`INSERT INTO precios (medicamento_id, farmacia_id, precio, fecha)
-       VALUES ($1, $2, $3, NOW())
-       RETURNING *`, [medicamento_id, farmacia_id, precio]);
-        res.status(201).json({ success: true, message: 'Precio creado', data: result.rows[0] });
+        const existingResult = await pool.query('SELECT id, precio FROM precios WHERE medicamento_id = $1 AND farmacia_id = $2', [medIdNum, farIdNum]);
+        const quienCambio = userEmail || req.headers['x-user-email'] || 'sistema';
+        if (existingResult.rows.length > 0) {
+            const current = existingResult.rows[0];
+            try {
+                await PrecioHistorialService.registrarCambio({
+                    precio_id: Number(current.id),
+                    medicamento_id: medIdNum,
+                    farmacia_id: farIdNum,
+                    precio_anterior: Math.round(Number(current.precio)),
+                    precio_nuevo: precioNum,
+                    quien_cambio: quienCambio,
+                });
+            }
+            catch (histErr) {
+                console.warn('[Precios] No se pudo registrar historial (no crítico):', histErr);
+            }
+            const result = await pool.query('UPDATE precios SET precio = $1, fecha = NOW() WHERE id = $2 RETURNING *', [precioNum, current.id]);
+            res.json({ success: true, message: 'Precio actualizado', data: result.rows[0] });
+        }
+        else {
+            const result = await pool.query(`INSERT INTO precios (medicamento_id, farmacia_id, precio, fecha)
+         VALUES ($1, $2, $3, NOW())
+         RETURNING *`, [medIdNum, farIdNum, precioNum]);
+            res.status(201).json({ success: true, message: 'Precio creado', data: result.rows[0] });
+        }
     }
     catch (error) {
-        console.error('[Precios] Error al crear precio:', error);
-        res.status(500).json({ success: false, message: 'Error al crear precio', error });
+        console.error('[Precios] Error al procesar precio:', error);
+        res.status(500).json({ success: false, message: 'Error al procesar precio', error });
     }
 });
 // ── Historial de precios (para gráfica tipo Keepa) ───────────────────────────
@@ -266,7 +295,8 @@ router.get('/historial/:medicamentoId', async (req, res) => {
             }
             // El primer punto de cada cambio usa precio_anterior si es la primera entrada de esa farmacia
             if (seriesMap[key].puntos.length === 0) {
-                seriesMap[key].puntos.push({ fecha: row.fecha_cambio, precio: row.precio_anterior });
+                const fechaAnte = new Date(new Date(row.fecha_cambio).getTime() - 1).toISOString();
+                seriesMap[key].puntos.push({ fecha: fechaAnte, precio: row.precio_anterior });
             }
             seriesMap[key].puntos.push({ fecha: row.fecha_cambio, precio: row.precio_nuevo });
         }

@@ -30,7 +30,6 @@ interface Medicamento {
   category?: string;
   categoria_id?: number;
   categoria_nombre?: string;
-  precio?: number;
   farmaciaId: Farmacia | string;
   farmacia_nombre?: string;
 }
@@ -64,11 +63,6 @@ const TOKEN_KEY = 'token';
 
 const GATEWAY = (import.meta as any).env?.VITE_API_URL || '';
 
-function formatPrice(v?: number | null): string {
-  if (v === undefined || v === null || Number.isNaN(v)) return '—';
-  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
-}
-
 async function getToken(): Promise<string> {
   let token = localStorage.getItem(TOKEN_KEY);
   if (!token) {
@@ -85,7 +79,7 @@ async function getToken(): Promise<string> {
 }
 
 export function AdminMedicamentos() {
-  const [activeTab, setActiveTab] = useState<'medicamentos' | 'farmacias' | 'usuarios'>('medicamentos');
+  const [activeTab, setActiveTab] = useState<'medicamentos' | 'farmacias' | 'usuarios' | 'precios'>('medicamentos');
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const [farmacias, setFarmacias] = useState<Farmacia[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -123,6 +117,12 @@ export function AdminMedicamentos() {
 
   // Filtro
   const [filtro, setFiltro] = useState('');
+
+  // Formulario de edición de precios
+  const [precioMedId, setPrecioMedId] = useState('');
+  const [precioFarId, setPrecioFarId] = useState('');
+  const [precioValor, setPrecioValor] = useState('');
+  const [savingPrecio, setSavingPrecio] = useState(false);
 
   // PUNTO 4: helpers para tooltips de prevención de error
   function mostrarTooltipCampo(setter: (v: boolean) => void, ref: { current: ReturnType<typeof setTimeout> | null }) {
@@ -272,7 +272,7 @@ export function AdminMedicamentos() {
       });
       setConfirmDelete(null);
       await loadAll();
-      showSuccess('Medicamento eliminado');
+      showSuccess('🗑️ Medicamento eliminado');
     } catch {
       setError('Error al eliminar');
       addToast('Error al eliminar el medicamento.', 'error');
@@ -365,7 +365,7 @@ export function AdminMedicamentos() {
       });
       setConfirmDeleteFarmacia(null);
       await loadAll();
-      showSuccess('Farmacia eliminada');
+      showSuccess('🗑️ Farmacia eliminada');
     } catch {
       setError('Error al eliminar');
       addToast('Error al eliminar la farmacia.', 'error');
@@ -424,19 +424,25 @@ export function AdminMedicamentos() {
           </p>
         </div>
         <div className="admin-tabs">
-          <button 
+          <button
             className={`admin-tab ${activeTab === 'medicamentos' ? 'active' : ''}`}
             onClick={() => setActiveTab('medicamentos')}
           >
             Medicamentos
           </button>
-          <button 
+          <button
+            className={`admin-tab ${activeTab === 'precios' ? 'active' : ''}`}
+            onClick={() => setActiveTab('precios')}
+          >
+            Editar
+          </button>
+          <button
             className={`admin-tab ${activeTab === 'farmacias' ? 'active' : ''}`}
             onClick={() => setActiveTab('farmacias')}
           >
             Farmacias
           </button>
-          <button 
+          <button
             className={`admin-tab ${activeTab === 'usuarios' ? 'active' : ''}`}
             onClick={() => setActiveTab('usuarios')}
           >
@@ -445,7 +451,7 @@ export function AdminMedicamentos() {
         </div>
       </div>
 
-      {activeTab !== 'usuarios' && (
+      {activeTab !== 'usuarios' && activeTab !== 'precios' && (
         <div className="admin-header-actions">
           {activeTab === 'medicamentos' ? (
             <button className="btn-nuevo" onClick={abrirCrear}>+ Nuevo Medicamento</button>
@@ -458,7 +464,7 @@ export function AdminMedicamentos() {
       {error && <div className="admin-error">{error}</div>}
       {successMsg && <div className="admin-success">{successMsg}</div>}
 
-      {activeTab !== 'usuarios' && (
+      {activeTab !== 'usuarios' && activeTab !== 'precios' && (
         <input
           className="admin-filtro"
           placeholder={activeTab === 'medicamentos'
@@ -471,6 +477,87 @@ export function AdminMedicamentos() {
 
       {activeTab === 'usuarios' && <AdminUsuarios />}
 
+      {activeTab === 'precios' && (
+        <div className="admin-precios-panel">
+          <p className="admin-precios-desc">Selecciona un medicamento y una farmacia para registrar o actualizar su precio.</p>
+          <form
+            className="admin-precios-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const precioNum = Number(precioValor);
+              if (!precioMedId || !precioFarId || !precioValor || isNaN(precioNum) || precioNum <= 0) {
+                addToast('Completa todos los campos con valores válidos.', 'error');
+                return;
+              }
+              setSavingPrecio(true);
+              try {
+                const token = await getToken();
+                const res = await fetch(`${GATEWAY}/api/precios`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                  body: JSON.stringify({
+                    medicamento_id: Number(precioMedId),
+                    farmacia_id: Number(precioFarId),
+                    precio: precioNum,
+                  }),
+                });
+                if (res.ok) {
+                  addToast('Precio guardado correctamente.', 'success');
+                  setPrecioValor('');
+                } else {
+                  const err = await res.json().catch(() => ({}));
+                  addToast(err?.message || 'Error al guardar el precio.', 'error');
+                }
+              } catch {
+                addToast('Error de conexión.', 'error');
+              } finally {
+                setSavingPrecio(false);
+              }
+            }}
+          >
+            <div className="admin-precios-field">
+              <label>Medicamento *</label>
+              <select value={precioMedId} onChange={e => setPrecioMedId(e.target.value)}>
+                <option value="">— Seleccionar medicamento —</option>
+                {medicamentos.map(m => (
+                  <option key={m.id ?? m._id} value={m.id ?? m._id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-precios-field">
+              <label>Farmacia *</label>
+              <select value={precioFarId} onChange={e => setPrecioFarId(e.target.value)}>
+                <option value="">— Seleccionar farmacia —</option>
+                {farmacias.map(f => (
+                  <option key={f.id ?? f._id} value={f.id ?? f._id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-precios-field">
+              <label>Precio (COP) *</label>
+              <div className="admin-precios-price-wrap">
+                <span className="admin-precios-currency">$</span>
+                <input
+                  type="number"
+                  value={precioValor}
+                  onChange={e => setPrecioValor(e.target.value)}
+                  placeholder="Ej. 15000"
+                  min="1"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="admin-precios-btn-save"
+              disabled={savingPrecio || !precioMedId || !precioFarId || !precioValor}
+            >
+              {savingPrecio ? 'Guardando...' : 'Guardar precio'}
+            </button>
+          </form>
+          <p className="admin-precios-hint">ℹ️ Si ya existe un precio para esa farmacia, se actualizará automáticamente.</p>
+        </div>
+      )}
+
       {activeTab === 'medicamentos' && (
         <>
           <div className="admin-table-wrapper">
@@ -481,29 +568,27 @@ export function AdminMedicamentos() {
                   <th>Laboratorio</th>
                   <th>Categoría</th>
                   <th>Farmacia</th>
-                  <th>Precio</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {filtrados.length === 0 ? (
-                  <tr><td colSpan={7} className="admin-empty">No hay medicamentos</td></tr>
+                  <tr><td colSpan={6} className="admin-empty">No hay medicamentos</td></tr>
                 ) : filtrados.map(med => (
                   <tr key={med._id}>
                     <td className="td-name">{med.name}</td>
                     <td>{med.lab}</td>
                     <td>{getCategoriaNombre(med)}</td>
                     <td>{getFarmaciaNombre(med)}</td>
-                    <td>{formatPrice(med.precio)}</td>
                     <td>
                       <span className={`badge ${med.active ? 'badge-active' : 'badge-inactive'}`}>
                         {med.active ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className="td-actions">
-                      <button className="btn-edit" onClick={() => abrirEditar(med)}>Editar</button>
-                      <button className="btn-delete" onClick={() => setConfirmDelete(med)}>Eliminar</button>
+                      <button className="btn-edit" onClick={() => abrirEditar(med)}>✏️ Editar</button>
+                      <button className="btn-delete" onClick={() => setConfirmDelete(med)}>🗑️ Eliminar</button>
                     </td>
                   </tr>
                 ))}
@@ -543,8 +628,8 @@ export function AdminMedicamentos() {
                           : '—'}
                     </td>
                     <td className="td-actions">
-                      <button className="btn-edit" onClick={() => abrirEditarFarmacia(far)}>Editar</button>
-                      <button className="btn-delete" onClick={() => setConfirmDeleteFarmacia(far)}>Eliminar</button>
+                      <button className="btn-edit" onClick={() => abrirEditarFarmacia(far)}>✏️ Editar</button>
+                      <button className="btn-delete" onClick={() => setConfirmDeleteFarmacia(far)}>🗑️ Eliminar</button>
                     </td>
                   </tr>
                 ))}
@@ -560,13 +645,13 @@ export function AdminMedicamentos() {
         <div className="modal-overlay" onClick={cerrarModal}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editando ? 'Editar Medicamento' : 'Nuevo Medicamento'}</h3>
+              <h3>{editando ? '✏️ Editar Medicamento' : '➕ Nuevo Medicamento'}</h3>
               <button className="modal-close" onClick={cerrarModal}>✕</button>
             </div>
 
             {formErrors.length > 0 && (
               <div className="form-errors">
-                {formErrors.map((e, i) => <p key={i}>{e}</p>)}
+                {formErrors.map((e, i) => <p key={i}>⚠️ {e}</p>)}
               </div>
             )}
 
@@ -625,7 +710,7 @@ export function AdminMedicamentos() {
       {confirmDelete && (
         <div className="modal-overlay" onClick={() => setConfirmDelete(null)}>
           <div className="modal-box modal-confirm" onClick={e => e.stopPropagation()}>
-            <h3>Confirmar eliminación</h3>
+            <h3>⚠️ Confirmar eliminación</h3>
             <p>¿Estás seguro de que deseas eliminar <strong>{confirmDelete.name}</strong>?</p>
             <p className="confirm-warning">Esta acción no se puede deshacer.</p>
             <div className="modal-footer">
@@ -641,13 +726,13 @@ export function AdminMedicamentos() {
         <div className="modal-overlay" onClick={cerrarFarmaciaModal}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editandoFarmacia ? 'Editar Farmacia' : 'Nueva Farmacia'}</h3>
+              <h3>{editandoFarmacia ? '✏️ Editar Farmacia' : '➕ Nueva Farmacia'}</h3>
               <button className="modal-close" onClick={cerrarFarmaciaModal}>✕</button>
             </div>
 
             {farmaciaFormErrors.length > 0 && (
               <div className="form-errors">
-                {farmaciaFormErrors.map((e, i) => <p key={i}>{e}</p>)}
+                {farmaciaFormErrors.map((e, i) => <p key={i}>⚠️ {e}</p>)}
               </div>
             )}
 
@@ -757,7 +842,7 @@ export function AdminMedicamentos() {
       {confirmDeleteFarmacia && (
         <div className="modal-overlay" onClick={() => setConfirmDeleteFarmacia(null)}>
           <div className="modal-box modal-confirm" onClick={e => e.stopPropagation()}>
-            <h3>Confirmar eliminación</h3>
+            <h3>⚠️ Confirmar eliminación</h3>
             <p>¿Estás seguro de que deseas eliminar <strong>{confirmDeleteFarmacia.name}</strong>?</p>
             <p className="confirm-warning">Esta acción no se puede deshacer.</p>
             <div className="modal-footer">
