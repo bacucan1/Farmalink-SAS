@@ -62,6 +62,7 @@ app.post('/api/auth/register', async (req, res) => {
 
 function validateJWT(req, res, next) {
     const authHeader = req.headers.authorization;
+    console.log('[Gateway] validateJWT - headers:', JSON.stringify(req.headers));
     console.log('[Gateway] validateJWT - authHeader:', authHeader ? 'present' : 'missing');
     if (!authHeader) return res.status(401).json({ message: 'Token requerido' });
     const token = authHeader.split(' ')[1];

@@ -8,10 +8,6 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
-    headers:
-      - path: "/*"
-        name: Content-Security-Policy
-        value: "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     envVars:
       - key: NODE_ENV
         value: production
@@ -29,10 +25,6 @@ services:
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
-    headers:
-      - path: "/*"
-        name: Content-Security-Policy
-        value: "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     envVars:
       - key: NODE_ENV
         value: production
@@ -54,10 +46,6 @@ services:
     rootDir: src
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    headers:
-      - path: "/*"
-        name: Cache-Control
-        value: "public, max-age=0, must-revalidate"
     envVars:
       - key: VITE_API_URL
         fromService:
