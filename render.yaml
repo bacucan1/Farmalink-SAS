@@ -34,10 +34,7 @@ services:
           name: farmalink-backend
           envVarKey: RENDER_EXTERNAL_URL
       - key: JWT_SECRET
-        fromService:
-          type: web
-          name: farmalink-backend
-          envVarKey: JWT_SECRET
+        value: AZaeieR45nFNjMFG0bEE63fAUNcBXvLFA3T2kK9Aq+c=
 
   # Frontend
   - type: web

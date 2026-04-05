@@ -233,11 +233,13 @@ app.put('/api/precios/:id', validateJWT, async (req, res) => {
 // Categorías
 app.get('/api/categorias', async (req, res) => {
     try {
+        console.log('[Gateway] Fetching categorias from:', BACKEND_URL + '/api/categorias');
         const response = await axios.get(`${BACKEND_URL}/api/categorias`);
         res.json(response.data);
     } catch (err) {
-        console.error('Error fetching categorias:', err.message);
-        res.status(500).json({ error: 'Error en backend categorias' });
+        console.error('[Gateway] Error fetching categorias:', err.response?.status, JSON.stringify(err.response?.data), err.message);
+        const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message;
+        res.status(err.response?.status || 500).json({ error: errorMsg || 'Error en backend categorias' });
     }
 });
 
