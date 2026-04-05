@@ -10,6 +10,7 @@ import farmaciasRouter from './farmacias/farmaciasRouter.js';
 import categoriasRouter from './categorias/categoriasRouter.js';
 import busquedaRouter from './busqueda/busquedaRouter.js';
 import usuariosRouter from './usuarios/usuariosRouter.js';
+import { requireAuth } from './shared/authMiddleware.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -60,7 +61,7 @@ app.get('/api/home', async (_req, res) => {
   }
 });
 
-app.get('/api/dashboard', async (_req, res) => {
+app.get('/api/dashboard', requireAuth, async (req, res) => {
   try {
     const pool = Database.getInstance().getPool();
     const [farmacias, medicamentos, precios] = await Promise.all([

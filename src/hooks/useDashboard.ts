@@ -9,7 +9,7 @@ function isAuthenticated(): boolean {
   return !!(token && token !== 'undefined' && token.trim().length > 10);
 }
 
-async function getToken(): Promise<string> {
+export async function getToken(): Promise<string> {
   let token = localStorage.getItem(TOKEN_KEY);
   if (!token || token === 'undefined' || token.trim().length < 10) {
     const res = await fetch(`${GATEWAY}/api/auth/login`, {

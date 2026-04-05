@@ -4,6 +4,7 @@ import { PrecioStrategyFactory } from './PrecioStrategyFactory.js';
 import { PrecioItem } from './strategies/PrecioStrategy.js';
 import { validateUpdatePrecio } from './PrecioDTO.js';
 import { PrecioHistorialService } from './PrecioHistorialService.js';
+import { requireAuth } from '../shared/authMiddleware.js';
 
 const router = Router();
 
@@ -25,7 +26,7 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
   }
 });
 
-router.get('/comparar/:medicamentoId', async (req: Request, res: Response): Promise<void> => {
+router.get('/comparar/:medicamentoId', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { medicamentoId: medId } = req.params;
     const orden = req.query.orden as string | undefined;
@@ -311,7 +312,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 
 // ── Historial de precios (para gráfica tipo Keepa) ───────────────────────────
 
-router.get('/historial/:medicamentoId', async (req: Request, res: Response): Promise<void> => {
+router.get('/historial/:medicamentoId', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { medicamentoId } = req.params;
     const pool = Database.getInstance().getPool();
