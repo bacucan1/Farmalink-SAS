@@ -113,9 +113,21 @@ export interface Sugerencia {
 }
 
 /**
+ * Tipos para el carrito de compras
+ */
+export interface CartItem {
+  id: string; // Unique ID for the cart item (usually medId + farmaciaId)
+  medicamento: Sugerencia;
+  farmaciaId: string;
+  farmaciaNombre: string;
+  precioUnidad: number;
+  cantidad: number;
+}
+
+/**
  * Vistas disponibles en la aplicación
  */
-export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'registro' | 'producto' | 'mapa' | 'categoria' | 'settings';
+export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'registro' | 'producto' | 'mapa' | 'categoria' | 'settings' | 'cart' | 'checkout';
 
 /**
  * Pestañas del dashboard

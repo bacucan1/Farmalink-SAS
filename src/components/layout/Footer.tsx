@@ -1,4 +1,5 @@
 import logoFarmalink from '../../assets/logo-farmalink.png';
+import { SocialLinks } from '../common/SocialLinks';
 import './Footer.css';
 
 interface FooterProps {
@@ -40,6 +41,7 @@ export function Footer({ onNavigate }: FooterProps) {
                 <span className="footer-badge footer-badge--green">Datos Seguros</span>
                 <span className="footer-badge footer-badge--blue"> Tiempo Real</span>
               </div>
+              <SocialLinks />
             </div>
 
             {/* ── Columna Navegación ── */}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Sugerencia } from '../../types';
 import { PharmacyMap } from '../common/PharmacyMap';
 import { useToast } from '../../hooks/useToast';
+import { useCart } from '../../hooks/useCart';
 import './ProductoDetalle.css';
 
 const GATEWAY = (import.meta as any).env?.VITE_API_URL || '';
@@ -586,6 +587,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
   const isAdmin = !!localStorage.getItem('token');
 
   const { addToast } = useToast();
+  const { addToCart } = useCart();
   const category = getCategory(medicamento);
   const catColor = getCategoryColor(category);
   const farmaciaIds = precios.map(p => Number(p.farmaciaId)).filter(n => !isNaN(n) && n > 0);
@@ -875,6 +877,30 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
 
           {/* Botones de acción */}
           <div className="pd-action-btns">
+            <button 
+              className="btn-primary pd-add-cart-btn" 
+              disabled={precios.length === 0}
+              onClick={() => {
+                const targetFarmacia = selectedFarmacia || sorted[0];
+                if (targetFarmacia) {
+                  addToCart({
+                    id: `${medicamento._id}-${targetFarmacia.farmaciaId}`,
+                    medicamento: medicamento,
+                    farmaciaId: targetFarmacia.farmaciaId,
+                    farmaciaNombre: targetFarmacia.farmaciaNombre,
+                    precioUnidad: targetFarmacia.precio,
+                    cantidad: 1
+                  });
+                  addToast('Añadido al carrito', 'success');
+                }
+              }}
+              style={{ padding: '0.8rem 1.5rem', width: '100%', marginBottom: '1rem', fontSize: '1.1rem' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '0.5rem' }}>
+                <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              Añadir al Carrito
+            </button>
             {precios.length > 1 && (
               <button className={`pd-action-btn pd-chart-btn ${showChart ? 'active' : ''}`}
                 onClick={() => setShowChart(v => !v)}>

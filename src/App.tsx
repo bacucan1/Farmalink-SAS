@@ -18,9 +18,11 @@ import { CategoryView } from './components/category/CategoryView';
 import { Breadcrumb } from './components/common/Breadcrumb';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import MiCuenta from './components/settings/MiCuenta';
+import { CartView } from './components/cart/CartView';
+import { CheckoutView } from './components/checkout/CheckoutView';
 import './App.css';
 
-const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria'];
+const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'cart', 'checkout'];
 
 function normPath(p: string): string {
   const x = p.replace(/\/$/, '') || '/';
@@ -242,6 +244,29 @@ function App() {
       {view === 'settings' && (
         <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('settings')} onGoHome={() => goView('home')} viewLabel="Mi cuenta">
           <MiCuenta onGoHome={() => goView('home')} />
+        </ProtectedRoute>
+      )}
+
+      {view === 'cart' && (
+        <CartView 
+          onGoHome={() => goView('home')} 
+          onGoSearch={() => goView('buscar')}
+          onGoCheckout={() => {
+            if (!isAuthenticated) {
+              goToLogin('checkout');
+            } else {
+              goView('checkout');
+            }
+          }}
+        />
+      )}
+
+      {view === 'checkout' && (
+        <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('checkout')} onGoHome={() => goView('home')} viewLabel="Checkout">
+          <CheckoutView 
+            onGoHome={() => goView('home')}
+            onGoCart={() => goView('cart')}
+          />
         </ProtectedRoute>
       )}
 

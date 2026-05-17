@@ -3,6 +3,7 @@ import iconBusqueda from '../../assets/icon-busqueda.png';
 import iconIA from '../../assets/icon-ia.png';
 import iconMapa from '../../assets/icon-mapa.png';
 import iconPrecios from '../../assets/icon-precios.png';
+import { SocialLinks } from '../common/SocialLinks';
 import './Hero.css';
 
 interface HeroProps {
@@ -74,6 +75,8 @@ export function Hero({ data, onSearchClick, onDashboardClick }: HeroProps) {
                 Ver Dashboard
               </a>
             </div>
+            
+            <SocialLinks />
           </div>
 
           <div
