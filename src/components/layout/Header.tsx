@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { View, Categoria } from '../../types';
 import logoFarmalink from '../../assets/logo-farmalink.png';
+import { useCart } from '../../hooks/useCart';
 import './Header.css';
 
 interface HeaderProps {
@@ -15,6 +16,7 @@ interface HeaderProps {
 const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 export function Header({ currentView, onViewChange, isAuthenticated, userRole, onLogout, onCategorySelect }: HeaderProps) {
+  const { cartCount } = useCart();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -179,6 +181,21 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
                   </a>
                 </li>
               )}
+              <li className="nav-cart-item">
+                <a 
+                  className={`nav-cart-link ${currentView === 'cart' || currentView === 'checkout' ? 'active' : ''}`}
+                  onClick={() => handleNavClick('cart')}
+                  aria-label="Ver carrito"
+                  title="Carrito de Compras"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                  {cartCount > 0 && <span className="nav-cart-badge">{cartCount}</span>}
+                </a>
+              </li>
               <li className="nav-cta-item">
                 {isAuthenticated ? (
                   <>

@@ -5,8 +5,12 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecreto';
+
+console.log('[Gateway] JWT_SECRET loaded:', JWT_SECRET ? 'YES (length: ' + JWT_SECRET.length + ')' : 'NO');
+console.log('[Gateway] BACKEND_URL:', BACKEND_URL);
 
 app.use(cors());
 app.use(express.json());
@@ -19,13 +23,16 @@ app.get('/health', (_req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
     try {
+        console.log('[Gateway] Login - requesting:', BACKEND_URL + '/api/auth/login');
         const response = await axios.post(`${BACKEND_URL}/api/auth/login`, req.body);
         const d = response.data;
+        console.log('[Gateway] Login response - token present:', !!d.token, 'user present:', !!d.user);
         if (d.token && d.user) {
             return res.json({ token: d.token, user: d.user });
         }
         res.json(d);
     } catch (err) {
+        console.log('[Gateway] Login error:', err.response?.status, err.response?.data);
         const status = err.response?.status || 401;
         const data = err.response?.data || { message: 'Error de autenticación' };
         res.status(status).json(data);
@@ -55,13 +62,18 @@ app.post('/api/auth/register', async (req, res) => {
 
 function validateJWT(req, res, next) {
     const authHeader = req.headers.authorization;
+    console.log('[Gateway] validateJWT - headers:', JSON.stringify(req.headers));
+    console.log('[Gateway] validateJWT - authHeader:', authHeader ? 'present' : 'missing');
     if (!authHeader) return res.status(401).json({ message: 'Token requerido' });
     const token = authHeader.split(' ')[1];
+    console.log('[Gateway] validateJWT - token length:', token?.length);
     try {
-        const decoded = jwt.verify(token, "supersecreto");
+        const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('[Gateway] validateJWT - decoded:', decoded);
         req.user = decoded;
         next();
-    } catch {
+    } catch (err) {
+        console.log('[Gateway] validateJWT - error:', err.message);
         return res.status(403).json({ message: 'Token inválido' });
     }
 }
@@ -86,7 +98,40 @@ app.get('/api/medicamentos', async (req, res) => {
 
 app.get('/api/medicamentos/:id', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get(`${BACKEND_URL}/api/medicamentos/${req.params.id}`);
+        const response = await axios.get(`${BACKEND_URL}/api/medicamentos/${req.params.id}`, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch { res.status(500).json({ error: 'Error en backend medicamentos' }); }
+});
+
+app.post('/api/medicamentos', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.post(BACKEND_URL + '/api/medicamentos', req.body, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.status(201).json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al crear medicamento' });
+    }
+});
+
+app.put('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.put(`${BACKEND_URL}/api/medicamentos/${req.params.id}`, req.body, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar medicamento' });
+    }
+});
+
+app.delete('/api/medicamentos/:id', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.delete(`${BACKEND_URL}/api/medicamentos/${req.params.id}`, {
+            headers: { Authorization: req.headers.authorization }
+        });
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend medicamentos' }); }
 });
@@ -128,7 +173,7 @@ app.get('/api/farmacias/cercanas', async (req, res) => {
     }
 });
 
-app.get('/api/farmacias', validateJWT, async (req, res) => {
+app.get('/api/farmacias', async (req, res) => {
     try {
         const response = await axios.get(`${BACKEND_URL}/api/farmacias`);
         res.json(response.data);
@@ -138,7 +183,9 @@ app.get('/api/farmacias', validateJWT, async (req, res) => {
 // Precios
 app.get('/api/precios', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get(`${BACKEND_URL}/api/precios`);
+        const response = await axios.get(`${BACKEND_URL}/api/precios`, {
+            headers: { Authorization: req.headers.authorization }
+        });
         res.json(response.data);
     } catch { res.status(500).json({ error: 'Error en backend precios' }); }
 });
@@ -147,6 +194,7 @@ app.post('/api/precios', validateJWT, async (req, res) => {
     try {
         const response = await axios.post(`${BACKEND_URL}/api/precios`, req.body, {
             headers: {
+                'Authorization': req.headers.authorization,
                 'x-user-email': req.user?.email || 'sistema'
             }
         });
@@ -161,7 +209,9 @@ app.get('/api/precios/comparar/:medicamentoId', validateJWT, async (req, res) =>
     try {
         const { medicamentoId } = req.params;
         const orden = req.query.orden || 'asc';
-        const response = await axios.get(`${BACKEND_URL}/api/precios/comparar/${medicamentoId}?orden=${orden}`);
+        const response = await axios.get(`${BACKEND_URL}/api/precios/comparar/${medicamentoId}?orden=${orden}`, {
+            headers: { Authorization: req.headers.authorization }
+        });
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error en comparación de precios' });
@@ -171,7 +221,9 @@ app.get('/api/precios/comparar/:medicamentoId', validateJWT, async (req, res) =>
 // Actualizar precio
 app.put('/api/precios/:id', validateJWT, async (req, res) => {
     try {
-        const response = await axios.put(`${BACKEND_URL}/api/precios/${req.params.id}`, req.body);
+        const response = await axios.put(`${BACKEND_URL}/api/precios/${req.params.id}`, req.body, {
+            headers: { Authorization: req.headers.authorization }
+        });
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar precio' });
@@ -181,11 +233,13 @@ app.put('/api/precios/:id', validateJWT, async (req, res) => {
 // Categorías
 app.get('/api/categorias', async (req, res) => {
     try {
+        console.log('[Gateway] Fetching categorias from:', BACKEND_URL + '/api/categorias');
         const response = await axios.get(`${BACKEND_URL}/api/categorias`);
         res.json(response.data);
     } catch (err) {
-        console.error('Error fetching categorias:', err.message);
-        res.status(500).json({ error: 'Error en backend categorias' });
+        console.error('[Gateway] Error fetching categorias:', err.response?.status, JSON.stringify(err.response?.data), err.message);
+        const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message;
+        res.status(err.response?.status || 500).json({ error: errorMsg || 'Error en backend categorias' });
     }
 });
 
@@ -193,11 +247,23 @@ app.get('/api/categorias', async (req, res) => {
 // Dashboard - Agrega datos consolidados
 app.get('/api/dashboard', validateJWT, async (req, res) => {
     try {
-        const response = await axios.get(`${BACKEND_URL}/api/dashboard`);
+        const response = await axios.get(`${BACKEND_URL}/api/dashboard`, {
+            headers: { Authorization: req.headers.authorization }
+        });
         res.json(response.data);
     } catch (err) {
         console.error('Error fetching dashboard:', err.message);
         res.status(500).json({ error: 'Error en backend dashboard' });
+    }
+});
+
+// Home público - datos mínimos sin autenticación
+app.get('/api/home', async (req, res) => {
+    try {
+        const response = await axios.get(`${BACKEND_URL}/api/home`);
+        res.json(response.data);
+    } catch {
+        res.json({ success: true, farmCount: 0, categorias: [] });
     }
 });
 
@@ -251,7 +317,9 @@ app.get('/api/usuarios/me', validateJWT, async (req, res) => {
 
 app.get('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.get(`${BACKEND_URL}/api/usuarios`);
+        const response = await axios.get(`${BACKEND_URL}/api/usuarios`, {
+            headers: { Authorization: req.headers.authorization }
+        });
         res.json(response.data);
     } catch (err) {
         res.status(500).json({ error: 'Error en backend usuarios' });
@@ -260,7 +328,9 @@ app.get('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
 
 app.get('/api/usuarios/:id', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.get(`${BACKEND_URL}/api/usuarios/${req.params.id}`);
+        const response = await axios.get(`${BACKEND_URL}/api/usuarios/${req.params.id}`, {
+            headers: { Authorization: req.headers.authorization }
+        });
         res.json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al obtener usuario' });
@@ -269,7 +339,9 @@ app.get('/api/usuarios/:id', validateJWT, requireAdmin, async (req, res) => {
 
 app.post('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
     try {
-        const response = await axios.post(`${BACKEND_URL}/api/usuarios`, req.body);
+        const response = await axios.post(`${BACKEND_URL}/api/usuarios`, req.body, {
+            headers: { Authorization: req.headers.authorization }
+        });
         res.status(201).json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al crear usuario' });
@@ -334,8 +406,8 @@ app.get('/api/busqueda/filtros', async (req, res) => {
 
 
 
-// Historial de precios: GET /api/precios/historial/:medicamentoId
-app.get('/api/precios/historial/:medicamentoId', validateJWT, async (req, res) => {
+// Historial de precios: GET /api/precios/historial/:medicamentoId (público)
+app.get('/api/precios/historial/:medicamentoId', async (req, res) => {
     try {
         const { medicamentoId } = req.params;
         const response = await axios.get(`${BACKEND_URL}/api/precios/historial/${medicamentoId}`);

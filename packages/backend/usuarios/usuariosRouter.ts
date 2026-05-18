@@ -57,7 +57,12 @@ router.get('/me', requireAuth, async (req, res) => {
 });
 
 // GET /api/usuarios - Listar todos los usuarios (solo admin)
-router.get('/', async (_req, res) => {
+router.get('/', requireAuth, async (req, res) => {
+  const usuarioActual = (req as any).usuarioActual;
+  console.log('[Usuarios] GET / — usuario:', usuarioActual.email, 'role:', usuarioActual.role);
+  if (usuarioActual.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Se requiere rol de administrador' });
+  }
   try {
     const pool = Database.getInstance().getPool();
     const result = await pool.query(
