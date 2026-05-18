@@ -127,7 +127,8 @@ export interface CartItem {
 /**
  * Vistas disponibles en la aplicación
  */
-export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'registro' | 'producto' | 'mapa' | 'categoria' | 'settings' | 'cart' | 'checkout';
+export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'registro' | 'producto' | 'mapa' | 'categoria' | 'settings'|'quienes-somos'| 'cart' | 'checkout';
+
 
 /**
  * Pestañas del dashboard

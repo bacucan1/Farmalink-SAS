@@ -20,9 +20,10 @@ import { ProtectedRoute } from './components/common/ProtectedRoute';
 import MiCuenta from './components/settings/MiCuenta';
 import { CartView } from './components/cart/CartView';
 import { CheckoutView } from './components/checkout/CheckoutView';
-import './App.css';
+import { QuienesSomos } from './components/QuienesSomos';
+const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'quienes-somos', 'cart', 'checkout'];
 
-const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'cart', 'checkout'];
+
 
 function normPath(p: string): string {
   const x = p.replace(/\/$/, '') || '/';
@@ -245,6 +246,11 @@ function App() {
         <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('settings')} onGoHome={() => goView('home')} viewLabel="Mi cuenta">
           <MiCuenta onGoHome={() => goView('home')} />
         </ProtectedRoute>
+      )}
+      {view === 'quienes-somos' && (
+        <div className="view active">
+          <QuienesSomos />
+        </div>
       )}
 
       {view === 'cart' && (
