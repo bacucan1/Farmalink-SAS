@@ -70,6 +70,11 @@ export function Footer({ onNavigate }: FooterProps) {
                   </a>
                 </li>
                 <li>
+                  <a onClick={() => onNavigate?.('quienes-somos')}>
+                    <span className="footer-link-arrow">→</span> Acerca de Farmalink
+                  </a>
+                </li>
+                <li>
                   <a onClick={() => onNavigate?.('login')}>
                     <span className="footer-link-arrow">→</span> Iniciar Sesión
                   </a>

@@ -18,9 +18,10 @@ import { CategoryView } from './components/category/CategoryView';
 import { Breadcrumb } from './components/common/Breadcrumb';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import MiCuenta from './components/settings/MiCuenta';
+import { QuienesSomos } from './components/QuienesSomos';
 import './App.css';
 
-const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria'];
+const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'quienes-somos'];
 
 function normPath(p: string): string {
   const x = p.replace(/\/$/, '') || '/';
@@ -243,6 +244,11 @@ function App() {
         <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('settings')} onGoHome={() => goView('home')} viewLabel="Mi cuenta">
           <MiCuenta onGoHome={() => goView('home')} />
         </ProtectedRoute>
+      )}
+      {view === 'quienes-somos' && (
+        <div className="view active">
+          <QuienesSomos />
+        </div>
       )}
 
       <Footer onNavigate={(viewName) => goView(viewName as View)} />
