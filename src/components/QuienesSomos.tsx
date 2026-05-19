@@ -1,3 +1,4 @@
+// @ts-ignore
 import './QuienesSomos.css';
 
 export function QuienesSomos() {
@@ -17,7 +18,7 @@ export function QuienesSomos() {
         {/* Misión */}
         <section className="quienes-somos-section">
           <div className="section-header">
-            <h2 className="section-title">Misión</h2>
+            <h2 className="qs-section-title">Misión</h2>
             <div className="section-divider"></div>
           </div>
           <p className="section-text">
@@ -28,7 +29,7 @@ export function QuienesSomos() {
         {/* Visión */}
         <section className="quienes-somos-section">
           <div className="section-header">
-            <h2 className="section-title">Visión</h2>
+            <h2 className="qs-section-title">Visión</h2>
             <div className="section-divider"></div>
           </div>
           <p className="section-text">
@@ -39,7 +40,7 @@ export function QuienesSomos() {
         {/* Estrategia */}
         <section className="quienes-somos-section">
           <div className="section-header">
-            <h2 className="section-title">Estrategia</h2>
+            <h2 className="qs-section-title">Estrategia</h2>
             <div className="section-divider"></div>
           </div>
           
@@ -59,7 +60,7 @@ export function QuienesSomos() {
         {/* Cultura */}
         <section className="quienes-somos-section">
           <div className="section-header">
-            <h2 className="section-title">Cultura</h2>
+            <h2 className="qs-section-title">Cultura</h2>
             <div className="section-divider"></div>
           </div>
           
@@ -101,7 +102,7 @@ export function QuienesSomos() {
         {/* Mercado */}
         <section className="quienes-somos-section">
           <div className="section-header">
-            <h2 className="section-title">Mercado</h2>
+            <h2 className="qs-section-title">Mercado</h2>
             <div className="section-divider"></div>
           </div>
           
@@ -165,7 +166,7 @@ export function QuienesSomos() {
         {/* Empresa */}
         <section className="quienes-somos-section">
           <div className="section-header">
-            <h2 className="section-title">Empresa</h2>
+            <h2 className="qs-section-title">Empresa</h2>
             <div className="section-divider"></div>
           </div>
           
@@ -207,7 +208,7 @@ export function QuienesSomos() {
         {/* Tecnología */}
         <section className="quienes-somos-section">
           <div className="section-header">
-            <h2 className="section-title">Tecnología</h2>
+            <h2 className="qs-section-title">Tecnología</h2>
             <div className="section-divider"></div>
           </div>
           

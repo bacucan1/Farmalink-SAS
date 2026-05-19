@@ -37,8 +37,7 @@ html.dark-mode body {
    ADMIN PANEL
    ════════════════════════════════════════════════════════════ */
 html.dark-mode .admin-wrapper {
-  /* Alinear con estilo de "Mi cuenta" en dark mode */
-  background: #1a3a5c;
+  background: #1f2937;
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
@@ -375,6 +374,7 @@ html.dark-mode .dashboard-subtitle {
 
 html.dark-mode .stat-card {
   background: #1f2937;
+  border: 1px solid #374151;
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
@@ -414,6 +414,7 @@ html.dark-mode .tab-btn.active .tab-count {
 html.dark-mode .farmacia-card,
 html.dark-mode .med-card {
   background: #1f2937;
+  border: 1px solid #374151;
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
@@ -567,8 +568,13 @@ html.dark-mode .features-strip {
 }
 
 html.dark-mode .feature-item {
-  background: #111827;
+  background: #1f2937;
+  border-color: #374151;
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+html.dark-mode .feature-item:hover {
+  border-color: var(--primary);
 }
 
 html.dark-mode .feature-title {

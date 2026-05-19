@@ -29,7 +29,7 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface);
   padding: 1.5rem;
   border-radius: 12px;
   text-align: center;
@@ -75,12 +75,12 @@
 }
 
 .tab-btn:hover {
-  background: white;
+  background: var(--surface);
   color: var(--text);
 }
 
 .tab-btn.active {
-  background: white;
+  background: var(--surface);
   color: var(--primary);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -116,7 +116,7 @@
 
 /* Farmacia Card */
 .farmacia-card {
-  background: white;
+  background: var(--surface);
   padding: 1.25rem;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -154,7 +154,7 @@
 
 /* Medicamento Card */
 .med-card {
-  background: white;
+  background: var(--surface);
   padding: 1.25rem;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -207,7 +207,7 @@
 
 /* Precios Table */
 .precios-table {
-  background: white;
+  background: var(--surface);
   border-radius: 10px;
   overflow-x: auto;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);

@@ -1,15 +1,15 @@
 :root {
-  /* Brand Colors */
-  --primary: #66B82E;
-  --primary-dark: #4a8a1e;
+  /* Brand Colors — primary oscurecido a #3e800e para cumplir WCAG AA (4.89:1 sobre blanco) */
+  --primary: #3e800e;
+  --primary-dark: #2d5e09;
   --secondary: #0B7DB8;
   
   /* Neutral Colors */
-  --green: #66B82E;
-  --green-dark: #4a8a1e;
-  --green-glow: rgba(102,184,46,0.40);
-  --green-mist: rgba(102,184,46,0.08);
-  --green-mist2: rgba(102,184,46,0.14);
+  --green: #3e800e;
+  --green-dark: #2d5e09;
+  --green-glow: rgba(62,128,14,0.40);
+  --green-mist: rgba(62,128,14,0.08);
+  --green-mist2: rgba(62,128,14,0.14);
   --blue: #0B7DB8;
   --blue-dark: #085d8a;
   --blue-glow: rgba(11,125,184,0.40);

@@ -6,6 +6,7 @@ import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { Hero } from './components/home/Hero';
 import { Features } from './components/home/Features';
+import { Slider } from './components/home/Slider';
 import { SearchSection } from './components/search/SearchSection';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { LoadingState, ErrorState } from './components/common/LoadingError';
@@ -172,6 +173,7 @@ function App() {
             }}
           />
           <Features farmCount={data?.farmacias.length ?? 0} />
+          <Slider onNavigate={goView} />
         </div>
       )}
 
