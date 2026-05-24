@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import logoBusqueda from '../../assets/icon-busqueda.png';
-import logoIA from '../../assets/icon-ia.png';
-import logoMapa from '../../assets/icon-mapa.png';
-import logoPrecios from '../../assets/icon-precios.png';
-import logoFarmalink from '../../assets/logo-farmalink.png';
-import iconDashFarmacias from '../../assets/icon-dash-farmacias.png';
+import slide1 from '../../assets/slide-1-compara-precios.png';
+import slide2 from '../../assets/slide-2-recomendaciones-ia.png';
+import slide3 from '../../assets/slide-3-encuentra-farmacias.png';
+import slide4 from '../../assets/slide-4-ahorro.png';
+import slide5 from '../../assets/slide-5-farmacias-aliadas.png';
 import './Slider.css';
 
 interface Slide {
@@ -28,8 +27,8 @@ const SLIDES: Slide[] = [
     cta: 'Buscar ahora',
     ctaAction: 'buscar',
     accent: '#3e800e',
-    img: logoPrecios,
-    imgAlt: 'Comparador de precios de medicamentos',
+    img: slide1,
+    imgAlt: 'Comparador de precios de medicamentos en tiempo real',
   },
   {
     id: 2,
@@ -39,7 +38,7 @@ const SLIDES: Slide[] = [
     cta: 'Conocer más',
     ctaAction: 'buscar',
     accent: '#0B7DB8',
-    img: logoIA,
+    img: slide2,
     imgAlt: 'Recomendaciones inteligentes con IA',
   },
   {
@@ -50,7 +49,7 @@ const SLIDES: Slide[] = [
     cta: 'Ver mapa',
     ctaAction: 'mapa',
     accent: '#00A896',
-    img: logoMapa,
+    img: slide3,
     imgAlt: 'Mapa interactivo de farmacias en Bogotá',
   },
   {
@@ -61,8 +60,8 @@ const SLIDES: Slide[] = [
     cta: 'Empezar a ahorrar',
     ctaAction: 'buscar',
     accent: '#3e800e',
-    img: logoBusqueda,
-    imgAlt: 'Ahorro en medicamentos',
+    img: slide4,
+    imgAlt: 'Ahorra hasta $15.000 por mes en medicamentos',
   },
   {
     id: 5,
@@ -72,19 +71,8 @@ const SLIDES: Slide[] = [
     cta: 'Ver farmacias',
     ctaAction: 'dashboard',
     accent: '#0B7DB8',
-    img: iconDashFarmacias,
+    img: slide5,
     imgAlt: 'Red de farmacias aliadas en Bogotá',
-  },
-  {
-    id: 6,
-    tag: 'FarmaLink',
-    title: 'Salud accesible para todos',
-    subtitle: 'Nuestra misión es democratizar el acceso a información farmacéutica transparente en Colombia.',
-    cta: 'Quiénes somos',
-    ctaAction: 'quienes-somos',
-    accent: '#3e800e',
-    img: logoFarmalink,
-    imgAlt: 'FarmaLink - Plataforma de salud',
   },
 ];
 
