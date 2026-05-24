@@ -142,17 +142,28 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
                       {categorias.length === 0 ? (
                         <li className="nav-dropdown-loading">Cargando...</li>
                       ) : (
-                        categorias.map(cat => (
-                          <li key={cat.id}>
+                        <>
+                          <li>
                             <button
                               className="nav-dropdown-item"
-                              onClick={() => handleCategoryClick(cat.nombre)}
+                              onClick={() => handleCategoryClick('')}
                               role="menuitem"
                             >
-                              {cat.nombre}
+                              Todos
                             </button>
                           </li>
-                        ))
+                          {categorias.map(cat => (
+                            <li key={cat.id}>
+                              <button
+                                className="nav-dropdown-item"
+                                onClick={() => handleCategoryClick(cat.nombre)}
+                                role="menuitem"
+                              >
+                                {cat.nombre}
+                              </button>
+                            </li>
+                          ))}
+                        </>
                       )}
                     </ul>
                   </div>
