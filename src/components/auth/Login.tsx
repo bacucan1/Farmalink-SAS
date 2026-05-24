@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useToast } from '../../hooks/useToast';
+
+// @ts-ignore: Vite CSS side-effect import declaration
 import './Login.css';
 
 interface LoginProps {
@@ -94,8 +96,8 @@ export default function Login({ onLoginSuccess, onNavigateToRegister }: LoginPro
 
   const handleDemoLogin = async (role: 'user' | 'admin') => {
     const credentials = role === 'admin'
-      ? { email: 'admin@farmalink.com',    password: '1234' }
-      : { email: 'user@farmalink.com', password: 'user123' };
+      ? { email: 'admin@farmalink.com',    password: 'admin123' }
+      : { email: 'demos.usuario@email.com', password: 'demo123' };
     await doLogin(credentials.email, credentials.password);
   };
 

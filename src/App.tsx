@@ -78,7 +78,8 @@ function App() {
     const role = user ? JSON.parse(user).role : '';
     setUserRole(role);
     setIsAuthenticated(true);
-    if (prevView && prevView !== 'login' && prevView !== 'home') {
+    const VIEWS_SIN_RETORNO: View[] = ['login'];
+    if (prevView && !VIEWS_SIN_RETORNO.includes(prevView)) {
       goView(prevView);
     } else {
       goView(role === 'admin' ? 'admin' : 'dashboard');
@@ -147,7 +148,13 @@ function App() {
     <>
       <Header
         currentView={view}
-        onViewChange={goView}
+        onViewChange={(v) => {
+          if (v === 'login') {
+            goToLogin(view);
+          } else {
+            goView(v);
+          }
+        }}
         isAuthenticated={isAuthenticated}
         userRole={userRole}
         onLogout={handleLogout}
@@ -173,7 +180,7 @@ function App() {
             }}
           />
           <Features farmCount={data?.farmacias.length ?? 0} />
-          <Slider onNavigate={goView} />
+          <Slider onNavigate={(v) => goView(v as any)} />
         </div>
       )}
 
