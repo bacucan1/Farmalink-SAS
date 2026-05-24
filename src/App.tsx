@@ -6,6 +6,7 @@ import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { Hero } from './components/home/Hero';
 import { Features } from './components/home/Features';
+import { Slider } from './components/home/Slider';
 import { SearchSection } from './components/search/SearchSection';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { LoadingState, ErrorState } from './components/common/LoadingError';
@@ -20,9 +21,10 @@ import { ProtectedRoute } from './components/common/ProtectedRoute';
 import MiCuenta from './components/settings/MiCuenta';
 import { CartView } from './components/cart/CartView';
 import { CheckoutView } from './components/checkout/CheckoutView';
-import './App.css';
+import { QuienesSomos } from './components/QuienesSomos';
+const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'quienes-somos', 'cart', 'checkout'];
 
-const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'cart', 'checkout'];
+
 
 function normPath(p: string): string {
   const x = p.replace(/\/$/, '') || '/';
@@ -76,7 +78,8 @@ function App() {
     const role = user ? JSON.parse(user).role : '';
     setUserRole(role);
     setIsAuthenticated(true);
-    if (prevView && prevView !== 'login' && prevView !== 'home') {
+    const VIEWS_SIN_RETORNO: View[] = ['login'];
+    if (prevView && !VIEWS_SIN_RETORNO.includes(prevView)) {
       goView(prevView);
     } else {
       goView(role === 'admin' ? 'admin' : 'dashboard');
@@ -145,7 +148,13 @@ function App() {
     <>
       <Header
         currentView={view}
-        onViewChange={goView}
+        onViewChange={(v) => {
+          if (v === 'login') {
+            goToLogin(view);
+          } else {
+            goView(v);
+          }
+        }}
         isAuthenticated={isAuthenticated}
         userRole={userRole}
         onLogout={handleLogout}
@@ -171,6 +180,7 @@ function App() {
             }}
           />
           <Features farmCount={data?.farmacias.length ?? 0} />
+          <Slider onNavigate={(v) => goView(v as any)} />
         </div>
       )}
 
@@ -245,6 +255,11 @@ function App() {
         <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('settings')} onGoHome={() => goView('home')} viewLabel="Mi cuenta">
           <MiCuenta onGoHome={() => goView('home')} />
         </ProtectedRoute>
+      )}
+      {view === 'quienes-somos' && (
+        <div className="view active">
+          <QuienesSomos />
+        </div>
       )}
 
       {view === 'cart' && (

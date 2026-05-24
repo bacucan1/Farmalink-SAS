@@ -1,6 +1,6 @@
 
 .admin-wrapper {
-  background: white;
+  background: var(--surface);
   border-radius: var(--r-lg);
   padding: 2rem 2.5rem;
   margin-top: 120px; /* header ~72px + breadcrumb ~41px + holgura */
@@ -104,7 +104,7 @@
 .admin-filtro:focus {
   outline: none;
   border-color: var(--primary);
-  background: white;
+  background: var(--surface);
 }
 
 .admin-filtro::placeholder {
@@ -195,6 +195,9 @@
 }
 
 .btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: var(--blue-mist);
   color: var(--blue);
   border: 1px solid var(--blue);
@@ -212,6 +215,9 @@
 }
 
 .btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: #fee2e2;
   color: #dc2626;
   border: 1px solid #fecaca;
@@ -290,7 +296,7 @@
 }
 
 .modal-box {
-  background: white;
+  background: var(--surface);
   border-radius: var(--r-lg);
   padding: 1.75rem;
   width: 100%;
@@ -426,7 +432,7 @@
 .form-group textarea:focus {
   outline: none;
   border-color: var(--primary);
-  background: white;
+  background: var(--surface);
 }
 
 .form-group textarea {
@@ -439,7 +445,7 @@
 }
 
 .form-group select option {
-  background: white;
+  background: var(--surface);
   color: var(--text);
 }
 
@@ -508,15 +514,15 @@
 /* ── Panel de edición de precios ── */
 .admin-precios-panel {
   padding: 1.5rem;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
   border-radius: var(--r-md);
   margin-bottom: 1rem;
 }
 
 .admin-precios-desc {
   margin: 0 0 1.25rem;
-  color: #78350f;
+  color: var(--text-2);
   font-size: 0.88rem;
   font-weight: 500;
 }
@@ -537,7 +543,7 @@
 .admin-precios-field label {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #78350f;
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -547,10 +553,10 @@
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #fcd34d;
-  background: white;
+  background: var(--surface);
   font-size: 0.88rem;
   font-family: inherit;
-  color: #1e293b;
+  color: var(--text);
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -583,7 +589,7 @@
 .admin-precios-btn-save {
   padding: 10px 20px;
   border-radius: 8px;
-  background: #f59e0b;
+  background: var(--amber, #f59e0b);
   color: white;
   border: none;
   font-weight: 700;
@@ -595,7 +601,7 @@
   font-family: inherit;
 }
 .admin-precios-btn-save:hover {
-  background: #d97706;
+  background: var(--amber-dark, #d97706);
   box-shadow: 0 4px 12px rgba(245,158,11,0.35);
 }
 .admin-precios-btn-save:disabled {
@@ -607,7 +613,7 @@
 .admin-precios-hint {
   margin: 12px 0 0;
   font-size: 0.78rem;
-  color: #92400e;
+  color: var(--text-2);
   opacity: 0.75;
 }
 
@@ -661,8 +667,8 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  background: #f59e0b;
-  color: #1e293b;
+  background: var(--amber, #f59e0b);
+  color: var(--text);
   border-radius: 50%;
   font-size: 11px;
   font-weight: 800;
@@ -680,8 +686,8 @@
 
 .badge-admin {
   background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
+  color: var(--text-2);
+  border: 1px solid var(--border);
 }
 
 .badge-farm {
@@ -844,6 +850,9 @@
 
   .btn-edit,
   .btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
     flex: 1;
     text-align: center;
     padding: 0.5rem 0.4rem;

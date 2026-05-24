@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useToast } from '../../hooks/useToast';
+// @ts-ignore
 import './Login.css';
 
 interface RegisterProps {

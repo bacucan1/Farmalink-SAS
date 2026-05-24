@@ -180,6 +180,11 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
                   Dashboard
                 </a>
               </li>
+              <li>
+                <a onClick={() => handleNavClick('quienes-somos')} className={currentView === 'quienes-somos' ? 'active' : ''}>
+                  Quiénes Somos
+                </a>
+              </li>
               {userRole === 'admin' && (
                 <li>
                   <a onClick={() => handleNavClick('admin')} className={currentView === 'admin' ? 'active' : ''}>
