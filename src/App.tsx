@@ -27,7 +27,7 @@ import { DevelopersView } from './components/developers/DevelopersView';
 import { ValidadorView } from './components/developers/ValidadorView';
 import { FaqView } from './components/help/FaqView';
 
-const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'quienes-somos', 'cart', 'checkout', 'desarrolladores', 'validador'];
+const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'checkout', 'validador'];
 
 
 

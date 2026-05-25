@@ -58,12 +58,12 @@ export function Footer({ onNavigate }: FooterProps) {
                 </li>
                 <li>
                   <a onClick={() => onNavigate?.('buscar')}>
-                    <span className="footer-link-arrow">→</span> Buscar Medicamento
+                    <span className="footer-link-arrow">→</span> Buscar
                   </a>
                 </li>
                 <li>
-                  <a onClick={() => onNavigate?.('dashboard')}>
-                    <span className="footer-link-arrow">→</span> Dashboard
+                  <a onClick={() => onNavigate?.('categoria')}>
+                    <span className="footer-link-arrow">→</span> Categorías
                   </a>
                 </li>
                 <li>
@@ -72,13 +72,33 @@ export function Footer({ onNavigate }: FooterProps) {
                   </a>
                 </li>
                 <li>
+                  <a onClick={() => onNavigate?.('dashboard')}>
+                    <span className="footer-link-arrow">→</span> Dashboard
+                  </a>
+                </li>
+                <li>
                   <a onClick={() => onNavigate?.('quienes-somos')}>
-                    <span className="footer-link-arrow">→</span> Acerca de Farmalink
+                    <span className="footer-link-arrow">→</span> Quiénes Somos
+                  </a>
+                </li>
+                <li>
+                  <a onClick={() => onNavigate?.('desarrolladores')}>
+                    <span className="footer-link-arrow">→</span> Equipo
                   </a>
                 </li>
                 <li>
                   <a onClick={() => onNavigate?.('faq')}>
                     <span className="footer-link-arrow">→</span> Preguntas Frecuentes
+                  </a>
+                </li>
+                <li>
+                  <a onClick={() => onNavigate?.('cart')}>
+                    <span className="footer-link-arrow">→</span> Carrito
+                  </a>
+                </li>
+                <li>
+                  <a onClick={() => onNavigate?.('settings')}>
+                    <span className="footer-link-arrow">→</span> Mi cuenta
                   </a>
                 </li>
                 <li>

@@ -7,6 +7,10 @@ const LABELS: Partial<Record<View, string>> = {
   admin:     'Administración',
   mapa:      'Mapa de farmacias',
   settings:  'Mi cuenta',
+  'quienes-somos': 'Quiénes somos',
+  desarrolladores: 'Equipo',
+  cart: 'Carrito',
+  checkout: 'Checkout',
   faq:       'Preguntas frecuentes',
 };
 
