@@ -2,7 +2,19 @@ import { useState, useEffect, useCallback } from 'react';
 import type { PerfilDesarrollador } from '../../types';
 import './DevelopersView.css';
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
+const API_BASE = ((import.meta as any).env?.VITE_API_URL || '').trim();
+
+async function parseApiResponse(res: Response) {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const body = await res.text();
+    const preview = body.slice(0, 120).replace(/\s+/g, ' ').trim();
+    throw new Error(
+      `Respuesta invalida del servidor (${res.status}). Se esperaba JSON. ${preview ? `Inicio: ${preview}` : ''}`
+    );
+  }
+  return res.json();
+}
 
 const ROLE_LABEL: Record<string, string> = {
   admin:        'Administrador',
@@ -52,6 +64,8 @@ export function DevelopersView({ isAuthenticated, userRole, onGoSettings, onGoVa
   const [editSaving, setEditSaving] = useState(false);
   const [editMsg, setEditMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [toggleBusy, setToggleBusy] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UsuarioAdmin | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   /* ── Carga pública del equipo ── */
   const fetchTeam = useCallback(async () => {
@@ -59,7 +73,7 @@ export function DevelopersView({ isAuthenticated, userRole, onGoSettings, onGoVa
     setError(null);
     try {
       const res = await fetch(`${API_BASE}/api/usuarios/public/equipo`);
-      const data = await res.json();
+      const data = await parseApiResponse(res);
       if (!res.ok || !data.success) throw new Error(data.message || 'Error al cargar el equipo');
       setDevelopers(data.data);
     } catch (err) {
@@ -81,7 +95,7 @@ export function DevelopersView({ isAuthenticated, userRole, onGoSettings, onGoVa
       const res = await fetch(`${API_BASE}/api/usuarios`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
+      const data = await parseApiResponse(res);
       if (!res.ok || !data.success) throw new Error(data.message || 'Error al cargar usuarios');
       setUsuarios(data.data);
     } catch (err) {
@@ -103,7 +117,7 @@ export function DevelopersView({ isAuthenticated, userRole, onGoSettings, onGoVa
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ is_team_member: !user.is_team_member }),
       });
-      const data = await res.json();
+      const data = await parseApiResponse(res);
       if (!res.ok || !data.success) throw new Error(data.message || 'Error');
       setUsuarios(prev => prev.map(u => u.id === user.id ? { ...u, is_team_member: data.data.is_team_member } : u));
       fetchTeam(); // refresca la vista pública
@@ -143,7 +157,7 @@ export function DevelopersView({ isAuthenticated, userRole, onGoSettings, onGoVa
           profile_picture: editForm.profile_picture.trim() || null,
         }),
       });
-      const data = await res.json();
+      const data = await parseApiResponse(res);
       if (!res.ok || !data.success) throw new Error(data.message || (data.errors?.join(', ')) || 'Error');
       setUsuarios(prev => prev.map(u => u.id === editTarget.id ? { ...u, ...data.data } : u));
       setEditMsg({ type: 'ok', text: '✅ Perfil actualizado correctamente' });
@@ -156,20 +170,24 @@ export function DevelopersView({ isAuthenticated, userRole, onGoSettings, onGoVa
   };
 
   /* ── Eliminar usuario ── */
-  const handleDelete = async (user: UsuarioAdmin) => {
-    if (!confirm(`¿Eliminar a ${user.name} (${user.email})? Esta acción no se puede deshacer.`)) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteBusy(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/api/usuarios/${user.id}`, {
+      const res = await fetch(`${API_BASE}/api/usuarios/${deleteTarget.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
+      const data = await parseApiResponse(res);
       if (!res.ok || !data.success) throw new Error(data.message || 'Error');
-      setUsuarios(prev => prev.filter(u => u.id !== user.id));
+      setUsuarios(prev => prev.filter(u => u.id !== deleteTarget.id));
+      setDeleteTarget(null);
       fetchTeam();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al eliminar');
+    } finally {
+      setDeleteBusy(false);
     }
   };
 
@@ -433,7 +451,7 @@ export function DevelopersView({ isAuthenticated, userRole, onGoSettings, onGoVa
                                   </button>
                                   <button
                                     className="dev-admin-btn dev-admin-btn--delete"
-                                    onClick={() => handleDelete(u)}
+                                    onClick={() => setDeleteTarget(u)}
                                     title="Eliminar usuario"
                                     id={`btn-eliminar-usr-${u.id}`}
                                   >
@@ -534,6 +552,56 @@ export function DevelopersView({ isAuthenticated, userRole, onGoSettings, onGoVa
                 id="btn-guardar-edicion-dev"
               >
                 {editSaving ? 'Guardando...' : '💾 Guardar cambios'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          className="dev-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirmar eliminación de usuario"
+          onClick={(e) => { if (e.target === e.currentTarget && !deleteBusy) setDeleteTarget(null); }}
+        >
+          <div className="dev-modal dev-modal--danger">
+            <div className="dev-modal-header">
+              <h2>Confirmar eliminación</h2>
+              <button
+                className="dev-modal-close"
+                onClick={() => setDeleteTarget(null)}
+                aria-label="Cerrar"
+                id="btn-cerrar-modal-delete-dev"
+                disabled={deleteBusy}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="dev-modal-body">
+              <p className="dev-delete-copy">
+                Vas a eliminar a <strong>{deleteTarget.name}</strong> ({deleteTarget.email}). Esta acción no se puede deshacer.
+              </p>
+            </div>
+
+            <div className="dev-modal-footer">
+              <button
+                className="dev-modal-cancel"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleteBusy}
+                id="btn-cancelar-delete-dev"
+              >
+                Cancelar
+              </button>
+              <button
+                className="dev-modal-danger"
+                onClick={handleDelete}
+                disabled={deleteBusy}
+                id="btn-confirmar-delete-dev"
+              >
+                {deleteBusy ? 'Eliminando...' : 'Sí, eliminar'}
               </button>
             </div>
           </div>

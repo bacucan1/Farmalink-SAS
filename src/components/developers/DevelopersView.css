@@ -885,6 +885,43 @@ html.dark-mode .dev-spinner::before { border-color: rgba(255,255,255,0.12); bord
 
 .dev-modal-save:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.dev-modal--danger .dev-modal-header h2 {
+  color: #c0392b;
+}
+
+.dev-delete-copy {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.dev-delete-copy strong {
+  color: var(--text);
+}
+
+.dev-modal-danger {
+  padding: 9px 22px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.18s;
+  font-family: inherit;
+}
+
+.dev-modal-danger:hover:not(:disabled) {
+  background: #a93226;
+  transform: translateY(-1px);
+}
+
+.dev-modal-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ── Dark mode: panel admin ── */
 html.dark-mode .dev-admin-panel {
   background: #1a2a3a;
@@ -951,6 +988,10 @@ html.dark-mode .dev-modal-cancel {
 }
 
 html.dark-mode .dev-admin-table-wrap .dev-admin-empty { color: #8aacca; }
+
+html.dark-mode .dev-modal--danger .dev-modal-header h2 { color: #fca5a5; }
+html.dark-mode .dev-delete-copy { color: #9fb8ce; }
+html.dark-mode .dev-delete-copy strong { color: #d7e6f3; }
 
 /* ── Responsive admin ── */
 @media (max-width: 768px) {

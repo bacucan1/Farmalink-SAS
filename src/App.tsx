@@ -18,12 +18,14 @@ import { MapView } from './components/map/MapView';
 import { CategoryView } from './components/category/CategoryView';
 import { Breadcrumb } from './components/common/Breadcrumb';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
+import PrivacyBanner from './components/common/PrivacyBanner';
 import MiCuenta from './components/settings/MiCuenta';
 import { CartView } from './components/cart/CartView';
 import { CheckoutView } from './components/checkout/CheckoutView';
 import { QuienesSomos } from './components/QuienesSomos';
 import { DevelopersView } from './components/developers/DevelopersView';
 import { ValidadorView } from './components/developers/ValidadorView';
+import { FaqView } from './components/help/FaqView';
 
 const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'quienes-somos', 'cart', 'checkout', 'desarrolladores', 'validador'];
 
@@ -168,6 +170,8 @@ function App() {
         <Breadcrumb view={view} onGoHome={() => goView('home')} />
       )}
 
+      <PrivacyBanner />
+
       {view === 'home' && (
         <div className="view active">
           <Hero
@@ -302,6 +306,12 @@ function App() {
       {view === 'validador' && (
         <div className="view active">
           <ValidadorView onGoBack={() => goView('desarrolladores')} />
+        </div>
+      )}
+
+      {view === 'faq' && (
+        <div className="view active">
+          <FaqView />
         </div>
       )}
 

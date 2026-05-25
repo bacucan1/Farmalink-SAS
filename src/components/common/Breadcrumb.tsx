@@ -7,6 +7,7 @@ const LABELS: Partial<Record<View, string>> = {
   admin:     'Administración',
   mapa:      'Mapa de farmacias',
   settings:  'Mi cuenta',
+  faq:       'Preguntas frecuentes',
 };
 
 interface BreadcrumbProps {

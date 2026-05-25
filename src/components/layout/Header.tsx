@@ -190,6 +190,11 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
                   Equipo
                 </a>
               </li>
+              <li>
+                <a onClick={() => handleNavClick('faq')} className={currentView === 'faq' ? 'active' : ''}>
+                  FAQ
+                </a>
+              </li>
               {userRole === 'admin' && (
                 <li>
                   <a onClick={() => handleNavClick('admin')} className={currentView === 'admin' ? 'active' : ''}>

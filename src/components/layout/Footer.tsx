@@ -77,6 +77,11 @@ export function Footer({ onNavigate }: FooterProps) {
                   </a>
                 </li>
                 <li>
+                  <a onClick={() => onNavigate?.('faq')}>
+                    <span className="footer-link-arrow">→</span> Preguntas Frecuentes
+                  </a>
+                </li>
+                <li>
                   <a onClick={() => onNavigate?.('login')}>
                     <span className="footer-link-arrow">→</span> Iniciar Sesión
                   </a>
