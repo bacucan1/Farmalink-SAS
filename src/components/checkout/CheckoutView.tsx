@@ -128,14 +128,14 @@ export function CheckoutView({ onGoHome, onGoCart }: CheckoutViewProps) {
             </tr>
           </thead>
           <tbody>
-            ${cartItems.map(item => \`
+            ${cartItems.map(item => `
               <tr>
-                <td>\${item.nombre}</td>
-                <td>\${item.cantidad}</td>
-                <td>$\${item.precioUnidad.toLocaleString('es-CO')}</td>
-                <td>$\${(item.precioUnidad * item.cantidad).toLocaleString('es-CO')}</td>
+                <td>${item.nombre}</td>
+                <td>${item.cantidad}</td>
+                <td>$${item.precioUnidad.toLocaleString('es-CO')}</td>
+                <td>$${(item.precioUnidad * item.cantidad).toLocaleString('es-CO')}</td>
               </tr>
-            \`).join('')}
+            `).join('')}
             <tr class="total-row">
               <td colspan="3" style="text-align: right;">Total:</td>
               <td>$${total.toLocaleString('es-CO')}</td>
