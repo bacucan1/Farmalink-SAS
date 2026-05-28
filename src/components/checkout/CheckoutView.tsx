@@ -66,7 +66,8 @@ export function CheckoutView({ onGoHome, onGoCart }: CheckoutViewProps) {
         city: data.ciudad,
       },
       items: cartItems.map(i => ({
-        name: i.nombre,
+        product: i.medicamento?.name || 'Producto Desconocido',
+        pharmacy: i.farmaciaNombre,
         quantity: i.cantidad,
         unitPrice: i.precioUnidad,
         subtotal: i.precioUnidad * i.cantidad
@@ -130,7 +131,10 @@ export function CheckoutView({ onGoHome, onGoCart }: CheckoutViewProps) {
           <tbody>
             ${cartItems.map(item => `
               <tr>
-                <td>${item.nombre}</td>
+                <td>
+                  <strong>${item.medicamento?.name || 'Producto Desconocido'}</strong><br/>
+                  <small style="color: #666;">Farmacia: ${item.farmaciaNombre}</small>
+                </td>
                 <td>${item.cantidad}</td>
                 <td>$${item.precioUnidad.toLocaleString('es-CO')}</td>
                 <td>$${(item.precioUnidad * item.cantidad).toLocaleString('es-CO')}</td>
