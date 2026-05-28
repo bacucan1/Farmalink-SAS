@@ -317,3 +317,503 @@
   .qs-section-title       { font-size: 1.6rem; }
   .values-grid, .segments-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Sección Scrum Horizontal ── */
+.scrum-horizontal-section {
+  overflow: hidden;
+}
+
+.timeline-horizontal-container {
+  position: relative;
+  margin: 50px 0;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.timeline-scroll-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.timeline-horizontal-track {
+  position: absolute;
+  top: 22px;
+  transform: translateY(-50%);
+  left: 22px;
+  width: calc(100% - 44px);
+  height: 6px;
+  background: var(--border);
+  border-radius: var(--r-full);
+  z-index: 1;
+}
+
+.timeline-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: var(--r-full);
+  transition: width 0.4s var(--ease-spring);
+}
+
+.timeline-nodes-wrapper {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.timeline-node {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  text-align: center;
+  outline: none;
+  transition: transform 0.25s var(--ease-spring);
+}
+
+.timeline-node:hover {
+  transform: translateY(-4px);
+}
+
+.timeline-node:focus-visible .node-marker {
+  outline: 3px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+.node-marker-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+  height: 44px;
+}
+
+.node-marker {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  color: var(--text-3);
+  position: relative;
+}
+
+.node-check-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
+}
+
+/* Estados de los Nodos */
+.timeline-node.is-completed .node-marker {
+  background: var(--green-mist);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.timeline-node.is-current .node-marker {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #fff;
+}
+
+.node-pulse-dot {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: var(--r-full);
+  display: inline-block;
+}
+
+.timeline-node.is-current .node-marker {
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+  animation: node-pulse 2s infinite;
+}
+
+@keyframes node-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+.node-planned-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--border);
+  border-radius: var(--r-full);
+  display: inline-block;
+}
+
+/* Nodo Activo */
+.timeline-node.is-active {
+  transform: scale(1.08);
+}
+
+.timeline-node.is-active .node-marker {
+  border-width: 4px;
+}
+
+.timeline-node.is-completed.is-active .node-marker {
+  border-color: var(--primary);
+  box-shadow: 0 4px 14px var(--green-glow);
+}
+
+.timeline-node.is-current.is-active .node-marker {
+  border-color: var(--amber);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.5);
+}
+
+.timeline-node.is-active:not(.is-completed):not(.is-current) .node-marker {
+  border-color: var(--secondary);
+  box-shadow: 0 4px 14px var(--blue-glow);
+  color: var(--secondary);
+}
+
+/* Info del Nodo */
+.node-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.node-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-2);
+  transition: color 0.2s;
+}
+
+.timeline-node.is-active .node-title {
+  color: var(--text);
+}
+
+.node-date {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+/* Tarjeta de Detalle */
+.scrum-detail-card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  padding: 36px;
+  box-shadow: var(--shadow-md);
+  margin-top: 30px;
+  position: relative;
+  animation: scrumFadeIn 0.4s var(--ease-spring);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.scrum-detail-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+@keyframes scrumFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scrum-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.scrum-header-left {
+  flex: 1;
+}
+
+.scrum-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.scrum-status-badge {
+  padding: 6px 14px;
+  border-radius: var(--r-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.scrum-status-badge.completed {
+  background: var(--green-mist);
+  color: var(--primary);
+}
+
+.scrum-status-badge.current {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--amber);
+}
+
+.scrum-status-badge.planned {
+  background: var(--surface-3);
+  color: var(--text-3);
+}
+
+.scrum-card-date {
+  font-size: 0.88rem;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.scrum-card-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.scrum-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.scrum-progress-container {
+  display: flex;
+  align-items: center;
+}
+
+.scrum-progress-circle {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--r-full);
+  border: 4px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.scrum-progress-number {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.scrum-progress-label {
+  font-size: 0.65rem;
+  color: var(--text-3);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Body / Tareas */
+.scrum-tasks-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 20px;
+}
+
+.scrum-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.scrum-task-item {
+  display: flex;
+  align-items: center;
+  padding: 18px 24px;
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.scrum-task-item:hover {
+  transform: translateX(4px);
+  border-color: var(--text-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.scrum-task-item.completed {
+  border-left: 4px solid var(--primary);
+}
+
+.scrum-task-item.in-progress {
+  border-left: 4px solid var(--amber);
+}
+
+.scrum-task-item.pending {
+  border-left: 4px solid var(--text-3);
+}
+
+.task-status-indicator {
+  margin-right: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.task-status-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.task-status-dot.completed {
+  background: var(--primary);
+  color: #fff;
+}
+
+.task-status-dot.in-progress {
+  background: var(--amber);
+  color: #fff;
+}
+
+.task-status-dot.pending {
+  border: 2px dashed var(--text-3);
+  color: var(--text-3);
+}
+
+.task-details {
+  flex: 1;
+}
+
+.task-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 4px;
+}
+
+.task-assignee {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.task-badge-container {
+  margin-left: 16px;
+}
+
+.task-status-badge {
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.task-status-badge.completed {
+  background: var(--green-mist);
+  color: var(--primary);
+}
+
+.task-status-badge.in-progress {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--amber);
+}
+
+.task-status-badge.pending {
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+
+/* Responsividad para la Línea de Tiempo Scrum */
+@media (max-width: 768px) {
+  .timeline-horizontal-container {
+    overflow-x: auto;
+    padding: 20px 10px 30px 10px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .timeline-horizontal-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .timeline-scroll-wrapper {
+    width: 680px; /* Ancho fijo para habilitar desplazamiento suave */
+  }
+  
+  .timeline-nodes-wrapper {
+    width: 100%;
+  }
+  
+  .timeline-horizontal-track {
+    width: calc(100% - 44px);
+    left: 22px;
+  }
+  
+  .timeline-node {
+    scroll-snap-align: center;
+  }
+  
+  .scrum-detail-card {
+    padding: 24px 20px;
+  }
+  
+  .scrum-card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .scrum-header-right {
+    justify-content: flex-start;
+  }
+  
+  .scrum-task-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px;
+  }
+  
+  .task-status-indicator {
+    margin-right: 0;
+  }
+  
+  .task-badge-container {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+}
