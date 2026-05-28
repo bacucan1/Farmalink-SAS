@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ReactGA from 'react-ga4';
 import type { View, Tab, Sugerencia } from './types';
 import { useDashboard, useScrollEffect } from './hooks/useDashboard';
 import { Header } from './components/layout/Header';
@@ -59,6 +60,16 @@ function App() {
   const { data, loading, error, refetch } = useDashboard();
 
   useScrollEffect();
+
+  // Inicializar Google Analytics una sola vez al cargar la app
+  useEffect(() => {
+    ReactGA.initialize('G-1GW8DFN2PV');
+  }, []);
+
+  // Registrar cada cambio de vista (view) en Google Analytics
+  useEffect(() => {
+    ReactGA.send({ hitType: 'pageview', page: `/${view}`, title: view.toUpperCase() });
+  }, [view]);
 
   const goView = useCallback((v: View) => {
     if (v === 'settings') {
