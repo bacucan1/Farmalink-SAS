@@ -125,9 +125,22 @@ export interface CartItem {
 }
 
 /**
+ * Perfil público de un desarrollador del equipo
+ */
+export interface PerfilDesarrollador {
+  id: number;
+  name: string;
+  role: string;
+  phone?: string | null;
+  profile_picture?: string | null;
+  bio?: string | null;
+  created_at: string;
+}
+
+/**
  * Vistas disponibles en la aplicación
  */
-export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'registro' | 'producto' | 'mapa' | 'categoria' | 'settings'|'quienes-somos'| 'cart' | 'checkout';
+export type View = 'home' | 'buscar' | 'dashboard' | 'admin' | 'login' | 'registro' | 'producto' | 'mapa' | 'categoria' | 'settings' | 'quienes-somos' | 'cart' | 'checkout' | 'desarrolladores' | 'validador' | 'faq';
 
 
 /**

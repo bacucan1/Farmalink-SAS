@@ -17,6 +17,7 @@ const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 export function Header({ currentView, onViewChange, isAuthenticated, userRole, onLogout, onCategorySelect }: HeaderProps) {
   const { cartCount } = useCart();
+  const headerRef = useRef<HTMLElement>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -70,6 +71,27 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
     document.documentElement.style.fontSize = `${fontSize}px`;
   }, [fontSize]);
 
+  // Sincroniza la altura real del header para posicionar correctamente el breadcrumb.
+  useEffect(() => {
+    const headerEl = headerRef.current;
+    if (!headerEl) return;
+
+    const applyHeaderHeight = () => {
+      const h = Math.ceil(headerEl.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--header-height', `${h}px`);
+    };
+
+    applyHeaderHeight();
+    const observer = new ResizeObserver(applyHeaderHeight);
+    observer.observe(headerEl);
+    window.addEventListener('resize', applyHeaderHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', applyHeaderHeight);
+    };
+  }, []);
+
   const increaseFontSize = () => setFontSize(prev => Math.min(prev + 2, 24));
   const decreaseFontSize = () => setFontSize(prev => Math.max(prev - 2, 12));
 
@@ -88,7 +110,7 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
 
   return (
     <>
-      <header className="header" id="header">
+      <header className="header" id="header" ref={headerRef}>
         <nav className="navbar">
           <div className="container navbar-container">
             <a
@@ -183,6 +205,16 @@ export function Header({ currentView, onViewChange, isAuthenticated, userRole, o
               <li>
                 <a onClick={() => handleNavClick('quienes-somos')} className={currentView === 'quienes-somos' ? 'active' : ''}>
                   Quiénes Somos
+                </a>
+              </li>
+              <li>
+                <a onClick={() => handleNavClick('desarrolladores')} className={currentView === 'desarrolladores' ? 'active' : ''}>
+                  Equipo
+                </a>
+              </li>
+              <li>
+                <a onClick={() => handleNavClick('faq')} className={currentView === 'faq' ? 'active' : ''}>
+                  FAQ
                 </a>
               </li>
               {userRole === 'admin' && (

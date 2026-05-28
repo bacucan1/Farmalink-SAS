@@ -300,6 +300,24 @@ app.get('/api/sugerencias', async (req, res) => {
 
 /* ================= USUARIOS ================= */
 
+app.get('/api/usuarios/public/equipo', async (req, res) => {
+    try {
+        const response = await axios.get(`${BACKEND_URL}/api/usuarios/public/equipo`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error en backend equipo' });
+    }
+});
+
+app.get('/api/usuarios/public/:id', async (req, res) => {
+    try {
+        const response = await axios.get(`${BACKEND_URL}/api/usuarios/public/${req.params.id}`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al obtener perfil público' });
+    }
+});
+
 // GET /api/usuarios/me — cualquier usuario autenticado puede ver su propio perfil
 // IMPORTANTE: debe ir ANTES de /:id para que Express no lo capture como id="me"
 app.get('/api/usuarios/me', validateJWT, async (req, res) => {
@@ -345,6 +363,18 @@ app.post('/api/usuarios', validateJWT, requireAdmin, async (req, res) => {
         res.status(201).json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al crear usuario' });
+    }
+});
+
+// PATCH /api/usuarios/:id/team-member — solo admin puede activar/desactivar miembro del equipo
+app.patch('/api/usuarios/:id/team-member', validateJWT, requireAdmin, async (req, res) => {
+    try {
+        const response = await axios.patch(`${BACKEND_URL}/api/usuarios/${req.params.id}/team-member`, req.body, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json(err.response?.data || { error: 'Error al actualizar miembro del equipo' });
     }
 });
 

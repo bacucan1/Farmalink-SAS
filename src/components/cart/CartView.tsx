@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { useCart } from '../../hooks/useCart';
+import { useToast } from '../../hooks/useToast';
 import type { View } from '../../types';
 import './CartView.css';
 
@@ -9,11 +11,55 @@ interface CartViewProps {
 }
 
 export function CartView({ onGoHome, onGoSearch, onGoCheckout }: CartViewProps) {
-  const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const { items, addToCart, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const { addToast } = useToast();
+  const [pendingRemoval, setPendingRemoval] = useState<{ item: CartItem; timeoutId: number } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pendingRemoval) {
+        window.clearTimeout(pendingRemoval.timeoutId);
+      }
+    };
+  }, [pendingRemoval]);
+
+  const scheduleRemoval = (item: CartItem) => {
+    if (pendingRemoval) {
+      window.clearTimeout(pendingRemoval.timeoutId);
+    }
+
+    removeFromCart(item.id);
+    const timeoutId = window.setTimeout(() => {
+      setPendingRemoval(null);
+    }, 5000);
+
+    setPendingRemoval({ item, timeoutId });
+    addToast(`"${item.medicamento.name}" eliminado del carrito`, 'warning', 2600);
+  };
+
+  const undoRemoval = () => {
+    if (!pendingRemoval) return;
+    window.clearTimeout(pendingRemoval.timeoutId);
+    addToCart({ ...pendingRemoval.item, cantidad: pendingRemoval.item.cantidad });
+    setPendingRemoval(null);
+    addToast('Producto restaurado en el carrito', 'success', 2200);
+  };
+
+  const undoBar = pendingRemoval ? (
+    <div className="cart-undo" role="status" aria-live="polite">
+      <span>
+        Se eliminó <strong>{pendingRemoval.item.medicamento.name}</strong>.
+      </span>
+      <button type="button" className="cart-undo-btn" onClick={undoRemoval}>
+        Deshacer
+      </button>
+    </div>
+  ) : null;
 
   if (items.length === 0) {
     return (
       <div className="cart-view container view active">
+        {undoBar}
         <div className="cart-empty">
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="cart-empty-icon">
             <circle cx="9" cy="21" r="1"></circle>
@@ -33,6 +79,7 @@ export function CartView({ onGoHome, onGoSearch, onGoCheckout }: CartViewProps) 
   return (
     <div className="cart-view container view active">
       <h1 className="cart-title">Carrito de Compras</h1>
+      {undoBar}
       
       <div className="cart-content">
         <div className="cart-items">
@@ -59,11 +106,11 @@ export function CartView({ onGoHome, onGoSearch, onGoCheckout }: CartViewProps) 
               </div>
               <div className="cart-item-actions">
                 <div className="quantity-control">
-                  <button onClick={() => updateQuantity(item.id, item.cantidad - 1)}>-</button>
+                  <button onClick={() => item.cantidad === 1 ? scheduleRemoval(item) : updateQuantity(item.id, item.cantidad - 1)}>-</button>
                   <span>{item.cantidad}</span>
                   <button onClick={() => updateQuantity(item.id, item.cantidad + 1)}>+</button>
                 </div>
-                <button className="cart-item-remove" onClick={() => removeFromCart(item.id)}>
+                <button className="cart-item-remove" onClick={() => scheduleRemoval(item)}>
                   Eliminar
                 </button>
               </div>

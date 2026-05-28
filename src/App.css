@@ -8,6 +8,8 @@
 @import './components/common/LoadingError.css';
 
 /* Legacy support - imports from existing styles */
+@import './components/developers/DevelopersView.css';
+@import './components/developers/ValidadorView.css';
 
 /* Dark mode global — debe ir al final para mayor especificidad */
 @import './darkmode.css';

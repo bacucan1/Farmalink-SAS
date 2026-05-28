@@ -18,11 +18,16 @@ import { MapView } from './components/map/MapView';
 import { CategoryView } from './components/category/CategoryView';
 import { Breadcrumb } from './components/common/Breadcrumb';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
+import PrivacyBanner from './components/common/PrivacyBanner';
 import MiCuenta from './components/settings/MiCuenta';
 import { CartView } from './components/cart/CartView';
 import { CheckoutView } from './components/checkout/CheckoutView';
 import { QuienesSomos } from './components/QuienesSomos';
-const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'quienes-somos', 'cart', 'checkout'];
+import { DevelopersView } from './components/developers/DevelopersView';
+import { ValidadorView } from './components/developers/ValidadorView';
+import { FaqView } from './components/help/FaqView';
+
+const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'checkout', 'validador'];
 
 
 
@@ -165,6 +170,8 @@ function App() {
         <Breadcrumb view={view} onGoHome={() => goView('home')} />
       )}
 
+      <PrivacyBanner />
+
       {view === 'home' && (
         <div className="view active">
           <Hero
@@ -283,6 +290,29 @@ function App() {
             onGoCart={() => goView('cart')}
           />
         </ProtectedRoute>
+      )}
+
+      {view === 'desarrolladores' && (
+        <div className="view active">
+          <DevelopersView 
+            isAuthenticated={isAuthenticated}
+            userRole={userRole}
+            onGoSettings={() => goView('settings')}
+            onGoValidator={() => goView('validador')}
+          />
+        </div>
+      )}
+
+      {view === 'validador' && (
+        <div className="view active">
+          <ValidadorView onGoBack={() => goView('desarrolladores')} />
+        </div>
+      )}
+
+      {view === 'faq' && (
+        <div className="view active">
+          <FaqView />
+        </div>
       )}
 
       <Footer onNavigate={(viewName) => goView(viewName as View)} />
