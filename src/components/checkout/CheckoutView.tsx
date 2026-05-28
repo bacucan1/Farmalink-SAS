@@ -9,7 +9,7 @@ interface CheckoutViewProps {
 }
 
 export function CheckoutView({ onGoHome, onGoCart }: CheckoutViewProps) {
-  const { cartTotal, cartCount, clearCart } = useCart();
+  const { items, cartTotal, cartCount, clearCart } = useCart();
   const { addToast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -31,17 +31,135 @@ export function CheckoutView({ onGoHome, onGoCart }: CheckoutViewProps) {
     e.preventDefault();
     setIsProcessing(true);
 
+    // Guardar copia de los items y datos para la factura antes de limpiar el carrito
+    const invoiceItems = [...items];
+    const invoiceData = { ...formData };
+    const total = cartTotal;
+
     // Simulate API call for payment processing
     setTimeout(() => {
       setIsProcessing(false);
       setSuccess(true);
+      
+      generateInvoice(invoiceData, invoiceItems, total);
+      
       clearCart();
-      addToast('¡Pago procesado exitosamente!', 'success');
+      addToast('¡Pago procesado exitosamente! Descargando facturas...', 'success');
       
       setTimeout(() => {
         onGoHome();
-      }, 3000);
+      }, 4000); // Dar un poco más de tiempo para ver el mensaje y descargas
     }, 2000);
+  };
+
+  const generateInvoice = (data: any, cartItems: any[], total: number) => {
+    const date = new Date().toLocaleDateString();
+    const invoiceId = Math.floor(Math.random() * 1000000);
+
+    // 1. JSON Invoice
+    const jsonInvoice = {
+      invoiceId,
+      date,
+      customer: {
+        name: data.nombre,
+        address: data.direccion,
+        city: data.ciudad,
+      },
+      items: cartItems.map(i => ({
+        name: i.nombre,
+        quantity: i.cantidad,
+        unitPrice: i.precioUnidad,
+        subtotal: i.precioUnidad * i.cantidad
+      })),
+      total
+    };
+
+    const jsonBlob = new Blob([JSON.stringify(jsonInvoice, null, 2)], { type: 'application/json' });
+    const jsonUrl = URL.createObjectURL(jsonBlob);
+    const jsonLink = document.createElement('a');
+    jsonLink.href = jsonUrl;
+    jsonLink.download = `factura_${invoiceId}.json`;
+    document.body.appendChild(jsonLink);
+    jsonLink.click();
+    document.body.removeChild(jsonLink);
+    URL.revokeObjectURL(jsonUrl);
+
+    // 2. HTML Invoice
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>Factura #${invoiceId}</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; max-width: 800px; margin: auto; color: #333; }
+          .header { display: flex; justify-content: space-between; border-bottom: 2px solid #0056b3; padding-bottom: 20px; margin-bottom: 30px; }
+          .logo-area h2 { color: #0056b3; margin: 0 0 10px 0; }
+          .details h3 { color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 0; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+          th { background-color: #f8f9fa; color: #333; font-weight: 600; }
+          .total-row { background-color: #f8f9fa; font-weight: bold; font-size: 1.2em; }
+          .footer { margin-top: 40px; text-align: center; color: #777; font-size: 0.9em; border-top: 1px solid #eee; padding-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo-area">
+            <h2>Farmalink SAS</h2>
+            <p><strong>Factura #:</strong> ${invoiceId}</p>
+            <p><strong>Fecha:</strong> ${date}</p>
+          </div>
+          <div class="details">
+            <h3>Facturado a:</h3>
+            <p><strong>Nombre:</strong> ${data.nombre}</p>
+            <p><strong>Dirección:</strong> ${data.direccion}</p>
+            <p><strong>Ciudad:</strong> ${data.ciudad}</p>
+          </div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${cartItems.map(item => \`
+              <tr>
+                <td>\${item.nombre}</td>
+                <td>\${item.cantidad}</td>
+                <td>$\${item.precioUnidad.toLocaleString('es-CO')}</td>
+                <td>$\${(item.precioUnidad * item.cantidad).toLocaleString('es-CO')}</td>
+              </tr>
+            \`).join('')}
+            <tr class="total-row">
+              <td colspan="3" style="text-align: right;">Total:</td>
+              <td>$${total.toLocaleString('es-CO')}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="footer">
+          <p>¡Gracias por su compra en Farmalink!</p>
+          <p>Para dudas o soporte, contáctenos en soporte@farmalink.com</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+    const htmlUrl = URL.createObjectURL(htmlBlob);
+    const htmlLink = document.createElement('a');
+    htmlLink.href = htmlUrl;
+    htmlLink.download = `factura_${invoiceId}.html`;
+    document.body.appendChild(htmlLink);
+    htmlLink.click();
+    document.body.removeChild(htmlLink);
+    URL.revokeObjectURL(htmlUrl);
   };
 
   if (success) {
