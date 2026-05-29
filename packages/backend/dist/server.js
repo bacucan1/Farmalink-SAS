@@ -10,6 +10,8 @@ import farmaciasRouter from './farmacias/farmaciasRouter.js';
 import categoriasRouter from './categorias/categoriasRouter.js';
 import busquedaRouter from './busqueda/busquedaRouter.js';
 import usuariosRouter from './usuarios/usuariosRouter.js';
+import aiRouter from './ai/aiRouter.js';
+import { requireAuth } from './shared/authMiddleware.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(cors({
@@ -33,7 +35,29 @@ app.use('/api/farmacias', farmaciasRouter);
 app.use('/api/categorias', categoriasRouter);
 app.use('/api/busqueda', busquedaRouter); // ← Búsqueda avanzada + fuzzy
 app.use('/api/usuarios', usuariosRouter); // ← Gestión de usuarios
-app.get('/api/dashboard', async (_req, res) => {
+app.use('/api/ai', aiRouter); // ← Asistente IA
+app.get('/api/home', async (_req, res) => {
+    try {
+        const pool = Database.getInstance().getPool();
+        const [farmacias, categorias] = await Promise.all([
+            pool.query('SELECT COUNT(*) as count FROM farmacias'),
+            pool.query('SELECT * FROM categorias ORDER BY nombre'),
+        ]);
+        res.json({
+            success: true,
+            farmCount: parseInt(farmacias.rows[0]?.count || '0'),
+            categorias: categorias.rows.map((c) => ({ id: c.id, nombre: c.nombre })),
+            farmacias: [],
+            medicamentos: [],
+            precios: [],
+        });
+    }
+    catch (err) {
+        console.error(err);
+        res.json({ success: true, farmCount: 0, categorias: [], farmacias: [], medicamentos: [], precios: [] });
+    }
+});
+app.get('/api/dashboard', requireAuth, async (req, res) => {
     try {
         const pool = Database.getInstance().getPool();
         const [farmacias, medicamentos, precios] = await Promise.all([

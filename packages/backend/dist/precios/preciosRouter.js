@@ -3,6 +3,7 @@ import Database from '../shared/db.js';
 import { PrecioStrategyFactory } from './PrecioStrategyFactory.js';
 import { validateUpdatePrecio } from './PrecioDTO.js';
 import { PrecioHistorialService } from './PrecioHistorialService.js';
+import { requireAuth } from '../shared/authMiddleware.js';
 const router = Router();
 router.get('/', async (_req, res) => {
     try {
@@ -22,7 +23,7 @@ router.get('/', async (_req, res) => {
         res.status(500).json({ success: false, message: 'Error al obtener precios', error });
     }
 });
-router.get('/comparar/:medicamentoId', async (req, res) => {
+router.get('/comparar/:medicamentoId', requireAuth, async (req, res) => {
     try {
         const { medicamentoId: medId } = req.params;
         const orden = req.query.orden;

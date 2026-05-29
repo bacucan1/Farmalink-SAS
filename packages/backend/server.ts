@@ -10,6 +10,7 @@ import farmaciasRouter from './farmacias/farmaciasRouter.js';
 import categoriasRouter from './categorias/categoriasRouter.js';
 import busquedaRouter from './busqueda/busquedaRouter.js';
 import usuariosRouter from './usuarios/usuariosRouter.js';
+import aiRouter from './ai/aiRouter.js';
 import { requireAuth } from './shared/authMiddleware.js';
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/farmacias',    farmaciasRouter);
 app.use('/api/categorias',   categoriasRouter);
 app.use('/api/busqueda',     busquedaRouter);  // ← Búsqueda avanzada + fuzzy
 app.use('/api/usuarios',    usuariosRouter);   // ← Gestión de usuarios
+app.use('/api/ai',          aiRouter);         // ← Asistente IA
 
 app.get('/api/home', async (_req, res) => {
   try {

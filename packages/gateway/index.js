@@ -8,6 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecreto';
+const AI_PROXY_TIMEOUT_MS = parseInt(process.env.AI_PROXY_TIMEOUT_MS || '15000', 10);
 
 console.log('[Gateway] JWT_SECRET loaded:', JWT_SECRET ? 'YES (length: ' + JWT_SECRET.length + ')' : 'NO');
 console.log('[Gateway] BACKEND_URL:', BACKEND_URL);
@@ -17,6 +18,78 @@ app.use(express.json());
 
 app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+/* ================= AI ASSISTANT ================= */
+
+app.get('/api/ai/health', async (_req, res) => {
+    const startedAt = Date.now();
+    console.log('[Gateway][AI] GET /api/ai/health -> backend');
+    try {
+        const response = await axios.get(`${BACKEND_URL}/api/ai/health`, {
+            timeout: AI_PROXY_TIMEOUT_MS,
+        });
+        console.log('[Gateway][AI] GET /api/ai/health <- backend', {
+            status: response.status,
+            ms: Date.now() - startedAt,
+            enabled: response.data?.enabled,
+            model: response.data?.model,
+        });
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Gateway][AI] GET /api/ai/health error', {
+            status: err.response?.status || 500,
+            ms: Date.now() - startedAt,
+            message: err.message,
+        });
+        res.status(err.response?.status || 500).json(
+            err.response?.data || { success: false, message: 'Error en backend AI health' }
+        );
+    }
+});
+
+app.post('/api/ai/assistant', async (req, res) => {
+    const startedAt = Date.now();
+    const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    console.log('[Gateway][AI] POST /api/ai/assistant -> backend', {
+        messageLength: message.length,
+        hasAuth: Boolean(req.headers.authorization),
+    });
+    try {
+        const response = await axios.post(`${BACKEND_URL}/api/ai/assistant`, req.body, {
+            headers: {
+                Authorization: req.headers.authorization,
+                'Content-Type': 'application/json',
+            },
+            timeout: AI_PROXY_TIMEOUT_MS,
+        });
+        console.log('[Gateway][AI] POST /api/ai/assistant <- backend', {
+            status: response.status,
+            ms: Date.now() - startedAt,
+            traceId: response.data?.traceId,
+            success: response.data?.success,
+            policy: response.data?.policy,
+            action: response.data?.action,
+        });
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Gateway][AI] POST /api/ai/assistant error', {
+            status: err.response?.status || 500,
+            ms: Date.now() - startedAt,
+            message: err.message,
+            traceId: err.response?.data?.traceId,
+        });
+        res.status(err.response?.status || 500).json(
+            err.response?.data || {
+                success: false,
+                policy: 'blocked',
+                action: 'none',
+                params: {},
+                traceId: 'gateway-ai-error',
+                message: 'No se pudo completar la solicitud del asistente.',
+            }
+        );
+    }
 });
 
 /* ================= AUTH (delegado al backend: bcrypt + JWT) ================= */

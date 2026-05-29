@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import Database from './db.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecreto';
+console.log('[Auth] JWT_SECRET loaded:', JWT_SECRET ? 'YES (length: ' + JWT_SECRET.length + ')' : 'NO');
 function emailFromBearerToken(token) {
     const parts = token.split('.');
     if (parts.length === 3) {

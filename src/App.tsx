@@ -27,6 +27,8 @@ import { QuienesSomos } from './components/QuienesSomos';
 import { DevelopersView } from './components/developers/DevelopersView';
 import { ValidadorView } from './components/developers/ValidadorView';
 import { FaqView } from './components/help/FaqView';
+import { AssistantChat } from './components/ai/AssistantChat';
+import type { AssistantResponsePayload } from './types/assistant';
 
 const VIEWS_SIN_BREADCRUMB: View[] = ['home', 'login', 'producto', 'categoria', 'checkout', 'validador'];
 
@@ -36,6 +38,8 @@ function normPath(p: string): string {
   const x = p.replace(/\/$/, '') || '/';
   return x === '/settings' ? '/settings' : x;
 }
+
+type ProductPanelTarget = 'compare' | 'history' | 'map' | null;
 
 function App() {
   const navigate = useNavigate();
@@ -48,6 +52,10 @@ function App() {
   const [prevView, setPrevView] = useState<View>('home');
   const [dashboardTab, setDashboardTab] = useState<Tab>('farmacias');
   const [selectedMed, setSelectedMed] = useState<Sugerencia | null>(null);
+  const [assistantPanelTarget, setAssistantPanelTarget] = useState<ProductPanelTarget>(null);
+  const [assistantPanelNonce, setAssistantPanelNonce] = useState(0);
+  const [assistantSelectedFarmaciaId, setAssistantSelectedFarmaciaId] = useState<number | null>(null);
+  const [assistantSelectedFarmaciaNombre, setAssistantSelectedFarmaciaNombre] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const token = localStorage.getItem('token');
@@ -121,12 +129,119 @@ function App() {
       return;
     }
     setSelectedMed(med);
+    setAssistantPanelTarget(null);
+    setAssistantSelectedFarmaciaId(null);
+    setAssistantSelectedFarmaciaNombre(null);
     goView('producto');
   };
 
   const handleTabChange = (tab: Tab) => {
     setDashboardTab(tab);
   };
+
+  const handleAssistantAction = useCallback((response: AssistantResponsePayload) => {
+    const paramMed = response.params?.medicamento as Sugerencia | undefined;
+    const dataMed = response.data?.primaryMedicine as Sugerencia | undefined;
+    const targetMedFromResponse = paramMed || dataMed || null;
+    const targetMed = targetMedFromResponse || selectedMed || null;
+    const paramFarmaciaId = Number(response.params?.farmaciaId);
+    const targetFarmaciaId = Number.isFinite(paramFarmaciaId) ? paramFarmaciaId : null;
+    const targetFarmaciaNombre =
+      typeof response.params?.farmaciaNombre === 'string' ? response.params.farmaciaNombre : null;
+
+    const openProductWithPanel = (
+      panel: ProductPanelTarget,
+      farmaciaId: number | null = null,
+      farmaciaNombre: string | null = null,
+    ) => {
+      if (!isAuthenticated) {
+        goToLogin('producto');
+        return;
+      }
+      if (targetMed) {
+        setSelectedMed(targetMed);
+      }
+      setAssistantPanelTarget(panel);
+      setAssistantSelectedFarmaciaId(farmaciaId);
+      setAssistantSelectedFarmaciaNombre(farmaciaNombre);
+      setAssistantPanelNonce((prev) => prev + 1);
+      goView('producto');
+    };
+
+    switch (response.action) {
+      case 'go_home':
+        setAssistantPanelTarget(null);
+        setAssistantSelectedFarmaciaId(null);
+        setAssistantSelectedFarmaciaNombre(null);
+        goView('home');
+        break;
+      case 'go_search':
+        setAssistantPanelTarget(null);
+        setAssistantSelectedFarmaciaId(null);
+        setAssistantSelectedFarmaciaNombre(null);
+        goView('buscar');
+        break;
+      case 'go_map':
+        if (targetMedFromResponse) {
+          if (!isAuthenticated) {
+            goToLogin('producto');
+            return;
+          }
+          setSelectedMed(targetMedFromResponse);
+          setAssistantPanelTarget('map');
+          setAssistantSelectedFarmaciaId(targetFarmaciaId);
+          setAssistantSelectedFarmaciaNombre(targetFarmaciaNombre);
+          setAssistantPanelNonce((prev) => prev + 1);
+          goView('producto');
+        } else {
+          if (!isAuthenticated) {
+            goToLogin('mapa');
+            return;
+          }
+          setAssistantSelectedFarmaciaId(null);
+          setAssistantSelectedFarmaciaNombre(null);
+          goView('mapa');
+        }
+        break;
+      case 'go_dashboard':
+        if (!isAuthenticated) {
+          goToLogin('dashboard');
+          return;
+        }
+        goView('dashboard');
+        break;
+      case 'go_category':
+        if (!isAuthenticated) {
+          goToLogin('categoria');
+          return;
+        }
+        goView('categoria');
+        break;
+      case 'go_cart':
+        goView('cart');
+        break;
+      case 'go_developers':
+        goView('desarrolladores');
+        break;
+      case 'go_about':
+        goView('quienes-somos');
+        break;
+      case 'go_faq':
+        goView('faq');
+        break;
+      case 'go_product':
+        openProductWithPanel(null, targetFarmaciaId, targetFarmaciaNombre);
+        break;
+      case 'go_compare':
+        openProductWithPanel('compare', targetFarmaciaId, targetFarmaciaNombre);
+        break;
+      case 'go_history':
+        openProductWithPanel('history', targetFarmaciaId, targetFarmaciaNombre);
+        break;
+      default:
+        break;
+    }
+  }, [goView, isAuthenticated, selectedMed]);
 
   if (loading) {
     return (
@@ -248,6 +363,10 @@ function App() {
         <ProtectedRoute isAuthenticated={isAuthenticated} onGoLogin={() => goToLogin('producto')} onGoHome={() => goView('home')} viewLabel="Detalle del Medicamento">
           <ProductoDetalle
             medicamento={selectedMed}
+            assistantPanelTarget={assistantPanelTarget}
+            assistantPanelNonce={assistantPanelNonce}
+            assistantSelectedFarmaciaId={assistantSelectedFarmaciaId}
+            assistantSelectedFarmaciaNombre={assistantSelectedFarmaciaNombre}
             onBack={() => goView('buscar')}
             onGoHome={() => goView('home')}
             onGoCategory={(cat) => { setSelectedCategory(cat); goView('categoria'); }}
@@ -325,6 +444,15 @@ function App() {
           <FaqView />
         </div>
       )}
+
+      <AssistantChat
+        context={{
+          currentView: view,
+          isAuthenticated,
+          userRole,
+        }}
+        onAction={handleAssistantAction}
+      />
 
       <Footer onNavigate={(viewName) => goView(viewName as View)} />
     </>

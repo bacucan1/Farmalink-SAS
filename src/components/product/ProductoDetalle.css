@@ -3,10 +3,24 @@
    ============================================================ */
 
 .pd-view {
-  background: #f4f6f9;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(11, 125, 184, 0.14), transparent 36%),
+    radial-gradient(circle at 88% 12%, rgba(102, 184, 46, 0.12), transparent 34%),
+    #f3f7fb;
   min-height: 100vh;
   padding-top: 80px;
   padding-bottom: 60px;
+}
+
+@keyframes pd-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Breadcrumb ── */
@@ -48,20 +62,22 @@
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 28px;
-  background: white;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(6px);
+  border-radius: 18px;
   padding: 28px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  border: 1px solid #e9ecef;
+  box-shadow: 0 14px 30px rgba(9, 30, 66, 0.08);
+  border: 1px solid rgba(11, 125, 184, 0.14);
   margin-bottom: 20px;
+  animation: pd-fade-up 0.45s ease;
 }
 
 /* Imagen */
 .pd-img-wrap {
   position: relative;
-  background: #f8fafc;
+  background: linear-gradient(145deg, #f9fbff, #eef5fd);
   border-radius: 12px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #dce9f8;
   overflow: hidden;
   aspect-ratio: 1;
   display: flex;
@@ -173,6 +189,9 @@
   transition: all 0.22s; border: 1.5px solid;
   font-family: inherit;
 }
+.pd-action-btn:hover {
+  transform: translateY(-1px);
+}
 .pd-chart-btn {
   background: #f8fafc; color: #374151; border-color: #e2e8f0;
 }
@@ -199,9 +218,11 @@
 .pd-chart-section,
 .pd-map-section,
 .pd-prices-section {
-  background: white; border-radius: 16px;
-  border: 1px solid #e9ecef; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  background: rgba(255, 255, 255, 0.93); border-radius: 16px;
+  border: 1px solid rgba(11, 125, 184, 0.14);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
   overflow: hidden; margin-bottom: 20px;
+  animation: pd-fade-up 0.5s ease;
 }
 .pd-section-header { padding: 18px 22px 14px; border-bottom: 1px solid #f1f5f9; }
 .pd-section-header h2 {
@@ -587,9 +608,13 @@
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 16px; border-radius: 12px; border: 1px solid #e9ecef;
   background: white; position: relative; gap: 12px;
-  cursor: pointer; transition: all 0.18s;
+  cursor: pointer; transition: all 0.2s ease;
 }
-.pd-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.07); transform: translateX(2px); }
+.pd-card:hover {
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.11);
+  transform: translateY(-1px);
+  border-color: rgba(11, 125, 184, 0.25);
+}
 .pd-card--best {
   background: linear-gradient(135deg,#f4fff0,#ecfce3);
   border-color: rgba(102,184,46,0.35);

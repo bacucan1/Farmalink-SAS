@@ -32,6 +32,10 @@ interface SerieHistorial {
 
 interface ProductoDetalleProps {
   medicamento: Sugerencia;
+  assistantPanelTarget?: 'compare' | 'history' | 'map' | null;
+  assistantPanelNonce?: number;
+  assistantSelectedFarmaciaId?: number | null;
+  assistantSelectedFarmaciaNombre?: string | null;
   onBack: () => void;
   onGoHome?: () => void;
   onGoCategory?: (cat: string) => void;
@@ -564,7 +568,16 @@ function PriceHistoryChart({ series }: { series: SerieHistorial[] }) {
 
 // ── Componente principal ─────────────────────────────────────────────────────
 
-export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }: ProductoDetalleProps) {
+export function ProductoDetalle({
+  medicamento,
+  assistantPanelTarget = null,
+  assistantPanelNonce = 0,
+  assistantSelectedFarmaciaId = null,
+  assistantSelectedFarmaciaNombre = null,
+  onBack,
+  onGoHome,
+  onGoCategory,
+}: ProductoDetalleProps) {
   const [precios, setPrecios] = useState<PrecioFarmacia[]>([]);
   const [loadingPrecios, setLoadingPrecios] = useState(true);
   const [showMap, setShowMap] = useState(false);
@@ -576,6 +589,11 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
   const [imgSrc, setImgSrc] = useState(`/medicamentos/${medicamento._id}.png`);
   const [imgTried, setImgTried] = useState<'png' | 'jpg' | 'placeholder'>('png');
   const [selectedFarmacia, setSelectedFarmacia] = useState<PrecioFarmacia | null>(null);
+  const chartSectionRef = useRef<HTMLDivElement | null>(null);
+  const historySectionRef = useRef<HTMLDivElement | null>(null);
+  const mapSectionRef = useRef<HTMLDivElement | null>(null);
+  const pricesSectionRef = useRef<HTMLDivElement | null>(null);
+  const heroSectionRef = useRef<HTMLDivElement | null>(null);
 
   // States para Formulario de Precios
   const [showPriceForm, setShowPriceForm] = useState(false);
@@ -762,6 +780,96 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
     fetchPrecios();
   }, [medicamento._id]);
 
+  useEffect(() => {
+    if (!assistantPanelTarget) return;
+
+    if (assistantPanelTarget === 'compare') {
+      setShowChart(precios.length > 1);
+      setShowHistory(false);
+      setShowMap(false);
+      return;
+    }
+
+    if (assistantPanelTarget === 'history') {
+      setShowChart(false);
+      setShowMap(false);
+      setShowHistory(true);
+      fetchHistorial();
+      return;
+    }
+
+    if (assistantPanelTarget === 'map') {
+      setShowChart(false);
+      setShowHistory(false);
+      setShowMap(precios.length > 0);
+    }
+  }, [assistantPanelTarget, assistantPanelNonce, precios.length, fetchHistorial]);
+
+  useEffect(() => {
+    if (!assistantSelectedFarmaciaId && !assistantSelectedFarmaciaNombre) return;
+    if (precios.length === 0) return;
+
+    const normalizedName = assistantSelectedFarmaciaNombre?.trim().toLowerCase();
+    const match = precios.find((p) => {
+      const idMatch =
+        assistantSelectedFarmaciaId !== null && Number(p.farmaciaId) === Number(assistantSelectedFarmaciaId);
+      const nameMatch =
+        !!normalizedName && p.farmaciaNombre.trim().toLowerCase() === normalizedName;
+      return idMatch || nameMatch;
+    });
+    if (match) {
+      setSelectedFarmacia(match);
+    }
+  }, [assistantSelectedFarmaciaId, assistantSelectedFarmaciaNombre, assistantPanelNonce, precios]);
+
+  useEffect(() => {
+    const smoothScroll = (target: HTMLDivElement | null) => {
+      if (!target) return;
+      window.requestAnimationFrame(() => {
+        const header = document.getElementById('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 88;
+        const top = target.getBoundingClientRect().top + window.scrollY - headerHeight - 22;
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior: 'smooth',
+        });
+      });
+    };
+
+    if (!assistantPanelTarget && !assistantSelectedFarmaciaId && !assistantSelectedFarmaciaNombre) {
+      smoothScroll(heroSectionRef.current);
+      return;
+    }
+
+    if (assistantPanelTarget === 'compare' && showChart) {
+      smoothScroll(chartSectionRef.current);
+      return;
+    }
+
+    if (assistantPanelTarget === 'history' && showHistory) {
+      smoothScroll(historySectionRef.current);
+      return;
+    }
+
+    if (assistantPanelTarget === 'map' && showMap) {
+      smoothScroll(mapSectionRef.current);
+      return;
+    }
+
+    if (!assistantPanelTarget && selectedFarmacia && (assistantSelectedFarmaciaId || assistantSelectedFarmaciaNombre)) {
+      smoothScroll(pricesSectionRef.current);
+    }
+  }, [
+    assistantPanelTarget,
+    assistantPanelNonce,
+    assistantSelectedFarmaciaId,
+    assistantSelectedFarmaciaNombre,
+    showChart,
+    showHistory,
+    showMap,
+    selectedFarmacia,
+  ]);
+
   const sorted = [...precios].sort((a, b) => sortOrder === 'asc' ? a.precio - b.precio : b.precio - a.precio);
   const minPrecio = precios.length > 0 ? Math.min(...precios.map(p => p.precio)) : null;
   const maxPrecio = precios.length > 0 ? Math.max(...precios.map(p => p.precio)) : null;
@@ -791,7 +899,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
       </nav>
 
       {/* ── Hero ── */}
-      <div className="container pd-hero">
+      <div ref={heroSectionRef} className="container pd-hero">
 
         {/* Imagen */}
         <div className="pd-img-wrap">
@@ -940,7 +1048,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
 
       {/* ── Gráfico de barras: comparativa actual por farmacia ── */}
       {showChart && precios.length > 1 && (
-        <div className="container pd-chart-section">
+        <div ref={chartSectionRef} className="container pd-chart-section">
           <div className="pd-section-header">
             <h2>Comparativa de precios por farmacia</h2>
             <p>Precio registrado en cada farmacia disponible</p>
@@ -951,7 +1059,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
 
       {/* ── Gráfica de historial tipo Keepa (precio vs. tiempo) ── */}
       {showHistory && (
-        <div className="container pd-chart-section">
+        <div ref={historySectionRef} className="container pd-chart-section">
           <div className="pd-section-header">
             <h2>📈 Historial de precios</h2>
             <p>Evolución del precio a través del tiempo, por farmacia</p>
@@ -975,7 +1083,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
 
       {/* ── Mapa ── */}
       {showMap && (
-        <div className="container pd-map-section">
+        <div ref={mapSectionRef} className="container pd-map-section">
           <div className="pd-section-header">
             <h2>Farmacias que venden este medicamento</h2>
             <p>Solo se muestran las {precios.length} farmacias donde puedes comprar este producto</p>
@@ -985,7 +1093,7 @@ export function ProductoDetalle({ medicamento, onBack, onGoHome, onGoCategory }:
       )}
 
       {/* ── Tabla de precios ── */}
-      <div className="container pd-prices-section">
+      <div ref={pricesSectionRef} className="container pd-prices-section">
         <div className="pd-prices-hd">
           <div>
             <h2>
